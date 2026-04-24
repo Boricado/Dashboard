@@ -4,6 +4,8 @@ import { useState } from "react";
 import {
   compositionMetrics,
   healthSummaryStats,
+  inbodyComparisonRows,
+  inbodyScans,
   latestMeasurement,
   routineTemplates,
   routineHtmlWeeks,
@@ -27,6 +29,15 @@ function clamp(value: number, max: number) {
   }
 
   return Math.max(18, Math.round((value / max) * 100));
+}
+
+function formatSignedDelta(value: number) {
+  const rounded = Math.round(value * 10) / 10;
+  if (rounded === 0) {
+    return "0";
+  }
+
+  return `${rounded > 0 ? "+" : ""}${rounded.toFixed(Math.abs(rounded) % 1 === 0 ? 0 : 1)}`;
 }
 
 function SummaryCard(props: {
@@ -65,6 +76,8 @@ export function SaludClient() {
 
   const maxConsistency = Math.max(...weeklyConsistency.map((item) => item.value));
   const maxWeight = Math.max(...weightTrend.map((item) => item.value));
+  const latestScan = inbodyScans[inbodyScans.length - 1];
+  const previousScan = inbodyScans[inbodyScans.length - 2];
 
   return (
     <div className="flex flex-col gap-6">
@@ -179,6 +192,123 @@ export function SaludClient() {
           </div>
           <div className="mt-5 rounded-2xl border border-[var(--line)] bg-white/70 p-4 text-sm leading-6 text-[var(--muted)]">
             El patron mas estable del bloque esta entre S10 y S11, con 6 sesiones.
+          </div>
+        </article>
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,1.75fr)]">
+        <article className="app-card p-6">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="text-2xl font-semibold text-[var(--ink)]">
+                Ultimo vs anterior
+              </h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">
+                {previousScan.label} frente a {latestScan.label}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-[var(--line)] bg-white/70 px-4 py-3 text-sm text-[var(--muted)]">
+              {latestScan.heightCm} cm · {latestScan.age} años
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-3">
+            {inbodyComparisonRows.map((row) => {
+              const delta = row.latestValue - row.previousValue;
+              const positive =
+                row.betterWhen === "higher" ? delta > 0 : delta < 0;
+              const neutral = delta === 0;
+
+              return (
+                <div
+                  key={row.label}
+                  className="grid items-center gap-3 rounded-[1.5rem] border border-[var(--line)] bg-white/80 px-4 py-4 sm:grid-cols-[minmax(120px,1fr)_minmax(90px,auto)_minmax(90px,auto)_minmax(80px,auto)]"
+                >
+                  <div className="font-medium text-[var(--ink)]">{row.label}</div>
+                  <div className="text-sm text-[var(--muted)]">
+                    Ant: {row.previousValue.toFixed(1).replace(".0", "")} {row.unit}
+                  </div>
+                  <div className="text-sm font-semibold text-[var(--ink)]">
+                    Act: {row.latestValue.toFixed(1).replace(".0", "")} {row.unit}
+                  </div>
+                  <div
+                    className={`rounded-full px-3 py-1 text-center text-xs font-semibold ${
+                      neutral
+                        ? "bg-zinc-100 text-zinc-700"
+                        : positive
+                          ? "bg-emerald-100 text-emerald-900"
+                          : "bg-rose-100 text-rose-900"
+                    }`}
+                  >
+                    {formatSignedDelta(delta)} {row.unit}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </article>
+
+        <article className="app-card p-6">
+          <div>
+            <h2 className="text-2xl font-semibold text-[var(--ink)]">
+              Timeline InBody
+            </h2>
+            <p className="mt-1 text-sm text-[var(--muted)]">
+              Lecturas reconstruidas manualmente desde los escaneos originales.
+            </p>
+          </div>
+
+          <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-[var(--line)]">
+            <div className="grid grid-cols-[minmax(110px,1.1fr)_repeat(5,minmax(90px,1fr))] bg-[var(--surface-strong)] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
+              <div>Fecha</div>
+              <div>Peso</div>
+              <div>Musc.</div>
+              <div>Grasa</div>
+              <div>PGC</div>
+              <div>Score</div>
+            </div>
+            <div className="max-h-[340px] overflow-y-auto bg-white/80">
+              {inbodyScans.map((scan) => (
+                <div
+                  key={scan.id}
+                  className="grid grid-cols-[minmax(110px,1.1fr)_repeat(5,minmax(90px,1fr))] border-t border-[var(--line)] px-4 py-3 text-sm text-[var(--ink)] first:border-t-0"
+                >
+                  <div className="font-medium">{scan.label}</div>
+                  <div>{scan.weightKg.toFixed(1)} kg</div>
+                  <div>{scan.skeletalMuscleKg.toFixed(1)} kg</div>
+                  <div>{scan.bodyFatMassKg.toFixed(1)} kg</div>
+                  <div>{scan.bodyFatPercent.toFixed(1)}%</div>
+                  <div>{scan.score}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-2xl border border-[var(--line)] bg-white/70 p-4">
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                Mejor PGC
+              </div>
+              <div className="mt-2 text-2xl font-semibold text-[var(--ink)]">
+                {Math.min(...inbodyScans.map((scan) => scan.bodyFatPercent)).toFixed(1)}%
+              </div>
+            </div>
+            <div className="rounded-2xl border border-[var(--line)] bg-white/70 p-4">
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                Mejor score
+              </div>
+              <div className="mt-2 text-2xl font-semibold text-[var(--ink)]">
+                {Math.max(...inbodyScans.map((scan) => scan.score))} pts
+              </div>
+            </div>
+            <div className="rounded-2xl border border-[var(--line)] bg-white/70 p-4">
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                Mejor musculo
+              </div>
+              <div className="mt-2 text-2xl font-semibold text-[var(--ink)]">
+                {Math.max(...inbodyScans.map((scan) => scan.skeletalMuscleKg)).toFixed(1)} kg
+              </div>
+            </div>
           </div>
         </article>
       </section>

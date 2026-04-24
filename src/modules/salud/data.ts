@@ -56,6 +56,14 @@ export type SessionHistoryItem = {
   details: string[];
 };
 
+export type InBodyComparisonRow = {
+  label: string;
+  latestValue: number;
+  previousValue: number;
+  unit: string;
+  betterWhen: "higher" | "lower";
+};
+
 export type InBodyScan = {
   id: string;
   date: string;
@@ -218,6 +226,58 @@ export const inbodyScans: InBodyScan[] = [
 
 const latestScan = inbodyScans[inbodyScans.length - 1];
 const previousScan = inbodyScans[inbodyScans.length - 2];
+
+export const inbodyComparisonRows: InBodyComparisonRow[] = [
+  {
+    label: "Peso",
+    latestValue: latestScan.weightKg,
+    previousValue: previousScan.weightKg,
+    unit: "kg",
+    betterWhen: "lower",
+  },
+  {
+    label: "Masa muscular",
+    latestValue: latestScan.skeletalMuscleKg,
+    previousValue: previousScan.skeletalMuscleKg,
+    unit: "kg",
+    betterWhen: "higher",
+  },
+  {
+    label: "Masa grasa",
+    latestValue: latestScan.bodyFatMassKg,
+    previousValue: previousScan.bodyFatMassKg,
+    unit: "kg",
+    betterWhen: "lower",
+  },
+  {
+    label: "PGC",
+    latestValue: latestScan.bodyFatPercent,
+    previousValue: previousScan.bodyFatPercent,
+    unit: "%",
+    betterWhen: "lower",
+  },
+  {
+    label: "Grasa visceral",
+    latestValue: latestScan.visceralFatLevel,
+    previousValue: previousScan.visceralFatLevel,
+    unit: "niv",
+    betterWhen: "lower",
+  },
+  {
+    label: "BMR",
+    latestValue: latestScan.basalMetabolicRateKcal,
+    previousValue: previousScan.basalMetabolicRateKcal,
+    unit: "kcal",
+    betterWhen: "higher",
+  },
+  {
+    label: "Score InBody",
+    latestValue: latestScan.score,
+    previousValue: previousScan.score,
+    unit: "pts",
+    betterWhen: "higher",
+  },
+];
 
 export const healthSummaryStats: HealthStat[] = [
   {
