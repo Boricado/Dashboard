@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rutina Fidel · Semana 5</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface2: #242424;
+  --border: rgba(255,255,255,0.07);
+  --text: #f0f0f0;
+  --text2: #888;
+  --text3: #555;
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --orange: #f97316;
+  --orange-dim: rgba(249,115,22,0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --blue: #3b82f6;
+  --blue-dim: rgba(59,130,246,0.12);
+  --gold: #eab308;
+  --gold-dim: rgba(234,179,8,0.12);
+  --mono: 'Space Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+  padding: 48px 48px 32px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 32px;
+  align-items: end;
+}
+
+.header-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 12px;
+}
+
+.header-title {
+  font-size: 42px;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.header-title strong { font-weight: 600; color: var(--orange); }
+
+.header-sub {
+  font-size: 13px;
+  color: var(--text2);
+  max-width: 480px;
+}
+
+.header-stats {
+  display: flex;
+  gap: 2px;
+}
+
+.hs {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 90px;
+}
+
+.hs-label {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+
+.hs-value {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.hs-value.g { color: var(--green); }
+.hs-value.o { color: var(--orange); }
+.hs-value.b { color: var(--blue); }
+
+/* WEEK STRIP */
+.week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+
+.ws-day {
+  padding: 16px 12px;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.ws-day:last-child { border-right: none; }
+.ws-day:hover { background: var(--surface); }
+.ws-day.active { background: var(--surface2); }
+
+.ws-day.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--orange);
+}
+
+.wsd-num {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--text3);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.wsd-name {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.wsd-type {
+  font-size: 11px;
+  color: var(--text2);
+}
+
+.wsd-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 8px;
+}
+
+.dot-push { background: var(--orange); }
+.dot-pull { background: var(--blue); }
+.dot-legs { background: var(--green); }
+.dot-cardio { background: var(--red); }
+.dot-sport { background: var(--gold); }
+.dot-rest { background: var(--text3); }
+
+/* PANELS */
+.panel { display: none; padding: 40px 48px; }
+.panel.active { display: block; }
+
+/* DAY TITLE */
+.day-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.day-title {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.day-focus {
+  font-size: 13px;
+  color: var(--text2);
+}
+
+/* ALERT BOX */
+.alert {
+  padding: 14px 18px;
+  border-radius: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+  border-left: 3px solid;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.alert.green { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+.alert.orange { background: var(--orange-dim); border-color: var(--orange); color: var(--orange); }
+.alert.red { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+.alert-text { color: var(--text); }
+.alert-text strong { color: inherit; }
+
+/* EXERCISE TABLE */
+.ex-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 8px;
+}
+
+.ex-table thead th {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-weight: 400;
+  background: var(--surface);
+}
+
+.ex-table thead th.r { text-align: right; }
+.ex-table thead th.c { text-align: center; }
+
+.ex-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+
+.ex-table tbody tr:last-child { border-bottom: none; }
+.ex-table tbody tr:hover { background: var(--surface); }
+
+.ex-table td {
+  padding: 14px 16px;
+  vertical-align: middle;
+}
+
+.td-letter {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  width: 32px;
+}
+
+.td-name { font-size: 14px; font-weight: 500; }
+.td-muscle { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+.td-sets {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--orange);
+}
+
+.td-reps {
+  font-family: var(--mono);
+  font-size: 12px;
+  text-align: center;
+  color: var(--text2);
+}
+
+/* WEIGHT CELL */
+.td-weight { text-align: right; }
+
+.w-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 10px;
+}
+
+.w-badge.same { color: var(--text); background: var(--surface2); }
+.w-badge.up { color: var(--green); background: var(--green-dim); }
+.w-badge.down { color: var(--red); background: var(--red-dim); }
+.w-badge.new { color: var(--blue); background: var(--blue-dim); }
+
+.w-arrow { font-size: 10px; }
+
+/* PREV WEIGHT */
+.td-prev {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  text-align: right;
+  text-decoration: line-through;
+}
+
+/* STATUS */
+.td-status { text-align: center; }
+
+.status-badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+}
+
+.status-badge.ok { background: var(--green-dim); color: var(--green); }
+.status-badge.warn { background: var(--orange-dim); color: var(--orange); }
+.status-badge.fail { background: var(--red-dim); color: var(--red); }
+.status-badge.new { background: var(--blue-dim); color: var(--blue); }
+
+/* NOTES */
+.ex-note {
+  font-size: 12px;
+  color: var(--text2);
+  padding: 8px 16px;
+  background: var(--surface);
+  border-left: 2px solid var(--orange);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.ex-note strong { color: var(--orange); }
+
+/* SECTION TITLE */
+.section-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* WARMUP */
+.warmup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2px;
+  margin-bottom: 32px;
+}
+
+.warmup-item {
+  background: var(--surface);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wi-icon { font-size: 16px; }
+.wi-text { font-size: 12px; color: var(--text2); }
+.wi-text strong { color: var(--text); font-size: 13px; display: block; margin-bottom: 1px; }
+
+/* PROGRESS BAR */
+.progress-section {
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
+
+.progress-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 2px;
+  margin-top: 16px;
+}
+
+.prog-card {
+  background: var(--surface);
+  padding: 16px;
+  border: 1px solid var(--border);
+}
+
+.prog-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 6px;
+}
+
+.prog-val {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.prog-sub { font-size: 11px; color: var(--text2); }
+
+/* CARDIO */
+.cardio-block {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2px;
+  margin-bottom: 24px;
+}
+
+.cb-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 20px;
+}
+
+.cb-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 8px;
+}
+
+.cb-value {
+  font-family: var(--mono);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--red);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.cb-note { font-size: 11px; color: var(--text2); line-height: 1.5; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .header { grid-template-columns: 1fr; padding: 28px 20px 20px; }
+  .header-stats { display: none; }
+  .week-strip { grid-template-columns: repeat(4, 1fr); }
+  .panel { padding: 24px 20px; }
+  .day-title-row { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="header-eyebrow">Bloque 2 · Semana 5 de 6</div>
+    <div class="header-title">Rutina <strong>actualizada</strong><br>con tus pesos reales</div>
+    <div class="header-sub">Pesos ajustados según tu semana 1 real. Lo que subió, lo que baja y lo que se mantiene — todo con el porqué.</div>
+  </div>
+  <div class="header-stats">
+    <div class="hs"><div class="hs-label">Semana</div><div class="hs-value o">5/6</div></div>
+    <div class="hs"><div class="hs-label">Días gym</div><div class="hs-value g">5</div></div>
+    <div class="hs"><div class="hs-label">Objetivo</div><div class="hs-value b">RIR 2</div></div>
+  </div>
+</div>
+
+<!-- WEEK STRIP -->
+<div class="week-strip">
+  <div class="ws-day active" onclick="go('lun')">
+    <div class="wsd-num">Lun</div>
+    <div class="wsd-name">Push B</div>
+    <div class="wsd-type">Pecho Alto · Tríceps</div>
+    <div class="wsd-dot dot-push"></div>
+  </div>
+  <div class="ws-day" onclick="go('mar')">
+    <div class="wsd-num">Mar</div>
+    <div class="wsd-name">Pull A</div>
+    <div class="wsd-type">Espalda · Bíceps</div>
+    <div class="wsd-dot dot-pull"></div>
+  </div>
+  <div class="ws-day" onclick="go('mie')">
+    <div class="wsd-num">Mié</div>
+    <div class="wsd-name">Pierna</div>
+    <div class="wsd-type">Rodilla-safe</div>
+    <div class="wsd-dot dot-legs"></div>
+  </div>
+  <div class="ws-day" onclick="go('jue')">
+    <div class="wsd-num">Jue</div>
+    <div class="wsd-name">Cardio Z2</div>
+    <div class="wsd-type">+ Movilidad</div>
+    <div class="wsd-dot dot-cardio"></div>
+  </div>
+  <div class="ws-day" onclick="go('vie')">
+    <div class="wsd-num">Vie</div>
+    <div class="wsd-name">Push A</div>
+    <div class="wsd-type">Pecho · Hombros</div>
+    <div class="wsd-dot dot-push"></div>
+  </div>
+  <div class="ws-day" onclick="go('sab')">
+    <div class="wsd-num">Sáb</div>
+    <div class="wsd-name">Deporte</div>
+    <div class="wsd-type">Running · Surf · Patín</div>
+    <div class="wsd-dot dot-sport"></div>
+  </div>
+  <div class="ws-day" onclick="go('dom')">
+    <div class="wsd-num">Dom</div>
+    <div class="wsd-name">Descanso</div>
+    <div class="wsd-type">Batch cooking</div>
+    <div class="wsd-dot dot-rest"></div>
+  </div>
+</div>
+
+<!-- ══════════ LUNES · PUSH B ══════════ -->
+<div id="p-lun" class="panel active">
+  <div class="day-title-row">
+    <div>
+      <div class="day-title">Push B · Lunes</div>
+      <div class="day-focus">Pecho superior · Hombros · Tríceps · Core rotacional</div>
+    </div>
+  </div>
+
+  <div class="alert orange">
+    <span>⚠️</span>
+    <span class="alert-text"><strong>Push B lleva varias semanas sin hacerse.</strong> No te sorprenda si sientes que bajó un poco — es normal. Arranca conservador y ve subiendo. El press inclinado debería estar en 38-40kg y los dips objetivo 3×10.</span>
+  </div>
+
+  <div class="section-title">Calentamiento · 8 min</div>
+  <div class="warmup-grid">
+    <div class="warmup-item"><div class="wi-icon">🔄</div><div class="wi-text"><strong>Rotación de hombros</strong>2×15 hacia adelante y atrás</div></div>
+    <div class="warmup-item"><div class="wi-icon">💪</div><div class="wi-text"><strong>Press inclinado vacío</strong>2×15, activar pecho alto</div></div>
+    <div class="warmup-item"><div class="wi-icon">🎯</div><div class="wi-text"><strong>Band pull-apart</strong>2×20</div></div>
+    <div class="warmup-item"><div class="wi-icon">⭕</div><div class="wi-text"><strong>Rotación manguito</strong>2×15 c/u</div></div>
+  </div>
+
+  <div class="section-title">Ejercicios</div>
+  <table class="ex-table">
+    <thead>
+      <tr>
+        <th style="width:32px"></th>
+        <th>Ejercicio</th>
+        <th class="c">Series</th>
+        <th class="c">Reps</th>
+        <th class="r">Última vez</th>
+        <th class="r">S5 (esta semana)</th>
+        <th class="c">Estado</th>
+        <th class="r">Descanso</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-letter">A</td>
+        <td>
+          <div class="td-name">Press inclinado con barra (30–45°)</div>
+          <div class="td-muscle">Pecho superior · Deltoides anterior</div>
+        </td>
+        <td class="td-sets">4</td>
+        <td class="td-reps">8–12</td>
+        <td class="td-prev">38 kg · 4×10</td>
+        <td class="td-weight"><div class="w-badge same">38 kg</div></td>
+        <td class="td-status"><span class="status-badge warn">MANTÉN</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">3 min</td>
+      </tr>
+      <tr>
+        <td class="td-letter">B</td>
+        <td>
+          <div class="td-name">Dips en paralelas</div>
+          <div class="td-muscle">Pecho inferior · Tríceps</div>
+        </td>
+        <td class="td-sets">3</td>
+        <td class="td-reps">8–12</td>
+        <td class="td-prev">Corporal · 8 reps</td>
+        <td class="td-weight"><div class="w-badge same">Corporal</div></td>
+        <td class="td-status"><span class="status-badge warn">MANTÉN</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">2 min</td>
+      </tr>
+      <tr>
+        <td class="td-letter">C</td>
+        <td>
+          <div class="td-name">Press de hombro sentado con mancuernas</div>
+          <div class="td-muscle">Deltoides anterior/medio · variación</div>
+        </td>
+        <td class="td-sets">3</td>
+        <td class="td-reps">10–12</td>
+        <td class="td-prev">15 kg c/u · 3×12</td>
+        <td class="td-weight"><div class="w-badge same">15 kg c/u</div></td>
+        <td class="td-status"><span class="status-badge warn">MANTÉN</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">90 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">D</td>
+        <td>
+          <div class="td-name">Elevaciones laterales sentado</div>
+          <div class="td-muscle">Deltoides medio — 2do estímulo semanal</div>
+        </td>
+        <td class="td-sets">4</td>
+        <td class="td-reps">15</td>
+        <td class="td-prev">7.5 kg c/u · 4×15</td>
+        <td class="td-weight"><div class="w-badge same">7.5 kg c/u</div></td>
+        <td class="td-status"><span class="status-badge warn">MANTÉN</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">E</td>
+        <td>
+          <div class="td-name">Skullcrusher barra EZ (superset press agarre cerrado)</div>
+          <div class="td-muscle">Tríceps — volumen de aislamiento</div>
+        </td>
+        <td class="td-sets">3</td>
+        <td class="td-reps">10 + 10</td>
+        <td class="td-prev">20 kg · 3×10</td>
+        <td class="td-weight"><div class="w-badge same">20 kg</div></td>
+        <td class="td-status"><span class="status-badge warn">MANTÉN</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">90 seg</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="ex-note"><strong>Push B de vuelta:</strong> No te exijas al máximo hoy — evalúa cómo responde el pecho superior y los tríceps después de varios días sin este estímulo. Si completas todo limpio, el viernes con Push A vas con todo. <strong>Superset:</strong> skullcrusher ×10 → press agarre cerrado ×10 sin soltar, luego 90 seg descanso.</div>
+
+  <div class="section-title" style="margin-top:24px;">Finisher Core Rotacional · 10 min</div>
+  <div class="warmup-grid">
+    <div class="warmup-item"><div class="wi-icon">🏋️</div><div class="wi-text"><strong>Plancha lateral</strong>3×30 seg c/lado</div></div>
+    <div class="warmup-item"><div class="wi-icon">🦵</div><div class="wi-text"><strong>Elevaciones pierna colgado</strong>3×12</div></div>
+    <div class="warmup-item"><div class="wi-icon">🎯</div><div class="wi-text"><strong>Pallof press</strong>3×10 c/lado · banda</div></div>
+  </div>
+</div>
+
+<!-- ══════════ MARTES · PULL A ══════════ -->
+<div id="p-mar" class="panel">
+  <div class="day-title-row">
+    <div>
+      <div class="day-title">Pull A · Martes</div>
+      <div class="day-focus">Lats · Romboides · Bíceps · Deltoides posterior</div>
+    </div>
+  </div>
+
+  <div class="alert green">
+    <span>✅</span>
+    <span class="alert-text"><strong>Dominadas 4 limpias sin banda.</strong> Esta semana objetivo 4×5 reps limpias. T-bar row sube a 35kg. Curl EZ en banco predicador — consolida técnica antes de subir peso.</span>
+  </div>
+
+  <div class="section-title">Calentamiento · 8 min</div>
+  <div class="warmup-grid">
+    <div class="warmup-item"><div class="wi-icon">🔄</div><div class="wi-text"><strong>Rotación escapular</strong>2×15, activar dorsales</div></div>
+    <div class="warmup-item"><div class="wi-icon">🎯</div><div class="wi-text"><strong>Band pull-apart</strong>2×20, banda ligera</div></div>
+    <div class="warmup-item"><div class="wi-icon">💪</div><div class="wi-text"><strong>Remo con banda</strong>2×15, activar romboides</div></div>
+    <div class="warmup-item"><div class="wi-icon">🤸</div><div class="wi-text"><strong>Colgarse de la barra</strong>3×20 seg, descomprimir</div></div>
+  </div>
+
+  <div class="section-title">Ejercicios</div>
+  <table class="ex-table">
+    <thead>
+      <tr>
+        <th style="width:32px"></th>
+        <th>Ejercicio</th>
+        <th class="c">Series</th>
+        <th class="c">Reps</th>
+        <th class="r">S4 (pasada)</th>
+        <th class="r">S5 (esta semana)</th>
+        <th class="c">Estado</th>
+        <th class="r">Descanso</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-letter">A</td>
+        <td>
+          <div class="td-name">Dominadas sin banda / Jalón asistido</div>
+          <div class="td-muscle">Dorsal ancho · Teres mayor — clave V-taper</div>
+        </td>
+        <td class="td-sets">4</td>
+        <td class="td-reps">4–6</td>
+        <td class="td-prev">4 limpias sin banda</td>
+        <td class="td-weight"><div class="w-badge same">Sin banda</div></td>
+        <td class="td-status"><span class="status-badge warn">MANTÉN</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">3 min</td>
+      </tr>
+      <tr>
+        <td class="td-letter">B</td>
+        <td>
+          <div class="td-name">T-bar row</div>
+          <div class="td-muscle">Dorsal · Romboides · Trapecio medio</div>
+        </td>
+        <td class="td-sets">4</td>
+        <td class="td-reps">8–10</td>
+        <td class="td-prev">30 kg · 4×12</td>
+        <td class="td-weight"><div class="w-badge up">35 kg <span class="w-arrow">↑</span></div></td>
+        <td class="td-status"><span class="status-badge ok">SUBE</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">2:30 min</td>
+      </tr>
+      <tr>
+        <td class="td-letter">C</td>
+        <td>
+          <div class="td-name">Remo unilateral con mancuerna</div>
+          <div class="td-muscle">Dorsal · Control unilateral</div>
+        </td>
+        <td class="td-sets">3</td>
+        <td class="td-reps">10–12</td>
+        <td class="td-prev">28 kg · 3×12</td>
+        <td class="td-weight"><div class="w-badge same">28 kg c/u</div></td>
+        <td class="td-status"><span class="status-badge warn">MANTÉN</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">90 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">D</td>
+        <td>
+          <div class="td-name">Face pulls (polea o banda)</div>
+          <div class="td-muscle">Deltoides posterior · Manguito rotador · Postura</div>
+        </td>
+        <td class="td-sets">4</td>
+        <td class="td-reps">15–20</td>
+        <td class="td-prev">25 kg · 4×20</td>
+        <td class="td-weight"><div class="w-badge same">25 kg</div></td>
+        <td class="td-status"><span class="status-badge warn">MANTÉN</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">E</td>
+        <td>
+          <div class="td-name">Curl EZ en banco predicador</div>
+          <div class="td-muscle">Bíceps braquial — técnica aislada sin balanceo</div>
+        </td>
+        <td class="td-sets">3</td>
+        <td class="td-reps">10–12</td>
+        <td class="td-prev">~18 kg · 3×12</td>
+        <td class="td-weight"><div class="w-badge up">20 kg <span class="w-arrow">↑</span></div></td>
+        <td class="td-status"><span class="status-badge ok">SUBE</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">F</td>
+        <td>
+          <div class="td-name">Curl martillo con mancuernas</div>
+          <div class="td-muscle">Braquialis · Grosor del brazo</div>
+        </td>
+        <td class="td-sets">3</td>
+        <td class="td-reps">10–12</td>
+        <td class="td-prev">15 kg · 3×10</td>
+        <td class="td-weight"><div class="w-badge same">15 kg c/u</div></td>
+        <td class="td-status"><span class="status-badge warn">MANTÉN</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="ex-note"><strong>T-bar sube a 35kg</strong> — completaste 4×12 con 30kg. <strong>Curl EZ sube a 20kg</strong> — 3×12 limpio con 18kg la semana pasada. Si sientes que el balanceo vuelve, baja a 18kg y prioriza técnica. <strong>Dominadas:</strong> si tienes 4 limpias busca llegar a 5 esta semana.</div>
+</div>
+
+<!-- ══════════ MIÉRCOLES · PIERNA ══════════ -->
+<div id="p-mie" class="panel">
+  <div class="day-title-row">
+    <div>
+      <div class="day-title">Pierna · Miércoles</div>
+      <div class="day-focus">Cuádriceps · Glúteos · Isquiotibiales · Gemelos — Protocolo rodilla</div>
+    </div>
+  </div>
+
+  <div class="alert green">
+    <span>✅</span>
+    <span class="alert-text"><strong>De vuelta en Coquimbo con las máquinas completas.</strong> Goblet y RDL vuelven a 22.5kg, hip thrust a 55kg. Abductor y aductor de vuelta — los extrañaste en Iquique 😄</span>
+  </div>
+
+  <div class="section-title">⚠️ Protocolo rodilla OBLIGATORIO antes de empezar · 10 min</div>
+  <div class="warmup-grid">
+    <div class="warmup-item"><div class="wi-icon">🦵</div><div class="wi-text"><strong>TKE con banda</strong>3×15 por pierna · activa VMO</div></div>
+    <div class="warmup-item"><div class="wi-icon">🐶</div><div class="wi-text"><strong>Clamshells</strong>3×20 por lado · activa glúteo medio</div></div>
+    <div class="warmup-item"><div class="wi-icon">🔤</div><div class="wi-text"><strong>Abecedario tobillo</strong>1× completo cada pie</div></div>
+    <div class="warmup-item"><div class="wi-icon">🦩</div><div class="wi-text"><strong>Equilibrio monopodal</strong>3×30 seg · ojos abiertos</div></div>
+  </div>
+
+  <div class="section-title">Ejercicios</div>
+  <table class="ex-table">
+    <thead>
+      <tr>
+        <th style="width:32px"></th>
+        <th>Ejercicio</th>
+        <th class="c">Series</th>
+        <th class="c">Reps</th>
+        <th class="r">S2 (pasada)</th>
+        <th class="r">S3 (esta semana)</th>
+        <th class="c">Estado</th>
+        <th class="r">Descanso</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-letter">A</td>
+        <td>
+          <div class="td-name">Goblet squat con mancuerna</div>
+          <div class="td-muscle">Cuádriceps · Glúteos — máx 90° de flexión de rodilla</div>
+        </td>
+        <td class="td-sets">4</td>
+        <td class="td-reps">10–12</td>
+        <td class="td-prev">20 kg · 4×12</td>
+        <td class="td-weight"><div class="w-badge up">22.5 kg <span class="w-arrow">↑</span></div></td>
+        <td class="td-status"><span class="status-badge ok">SUBE</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">2:30 min</td>
+      </tr>
+      <tr>
+        <td class="td-letter">B</td>
+        <td>
+          <div class="td-name">Romanian Deadlift con mancuernas</div>
+          <div class="td-muscle">Isquiotibiales · Glúteos · Erectors</div>
+        </td>
+        <td class="td-sets">4</td>
+        <td class="td-reps">10–12</td>
+        <td class="td-prev">2×20 kg · 4×12</td>
+        <td class="td-weight"><div class="w-badge up">2×22.5 kg <span class="w-arrow">↑</span></div></td>
+        <td class="td-status"><span class="status-badge ok">SUBE</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">2:30 min</td>
+      </tr>
+      <tr>
+        <td class="td-letter">C</td>
+        <td>
+          <div class="td-name">Hip thrust con barra</div>
+          <div class="td-muscle">Glúteo mayor — cero carga en rodilla</div>
+        </td>
+        <td class="td-sets">4</td>
+        <td class="td-reps">12–15</td>
+        <td class="td-prev">51.7 kg · 4×15</td>
+        <td class="td-weight"><div class="w-badge up">55 kg <span class="w-arrow">↑</span></div></td>
+        <td class="td-status"><span class="status-badge ok">SUBE</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">90 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">D</td>
+        <td>
+          <div class="td-name">Curl de isquio en máquina</div>
+          <div class="td-muscle">Isquiotibiales — aislamiento</div>
+        </td>
+        <td class="td-sets">3</td>
+        <td class="td-reps">12–15</td>
+        <td class="td-prev">44 lbs · 4×12</td>
+        <td class="td-weight"><div class="w-badge up">50 lbs <span class="w-arrow">↑</span></div></td>
+        <td class="td-status"><span class="status-badge ok">SUBE</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">E</td>
+        <td>
+          <div class="td-name">Elevaciones de talón excéntricas (escalón)</div>
+          <div class="td-muscle">Sóleo · Gastrocnemio — rehabilitación tobillo</div>
+        </td>
+        <td class="td-sets">4</td>
+        <td class="td-reps">15 c/u</td>
+        <td class="td-prev">Peso corporal</td>
+        <td class="td-weight"><div class="w-badge same">Corporal</div></td>
+        <td class="td-status"><span class="status-badge warn">MANTÉN</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">F</td>
+        <td>
+          <div class="td-name">Extensión terminal de rodilla (banda)</div>
+          <div class="td-muscle">VMO — fortalecimiento terapéutico condromalacia</div>
+        </td>
+        <td class="td-sets">3</td>
+        <td class="td-reps">15 c/u</td>
+        <td class="td-prev">Banda ligera</td>
+        <td class="td-weight"><div class="w-badge same">Banda ligera</div></td>
+        <td class="td-status"><span class="status-badge warn">MANTÉN</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">45 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">G</td>
+        <td>
+          <div class="td-name">Abductor en máquina (abrir)</div>
+          <div class="td-muscle">Glúteo medio · Estabilización rodilla — terapéutico</div>
+        </td>
+        <td class="td-sets">3</td>
+        <td class="td-reps">15–20</td>
+        <td class="td-prev">82 lbs · 3×18</td>
+        <td class="td-weight"><div class="w-badge up">85 lbs <span class="w-arrow">↑</span></div></td>
+        <td class="td-status"><span class="status-badge ok">SUBE</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">H</td>
+        <td>
+          <div class="td-name">Aductor en máquina (cerrar)</div>
+          <div class="td-muscle">Aductores · Equilibrio muscular cara interna</div>
+        </td>
+        <td class="td-sets">2</td>
+        <td class="td-reps">15–20</td>
+        <td class="td-prev">75 lbs · 3×20</td>
+        <td class="td-weight"><div class="w-badge up">80 lbs <span class="w-arrow">↑</span></div></td>
+        <td class="td-status"><span class="status-badge ok">SUBE</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="ex-note"><strong>Goblet y RDL suben a 22.5kg</strong> — vuelves a las cargas de Coquimbo. <strong>Hip thrust sube a 55kg.</strong> <strong>Abductor sube a 85 lbs y aductor a 80 lbs</strong> — de vuelta con las máquinas completas. <strong>Regla absoluta goblet squat:</strong> nunca bajar los muslos más allá del paralelo.</div>
+</div>
+
+<!-- ══════════ JUEVES · CARDIO ══════════ -->
+<div id="p-jue" class="panel">
+  <div class="day-title-row">
+    <div>
+      <div class="day-title">Cardio Z2 · Jueves</div>
+      <div class="day-focus">Base aeróbica · Recuperación activa · Protocolo tobillo/rodilla</div>
+    </div>
+  </div>
+
+  <div class="alert green">
+    <span>✅</span>
+    <span class="alert-text"><strong>42 minutos el último cardio con FC media 120 ppm.</strong> Esta semana objetivo 44 minutos. Protocolo arranque: 3 min a 9 km/h → bajar a 8 km/h con 3.5% pendiente y mantener.</span>
+  </div>
+
+  <div class="section-title">Protocolo Semana 5</div>
+  <div class="cardio-block">
+    <div class="cb-item">
+      <div class="cb-label">Activación inicial</div>
+      <div class="cb-value">3 min</div>
+      <div class="cb-note">9 km/h sin pendiente — provoca el switch de FC antes del minuto 5</div>
+    </div>
+    <div class="cb-item">
+      <div class="cb-label">Z2 sostenido</div>
+      <div class="cb-value">41 min</div>
+      <div class="cb-note">8 km/h · 3.5% pendiente · sube de 7.5 a 8 km/h</div>
+    </div>
+    <div class="cb-item">
+      <div class="cb-label">Total sesión</div>
+      <div class="cb-value">44 min</div>
+      <div class="cb-note">+3 min respecto sesión anterior</div>
+    </div>
+    <div class="cb-item">
+      <div class="cb-label">FC objetivo</div>
+      <div class="cb-value">118–138</div>
+      <div class="cb-note">bpm · agua cada 10 min · Garmin ajustado en muñeca</div>
+    </div>
+  </div>
+
+  <div class="section-title">Post-cardio · Protocolo rodilla/tobillo · 15 min</div>
+  <div class="warmup-grid">
+    <div class="warmup-item"><div class="wi-icon">🦩</div><div class="wi-text"><strong>Equilibrio monopodal</strong>3×30 seg c/u</div></div>
+    <div class="warmup-item"><div class="wi-icon">🔄</div><div class="wi-text"><strong>Foam roller ITB</strong>60 seg c/pierna</div></div>
+    <div class="warmup-item"><div class="wi-icon">🔄</div><div class="wi-text"><strong>Foam roller cuádriceps</strong>60 seg c/pierna</div></div>
+    <div class="warmup-item"><div class="wi-icon">🔄</div><div class="wi-text"><strong>Foam roller gemelos</strong>60 seg c/pierna</div></div>
+    <div class="warmup-item"><div class="wi-icon">🦵</div><div class="wi-text"><strong>Estiramiento isquio</strong>2×45 seg c/pierna</div></div>
+    <div class="warmup-item"><div class="wi-icon">🐶</div><div class="wi-text"><strong>Glute bridge + clamshell</strong>2×15</div></div>
+  </div>
+</div>
+
+<!-- ══════════ VIERNES · PUSH A ══════════ -->
+<div id="p-vie" class="panel">
+  <div class="day-title-row">
+    <div>
+      <div class="day-title">Push A · Viernes</div>
+      <div class="day-focus">Pecho medio · Hombros laterales · Tríceps · Core</div>
+    </div>
+  </div>
+
+  <div class="alert green">
+    <span>✅</span>
+    <span class="alert-text"><strong>Bench press a 50kg con 4×12 en la semana 4.</strong> Esta semana mantén 50kg y consolida. Military press 30kg — busca completar las 4×10 limpias. Aperturas a 17.5kg.</span>
+  </div>
+
+  <div class="section-title">Calentamiento · 8 min</div>
+  <div class="warmup-grid">
+    <div class="warmup-item"><div class="wi-icon">🔄</div><div class="wi-text"><strong>Rotación de hombros</strong>2×15 hacia adelante y atrás</div></div>
+    <div class="warmup-item"><div class="wi-icon">💪</div><div class="wi-text"><strong>Press con barra vacía</strong>2×15, activar escápulas</div></div>
+    <div class="warmup-item"><div class="wi-icon">🎯</div><div class="wi-text"><strong>Band pull-apart</strong>2×20, banda ligera</div></div>
+    <div class="warmup-item"><div class="wi-icon">⭕</div><div class="wi-text"><strong>Rotación manguito</strong>2×15 c/u con banda</div></div>
+  </div>
+
+  <div class="section-title">Ejercicios</div>
+  <table class="ex-table">
+    <thead>
+      <tr>
+        <th style="width:32px"></th>
+        <th>Ejercicio</th>
+        <th class="c">Series</th>
+        <th class="c">Reps</th>
+        <th class="r">S4 (pasada)</th>
+        <th class="r">S5 (esta semana)</th>
+        <th class="c">Estado</th>
+        <th class="r">Descanso</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-letter">A</td>
+        <td>
+          <div class="td-name">Press de banca plano (barra)</div>
+          <div class="td-muscle">Pectoral medio · Tríceps · Deltoides anterior</div>
+        </td>
+        <td class="td-sets">4</td>
+        <td class="td-reps">8–12</td>
+        <td class="td-prev">50 kg · 3×12 + 1×10</td>
+        <td class="td-weight"><div class="w-badge same">50 kg</div></td>
+        <td class="td-status"><span class="status-badge warn">MANTÉN</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">3 min</td>
+      </tr>
+      <tr>
+        <td class="td-letter">B</td>
+        <td>
+          <div class="td-name">Press inclinado con mancuernas (30–45°)</div>
+          <div class="td-muscle">Pectoral superior · Deltoides anterior</div>
+        </td>
+        <td class="td-sets">3</td>
+        <td class="td-reps">10–12</td>
+        <td class="td-prev">20 kg c/u · 4×8</td>
+        <td class="td-weight"><div class="w-badge same">20 kg c/u</div></td>
+        <td class="td-status"><span class="status-badge warn">MANTÉN</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">2:30 min</td>
+      </tr>
+      <tr>
+        <td class="td-letter">C</td>
+        <td>
+          <div class="td-name">Press militar con barra (de pie)</div>
+          <div class="td-muscle">Deltoides frontal/medio · Tríceps · Core</div>
+        </td>
+        <td class="td-sets">4</td>
+        <td class="td-reps">8–10</td>
+        <td class="td-prev">30 kg · 3×8 + incompleto</td>
+        <td class="td-weight"><div class="w-badge same">30 kg</div></td>
+        <td class="td-status"><span class="status-badge warn">MANTÉN</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">2 min</td>
+      </tr>
+      <tr>
+        <td class="td-letter">D</td>
+        <td>
+          <div class="td-name">Elevaciones laterales con mancuernas</div>
+          <div class="td-muscle">Deltoides medio — clave para el ancho de hombros</div>
+        </td>
+        <td class="td-sets">4</td>
+        <td class="td-reps">12–15</td>
+        <td class="td-prev">10 kg c/u · 4×12</td>
+        <td class="td-weight"><div class="w-badge same">10 kg c/u</div></td>
+        <td class="td-status"><span class="status-badge warn">MANTÉN</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">E</td>
+        <td>
+          <div class="td-name">Aperturas con mancuernas (banco plano)</div>
+          <div class="td-muscle">Pectoral esternal · Pecho bajo/exterior</div>
+        </td>
+        <td class="td-sets">3</td>
+        <td class="td-reps">12–15</td>
+        <td class="td-prev">15 kg c/u · 4×12</td>
+        <td class="td-weight"><div class="w-badge up">17.5 kg c/u <span class="w-arrow">↑</span></div></td>
+        <td class="td-status"><span class="status-badge ok">SUBE</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="ex-note"><strong>Bench press 50kg:</strong> objetivo 4×12 completas esta semana. Si lo logras, semana 6 subes a 52.5kg. <strong>Military press:</strong> la semana pasada bajó por la enfermedad — fresco hoy deberías recuperar las 4×10. <strong>Aperturas suben a 17.5kg</strong> — ya las hiciste con ese peso antes.</div>
+
+  <div class="section-title" style="margin-top:24px;">Finisher Core · 10 min</div>
+  <div class="warmup-grid">
+    <div class="warmup-item"><div class="wi-icon">🏋️</div><div class="wi-text"><strong>Plancha frontal</strong>3×45 seg · 45 seg descanso</div></div>
+    <div class="warmup-item"><div class="wi-icon">🦵</div><div class="wi-text"><strong>Elevaciones de pierna colgado</strong>3×12 · 45 seg descanso</div></div>
+    <div class="warmup-item"><div class="wi-icon">🐛</div><div class="wi-text"><strong>Dead bug</strong>3×8 por lado · 45 seg descanso</div></div>
+  </div>
+</div>
+
+<!-- ══════════ SÁBADO · DEPORTE ══════════ -->
+<div id="p-sab" class="panel">
+  <div class="day-title-row">
+    <div>
+      <div class="day-title">Deporte · Sábado</div>
+      <div class="day-focus">Tirada larga · Base aeróbica media maratón</div>
+    </div>
+  </div>
+
+  <div class="alert green">
+    <span>🏃</span>
+    <span class="alert-text"><strong>Esta semana deporte largo en Coquimbo — de vuelta en casa.</strong> Running por la costanera, natación en el muelle o patinaje. Objetivo running: 10 km pace conversacional.</span>
+  </div>
+
+  <div class="section-title">Opciones de deporte · Elige una</div>
+  <div class="cardio-block">
+    <div class="cb-item">
+      <div class="cb-label">Opción A · Running</div>
+      <div class="cb-value">10 km</div>
+      <div class="cb-note">Pace conversacional. Semana 2 era 9km — esta semana sube a 10km. Temprano en la mañana.</div>
+    </div>
+    <div class="cb-item">
+      <div class="cb-label">Opción B · Natación mar</div>
+      <div class="cb-value">30–40 min</div>
+      <div class="cb-note">Excelente para los hombros cansados de la semana. Bajo impacto articular, alto trabajo cardiovascular.</div>
+    </div>
+    <div class="cb-item">
+      <div class="cb-label">Opción C · Surf o Patinaje</div>
+      <div class="cb-value">60–90 min</div>
+      <div class="cb-note">Bajo impacto en rodilla. Perfecto si las piernas están muy cargadas después del miércoles.</div>
+    </div>
+  </div>
+
+  <div class="ex-note"><strong>Nutrición sábado:</strong> Desayuno cargado en carbohidratos antes del deporte. Post-deporte: batido de proteína + fruta dentro de los 30 min. Si haces running largo, lleva 2-3 dátiles como combustible para el km 8.</div>
+</div>
+
+<!-- ══════════ DOMINGO · DESCANSO ══════════ -->
+<div id="p-dom" class="panel">
+  <div class="day-title-row">
+    <div>
+      <div class="day-title">Descanso · Domingo</div>
+      <div class="day-focus">Recuperación activa · Batch cooking · Preparar la semana 4</div>
+    </div>
+  </div>
+
+  <div class="section-title">El domingo es parte del programa</div>
+  <div class="warmup-grid">
+    <div class="warmup-item"><div class="wi-icon">🚶</div><div class="wi-text"><strong>Caminata máx 30 min</strong>Pace muy suave. Sin pendiente fuerte.</div></div>
+    <div class="warmup-item"><div class="wi-icon">🔄</div><div class="wi-text"><strong>Foam rolling completo</strong>15 min · espalda, piernas, glúteos</div></div>
+    <div class="warmup-item"><div class="wi-icon">🍳</div><div class="wi-text"><strong>Batch cooking</strong>Garbanzos + lentejas + arroz integral para la semana</div></div>
+    <div class="warmup-item"><div class="wi-icon">😴</div><div class="wi-text"><strong>Dormir 7-8 hrs</strong>El músculo crece en el sueño, no en el gym</div></div>
+  </div>
+
+  <div class="ex-note" style="margin-top:24px;"><strong>Batch cooking del domingo:</strong> Ya tienes el hábito — garbanzos o lentejas cocidas en taper + arroz integral. Con eso tienes almuerzo y cena de lunes a jueves lista. Agrega verduras frescas encima y listo.</div>
+
+  <!-- PROGRESS SUMMARY -->
+  <div class="progress-section">
+    <div class="section-title">Progresión acumulada · Semana 1 → Semana 5</div>
+    <div class="progress-grid">
+      <div class="prog-card">
+        <div class="prog-label">Bench press</div>
+        <div class="prog-val" style="color:var(--green)">+7.5 kg</div>
+        <div class="prog-sub">42.5 → 50 kg ↑</div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-label">Hip thrust</div>
+        <div class="prog-val" style="color:var(--green)">+15 kg</div>
+        <div class="prog-sub">40 → 55 kg ↑</div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-label">Goblet squat</div>
+        <div class="prog-val" style="color:var(--green)">+2.5 kg</div>
+        <div class="prog-sub">20 → 22.5 kg ↑</div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-label">Dominadas</div>
+        <div class="prog-val" style="color:var(--green)">Sin banda</div>
+        <div class="prog-sub">Banda → 4 reps limpias ↑</div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-label">T-bar row</div>
+        <div class="prog-val" style="color:var(--green)">35 kg</div>
+        <div class="prog-sub">Nuevo ejercicio ↑</div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-label">Aperturas DB</div>
+        <div class="prog-val" style="color:var(--green)">+2.5 kg</div>
+        <div class="prog-sub">15 → 17.5 kg c/u ↑</div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-label">Cardio Z2</div>
+        <div class="prog-val" style="color:var(--green)">+9 min</div>
+        <div class="prog-sub">35 → 44 min ↑</div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-label">Peso corporal</div>
+        <div class="prog-val" style="color:var(--green)">-2.2 kg</div>
+        <div class="prog-sub">92.2 → 90.0 kg ↓</div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-label">Grasa visceral</div>
+        <div class="prog-val" style="color:var(--green)">-2 niv</div>
+        <div class="prog-sub">11 → 9 · rango normal ↓</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const days = ['lun','mar','mie','jue','vie','sab','dom'];
+function go(id) {
+  days.forEach(d => {
+    document.getElementById('p-' + d).classList.remove('active');
+  });
+  document.querySelectorAll('.ws-day').forEach(el => el.classList.remove('active'));
+  document.getElementById('p-' + id).classList.add('active');
+  const idx = days.indexOf(id);
+  document.querySelectorAll('.ws-day')[idx].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

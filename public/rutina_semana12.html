@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rutina Fidel · Semana 12</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface2: #242424;
+  --border: rgba(255,255,255,0.07);
+  --text: #f0f0f0;
+  --text2: #888;
+  --text3: #555;
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --orange: #f97316;
+  --orange-dim: rgba(249,115,22,0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --blue: #3b82f6;
+  --blue-dim: rgba(59,130,246,0.12);
+  --gold: #eab308;
+  --gold-dim: rgba(234,179,8,0.12);
+  --mono: 'Space Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+  padding: 48px 48px 32px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 32px;
+  align-items: end;
+}
+
+.header-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 12px;
+}
+
+.header-title {
+  font-size: 42px;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.header-title strong { font-weight: 600; color: var(--blue); }
+
+.header-sub {
+  font-size: 13px;
+  color: var(--text2);
+  max-width: 520px;
+}
+
+.header-stats {
+  display: flex;
+  gap: 2px;
+}
+
+.hs {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 90px;
+}
+
+.hs-label {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+
+.hs-value {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.hs-value.g { color: var(--green); }
+.hs-value.o { color: var(--orange); }
+.hs-value.b { color: var(--blue); }
+.hs-value.gold { color: var(--gold); }
+
+/* WEEK STRIP */
+.week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+
+.ws-day {
+  padding: 16px 12px;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.ws-day:last-child { border-right: none; }
+.ws-day:hover { background: var(--surface); }
+.ws-day.active { background: var(--surface2); }
+
+.ws-day.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--blue);
+}
+
+.wsd-num {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--text3);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.wsd-name {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.wsd-type {
+  font-size: 11px;
+  color: var(--text2);
+}
+
+.wsd-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 8px;
+}
+
+.dot-push { background: var(--orange); }
+.dot-pull { background: var(--blue); }
+.dot-legs { background: var(--green); }
+.dot-cardio { background: var(--red); }
+.dot-sport { background: var(--gold); }
+.dot-rest { background: var(--text3); }
+
+/* PANELS */
+.panel { display: none; padding: 40px 48px; }
+.panel.active { display: block; }
+
+/* DAY TITLE */
+.day-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.day-title {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.day-focus {
+  font-size: 13px;
+  color: var(--text2);
+}
+
+/* ALERT BOX */
+.alert {
+  padding: 14px 18px;
+  border-radius: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+  border-left: 3px solid;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.alert.green { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+.alert.orange { background: var(--orange-dim); border-color: var(--orange); color: var(--orange); }
+.alert.red { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+.alert.blue { background: var(--blue-dim); border-color: var(--blue); color: var(--blue); }
+.alert.gold { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+.alert-text { color: var(--text); }
+.alert-text strong { color: inherit; }
+
+/* EXERCISE TABLE */
+.ex-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 8px;
+}
+
+.ex-table thead th {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-weight: 400;
+  background: var(--surface);
+}
+
+.ex-table thead th.r { text-align: right; }
+.ex-table thead th.c { text-align: center; }
+
+.ex-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+
+.ex-table tbody tr:last-child { border-bottom: none; }
+.ex-table tbody tr:hover { background: var(--surface); }
+
+.ex-table td {
+  padding: 14px 16px;
+  vertical-align: middle;
+}
+
+.td-letter {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  width: 32px;
+}
+
+.td-name { font-size: 14px; font-weight: 500; }
+.td-muscle { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+.td-sets {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--blue);
+}
+
+.td-reps {
+  font-family: var(--mono);
+  font-size: 12px;
+  text-align: center;
+  color: var(--text2);
+}
+
+/* WEIGHT CELL */
+.td-weight { text-align: right; }
+
+.w-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 10px;
+}
+
+.w-badge.same { color: var(--text); background: var(--surface2); }
+.w-badge.up { color: var(--green); background: var(--green-dim); }
+.w-badge.down { color: var(--red); background: var(--red-dim); }
+.w-badge.new { color: var(--blue); background: var(--blue-dim); }
+
+.w-arrow { font-size: 10px; }
+
+/* PREV WEIGHT */
+.td-prev {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  text-align: right;
+  text-decoration: line-through;
+}
+
+/* STATUS */
+.td-status { text-align: center; }
+
+.status-badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+}
+
+.status-badge.ok { background: var(--green-dim); color: var(--green); }
+.status-badge.warn { background: var(--orange-dim); color: var(--orange); }
+.status-badge.fail { background: var(--red-dim); color: var(--red); }
+.status-badge.new { background: var(--blue-dim); color: var(--blue); }
+.status-badge.deload { background: var(--blue-dim); color: var(--blue); }
+
+/* NOTES */
+.ex-note {
+  font-size: 12px;
+  color: var(--text2);
+  padding: 8px 16px;
+  background: var(--surface);
+  border-left: 2px solid var(--blue);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.ex-note strong { color: var(--blue); }
+
+/* SECTION TITLE */
+.section-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* WARMUP */
+.warmup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2px;
+  margin-bottom: 32px;
+}
+
+.warmup-item {
+  background: var(--surface);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wi-icon { font-size: 16px; }
+.wi-text { font-size: 12px; color: var(--text2); }
+.wi-text strong { color: var(--text); font-size: 13px; display: block; margin-bottom: 1px; }
+
+/* PROGRESS BAR */
+.progress-section {
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
+
+.progress-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 2px;
+  margin-top: 16px;
+}
+
+.prog-card {
+  background: var(--surface);
+  padding: 16px;
+  border: 1px solid var(--border);
+}
+
+.prog-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 6px;
+}
+
+.prog-val {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.prog-sub { font-size: 11px; color: var(--text2); }
+
+/* CARDIO */
+.cardio-block {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2px;
+  margin-bottom: 24px;
+}
+
+.cb-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 20px;
+}
+
+.cb-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 8px;
+}
+
+.cb-value {
+  font-family: var(--mono);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--red);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.cb-value.green { color: var(--green); }
+.cb-value.gold { color: var(--gold); }
+.cb-value.blue { color: var(--blue); }
+
+.cb-note { font-size: 11px; color: var(--text2); line-height: 1.5; }
+
+/* MARATHON PLAN TABLE */
+.plan-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.plan-table thead th {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-weight: 400;
+  background: var(--surface);
+}
+
+.plan-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+
+.plan-table tbody tr:last-child { border-bottom: none; }
+.plan-table tbody tr:hover { background: var(--surface); }
+.plan-table tbody tr.current-week { background: var(--blue-dim); }
+
+.plan-table td {
+  padding: 12px 16px;
+  vertical-align: middle;
+  font-size: 13px;
+}
+
+.plan-table td.week-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  width: 60px;
+}
+
+.plan-table td.current-week-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--blue);
+  width: 60px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .header { grid-template-columns: 1fr; padding: 28px 20px 20px; }
+  .header-stats { display: none; }
+  .week-strip { grid-template-columns: repeat(4, 1fr); }
+  .panel { padding: 24px 20px; }
+  .day-title-row { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="header-eyebrow">PPL + Running · Semana 12 · Deload · 17 semanas para La Serena</div>
+    <div class="header-title">Semana de<br><strong>descarga</strong></div>
+    <div class="header-sub">El cuerpo consolida, no pierde. Volumen &ndash;40%, intensidad igual. El fitness no se pierde en 7 días &mdash; se consolida. Saldrás más fuerte la semana 13.</div>
+  </div>
+  <div class="header-stats">
+    <div class="hs"><div class="hs-label">Semana</div><div class="hs-value b">12</div></div>
+    <div class="hs"><div class="hs-label">Para la carrera</div><div class="hs-value gold">17 sem</div></div>
+    <div class="hs"><div class="hs-label">Tirada</div><div class="hs-value g">8 km</div></div>
+    <div class="hs"><div class="hs-label">Objetivo</div><div class="hs-value b">sub-2h</div></div>
+  </div>
+</div>
+
+<!-- WEEK STRIP -->
+<div class="week-strip">
+  <div class="ws-day active" onclick="go('lun')">
+    <div class="wsd-num">Lun 20/4</div>
+    <div class="wsd-name">Push A</div>
+    <div class="wsd-type">Deload · 2–3 series</div>
+    <div class="wsd-dot dot-push"></div>
+  </div>
+  <div class="ws-day" onclick="go('mar')">
+    <div class="wsd-num">Mar 21/4</div>
+    <div class="wsd-name">Carrera 4km</div>
+    <div class="wsd-type">Z2 · FC &lt; 140</div>
+    <div class="wsd-dot dot-legs"></div>
+  </div>
+  <div class="ws-day" onclick="go('mie')">
+    <div class="wsd-num">Mié 22/4</div>
+    <div class="wsd-name">Pierna</div>
+    <div class="wsd-type">Deload · 2–3 series</div>
+    <div class="wsd-dot dot-legs"></div>
+  </div>
+  <div class="ws-day" onclick="go('jue')">
+    <div class="wsd-num">Jue 23/4</div>
+    <div class="wsd-name">Z2 Caminadora</div>
+    <div class="wsd-type">30 min · Deload</div>
+    <div class="wsd-dot dot-cardio"></div>
+  </div>
+  <div class="ws-day" onclick="go('vie')">
+    <div class="wsd-num">Vie 24/4</div>
+    <div class="wsd-name">Pull A</div>
+    <div class="wsd-type">Deload · 2–3 series</div>
+    <div class="wsd-dot dot-pull"></div>
+  </div>
+  <div class="ws-day" onclick="go('sab')">
+    <div class="wsd-num">Sáb 25/4</div>
+    <div class="wsd-name">Carrera 8km</div>
+    <div class="wsd-type">Moderada · Sin presión</div>
+    <div class="wsd-dot dot-sport"></div>
+  </div>
+  <div class="ws-day" onclick="go('dom')">
+    <div class="wsd-num">Dom 26/4</div>
+    <div class="wsd-name">Descanso</div>
+    <div class="wsd-type">Recuperación total</div>
+    <div class="wsd-dot dot-rest"></div>
+  </div>
+</div>
+
+<!-- ══════════ LUNES · PUSH A DELOAD ══════════ -->
+<div id="p-lun" class="panel active">
+  <div class="day-title-row">
+    <div>
+      <div class="day-title">Push A Deload · Lunes 20/4</div>
+      <div class="day-focus">Pecho · Hombros · Tríceps — mismos pesos, menos series</div>
+    </div>
+  </div>
+
+  <div class="alert blue">
+    <span>💙</span>
+    <span class="alert-text"><strong>Semana de descarga activa — mismos pesos, menos series. No intentes PRs esta semana.</strong> El deload no es debilidad — es parte del programa. 2 series por ejercicio es suficiente para mantener el estímulo sin acumular fatiga. El cuerpo consolida adaptaciones esta semana.</span>
+  </div>
+
+  <div class="section-title">Calentamiento · 8 min</div>
+  <div class="warmup-grid">
+    <div class="warmup-item"><div class="wi-icon">🔄</div><div class="wi-text"><strong>Rotación de hombros</strong>2×15 hacia adelante y atrás</div></div>
+    <div class="warmup-item"><div class="wi-icon">💪</div><div class="wi-text"><strong>Press con barra vacía</strong>2×15, activar escápulas</div></div>
+    <div class="warmup-item"><div class="wi-icon">🎯</div><div class="wi-text"><strong>Band pull-apart</strong>2×20, banda ligera</div></div>
+    <div class="warmup-item"><div class="wi-icon">⭕</div><div class="wi-text"><strong>Rotación manguito</strong>2×15 c/u con banda</div></div>
+  </div>
+
+  <div class="section-title">Ejercicios · Deload (mismos pesos, –40% series)</div>
+  <table class="ex-table">
+    <thead>
+      <tr>
+        <th style="width:32px"></th>
+        <th>Ejercicio</th>
+        <th class="c">Series</th>
+        <th class="c">Reps</th>
+        <th class="r">S11 (pasada)</th>
+        <th class="r">S12 (deload)</th>
+        <th class="c">Estado</th>
+        <th class="r">Descanso</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-letter">A</td>
+        <td>
+          <div class="td-name">Press de banca plano (barra)</div>
+          <div class="td-muscle">Pectoral medio · Tríceps · Deltoides anterior</div>
+        </td>
+        <td class="td-sets">2</td>
+        <td class="td-reps">8–10</td>
+        <td class="td-prev">50 kg · 4×10</td>
+        <td class="td-weight"><div class="w-badge same">50 kg</div></td>
+        <td class="td-status"><span class="status-badge deload">DELOAD</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">3 min</td>
+      </tr>
+      <tr>
+        <td class="td-letter">B</td>
+        <td>
+          <div class="td-name">Press inclinado con mancuernas (30–45°)</div>
+          <div class="td-muscle">Pectoral superior · Deltoides anterior</div>
+        </td>
+        <td class="td-sets">2</td>
+        <td class="td-reps">10</td>
+        <td class="td-prev">20 kg c/u · 3×10</td>
+        <td class="td-weight"><div class="w-badge same">20 kg c/u</div></td>
+        <td class="td-status"><span class="status-badge deload">DELOAD</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">2:30 min</td>
+      </tr>
+      <tr>
+        <td class="td-letter">C</td>
+        <td>
+          <div class="td-name">Press militar con barra (de pie)</div>
+          <div class="td-muscle">Deltoides frontal/medio · Tríceps · Core</div>
+        </td>
+        <td class="td-sets">2</td>
+        <td class="td-reps">8–10</td>
+        <td class="td-prev">30 kg · 4×10</td>
+        <td class="td-weight"><div class="w-badge same">30 kg</div></td>
+        <td class="td-status"><span class="status-badge deload">DELOAD</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">2 min</td>
+      </tr>
+      <tr>
+        <td class="td-letter">D</td>
+        <td>
+          <div class="td-name">Elevaciones laterales con mancuernas</div>
+          <div class="td-muscle">Deltoides medio — clave para el ancho de hombros</div>
+        </td>
+        <td class="td-sets">2</td>
+        <td class="td-reps">12</td>
+        <td class="td-prev">10 kg c/u · 4×12</td>
+        <td class="td-weight"><div class="w-badge same">10 kg c/u</div></td>
+        <td class="td-status"><span class="status-badge deload">DELOAD</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">E</td>
+        <td>
+          <div class="td-name">Aperturas con mancuernas</div>
+          <div class="td-muscle">Pectoral esternal · Pecho bajo/exterior</div>
+        </td>
+        <td class="td-sets" style="color:var(--text3);">—</td>
+        <td class="td-reps" style="color:var(--text3);">—</td>
+        <td class="td-prev">17.5 kg c/u · 3×12</td>
+        <td class="td-weight"><div class="w-badge" style="color:var(--text3); background:var(--surface2);">OMITIR</div></td>
+        <td class="td-status"><span class="status-badge" style="background:var(--surface2); color:var(--text3);">SKIP</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">—</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="ex-note"><strong>Deload inteligente:</strong> 2 series es suficiente para mantener la fuerza sin acumular fatiga. La semana 13 vuelves a 4 series y buscas PRs. <strong>Aperturas omitidas esta semana</strong> — reduce el volumen total de pecho. Military press: consolida los 30kg, no busques nuevos reps. <strong>Sesión corta por diseño — no añadir ejercicios extra.</strong></div>
+
+  <div class="section-title" style="margin-top:24px;">Finisher Core · 8 min (opcional)</div>
+  <div class="warmup-grid">
+    <div class="warmup-item"><div class="wi-icon">🏋️</div><div class="wi-text"><strong>Plancha frontal</strong>2×45 seg · 45 seg descanso</div></div>
+    <div class="warmup-item"><div class="wi-icon">🐛</div><div class="wi-text"><strong>Dead bug</strong>2×8 por lado · 45 seg descanso</div></div>
+  </div>
+</div>
+
+<!-- ══════════ MARTES · CARRERA FÁCIL 4KM ══════════ -->
+<div id="p-mar" class="panel">
+  <div class="day-title-row">
+    <div>
+      <div class="day-title">Carrera Fácil 4km · Martes 21/4</div>
+      <div class="day-focus">Zona 2 · Pace conversacional · FC &lt; 140 · Deload de running</div>
+    </div>
+  </div>
+
+  <div class="alert blue">
+    <span>💙</span>
+    <span class="alert-text"><strong>Deload de running — 4km en lugar de 6km.</strong> Misma intensidad Z2, menos distancia. El objetivo esta semana no es construir base aeróbica — es mantener el ritmo de salidas sin acumular fatiga. Pace conversacional estricto, sin apuro.</span>
+  </div>
+
+  <div class="section-title">Protocolo Martes 21/4</div>
+  <div class="cardio-block">
+    <div class="cb-item">
+      <div class="cb-label">Calentamiento</div>
+      <div class="cb-value blue">5 min</div>
+      <div class="cb-note">Caminata a paso normal antes de arrancar. No saltar directo a trotar.</div>
+    </div>
+    <div class="cb-item">
+      <div class="cb-label">Z2 sostenido</div>
+      <div class="cb-value blue">4 km</div>
+      <div class="cb-note">Pace 6:30–7:00/km · conversacional · puedes hablar en frases completas</div>
+    </div>
+    <div class="cb-item">
+      <div class="cb-label">FC objetivo</div>
+      <div class="cb-value blue">&lt;140</div>
+      <div class="cb-note">bpm · si superas 140, caminar 1 min y retomar el trote</div>
+    </div>
+    <div class="cb-item">
+      <div class="cb-label">No hay tiempo objetivo</div>
+      <div class="cb-value blue">Libre</div>
+      <div class="cb-note">Esta semana no se mide el tiempo — solo la FC. 4km es suficiente.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Logística</div>
+  <div class="warmup-grid">
+    <div class="warmup-item"><div class="wi-icon">🛣️</div><div class="wi-text"><strong>Costanera plana</strong>Superficie ideal — sin subidas pronunciadas</div></div>
+    <div class="warmup-item"><div class="wi-icon">💧</div><div class="wi-text"><strong>Hidratación previa</strong>500ml de agua 30 min antes de salir</div></div>
+    <div class="warmup-item"><div class="wi-icon">⌚</div><div class="wi-text"><strong>Garmin en muñeca</strong>FC en tiempo real — no estimar a ojo</div></div>
+    <div class="warmup-item"><div class="wi-icon">🔄</div><div class="wi-text"><strong>Post-carrera</strong>10 min foam rolling piernas · cooldown obligatorio</div></div>
+  </div>
+
+  <div class="ex-note"><strong>4km en deload no es poco — es lo que corresponde.</strong> Bajar distancia esta semana permite que el sistema musculoesquelético recupere sin perder la adaptación cardiovascular. El sábado tienes 8km cómodos. Cuida las piernas hoy.</div>
+</div>
+
+<!-- ══════════ MIÉRCOLES · PIERNA DELOAD ══════════ -->
+<div id="p-mie" class="panel">
+  <div class="day-title-row">
+    <div>
+      <div class="day-title">Pierna Deload · Miércoles 22/4</div>
+      <div class="day-focus">Cuádriceps · Glúteos · Isquiotibiales · Gemelos — 2–3 series, mismos pesos</div>
+    </div>
+  </div>
+
+  <div class="alert orange">
+    <span>⚠️</span>
+    <span class="alert-text"><strong>Hip thrust 60 kg — consolida el PR. 2 series es suficiente esta semana.</strong> No subas el peso, no alargues el volumen. La semana 13 buscas nuevos PRs. Hoy el objetivo es consolidar las adaptaciones neuromusculares de las últimas 11 semanas.</span>
+  </div>
+
+  <div class="section-title">Protocolo rodilla OBLIGATORIO antes de empezar · 8 min</div>
+  <div class="warmup-grid">
+    <div class="warmup-item"><div class="wi-icon">🦵</div><div class="wi-text"><strong>TKE con banda</strong>3×15 por pierna · activa VMO</div></div>
+    <div class="warmup-item"><div class="wi-icon">🐶</div><div class="wi-text"><strong>Clamshells</strong>3×20 por lado · activa glúteo medio</div></div>
+    <div class="warmup-item"><div class="wi-icon">🔤</div><div class="wi-text"><strong>Abecedario tobillo</strong>1× completo cada pie</div></div>
+    <div class="warmup-item"><div class="wi-icon">🦩</div><div class="wi-text"><strong>Equilibrio monopodal</strong>3×30 seg · ojos abiertos</div></div>
+  </div>
+
+  <div class="section-title">Ejercicios · Deload (mismos pesos, –40% series)</div>
+  <table class="ex-table">
+    <thead>
+      <tr>
+        <th style="width:32px"></th>
+        <th>Ejercicio</th>
+        <th class="c">Series</th>
+        <th class="c">Reps</th>
+        <th class="r">S11 (pasada)</th>
+        <th class="r">S12 (deload)</th>
+        <th class="c">Estado</th>
+        <th class="r">Descanso</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-letter">A</td>
+        <td>
+          <div class="td-name">Goblet squat con mancuerna</div>
+          <div class="td-muscle">Cuádriceps · Glúteos — máx 90° de flexión de rodilla</div>
+        </td>
+        <td class="td-sets">2</td>
+        <td class="td-reps">10</td>
+        <td class="td-prev">22.5 kg · 4×12</td>
+        <td class="td-weight"><div class="w-badge same">22.5 kg</div></td>
+        <td class="td-status"><span class="status-badge deload">DELOAD</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">2:30 min</td>
+      </tr>
+      <tr>
+        <td class="td-letter">B</td>
+        <td>
+          <div class="td-name">Romanian Deadlift con mancuernas</div>
+          <div class="td-muscle">Isquiotibiales · Glúteos · Erectors</div>
+        </td>
+        <td class="td-sets">2</td>
+        <td class="td-reps">10</td>
+        <td class="td-prev">2×22.5 kg · 4×12</td>
+        <td class="td-weight"><div class="w-badge same">2×22.5 kg</div></td>
+        <td class="td-status"><span class="status-badge deload">DELOAD</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">2:30 min</td>
+      </tr>
+      <tr>
+        <td class="td-letter">C</td>
+        <td>
+          <div class="td-name">Hip thrust con barra</div>
+          <div class="td-muscle">Glúteo mayor — consolida PR de 60kg</div>
+        </td>
+        <td class="td-sets">2</td>
+        <td class="td-reps">10</td>
+        <td class="td-prev">57.5 kg → 60 kg PR</td>
+        <td class="td-weight"><div class="w-badge same">60 kg</div></td>
+        <td class="td-status"><span class="status-badge deload">DELOAD</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">90 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">D</td>
+        <td>
+          <div class="td-name">Curl de isquio en máquina</div>
+          <div class="td-muscle">Isquiotibiales — aislamiento</div>
+        </td>
+        <td class="td-sets">2</td>
+        <td class="td-reps">12</td>
+        <td class="td-prev">25 kg · 3×12</td>
+        <td class="td-weight"><div class="w-badge same">25 kg</div></td>
+        <td class="td-status"><span class="status-badge deload">DELOAD</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">E</td>
+        <td>
+          <div class="td-name">Elevaciones de talón (escalón)</div>
+          <div class="td-muscle">Sóleo · Gastrocnemio — clave para running y rodilla</div>
+        </td>
+        <td class="td-sets">2</td>
+        <td class="td-reps">12 c/u</td>
+        <td class="td-prev">Peso corporal · 4×15</td>
+        <td class="td-weight"><div class="w-badge same">Corporal</div></td>
+        <td class="td-status"><span class="status-badge deload">DELOAD</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">F</td>
+        <td>
+          <div class="td-name">Extensión terminal de rodilla (banda)</div>
+          <div class="td-muscle">VMO — fortalecimiento terapéutico · fue omitida en S11</div>
+        </td>
+        <td class="td-sets">3</td>
+        <td class="td-reps">12 c/u</td>
+        <td class="td-prev">Omitida en S11</td>
+        <td class="td-weight"><div class="w-badge new">Banda</div></td>
+        <td class="td-status"><span class="status-badge new">INCLUIR</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">45 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">G</td>
+        <td>
+          <div class="td-name">Abductor en máquina (abrir)</div>
+          <div class="td-muscle">Glúteo medio · Estabilización rodilla — terapéutico</div>
+        </td>
+        <td class="td-sets">1</td>
+        <td class="td-reps">15–20</td>
+        <td class="td-prev">85 lbs · 3×18</td>
+        <td class="td-weight"><div class="w-badge same">85 lbs</div></td>
+        <td class="td-status"><span class="status-badge deload">DELOAD</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">H</td>
+        <td>
+          <div class="td-name">Aductor en máquina (cerrar)</div>
+          <div class="td-muscle">Aductores · Equilibrio muscular cara interna</div>
+        </td>
+        <td class="td-sets">1</td>
+        <td class="td-reps">15–20</td>
+        <td class="td-prev">80 lbs · 2×20</td>
+        <td class="td-weight"><div class="w-badge same">80 lbs</div></td>
+        <td class="td-status"><span class="status-badge deload">DELOAD</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="ex-note"><strong>Hip thrust 60kg consolida el PR</strong> — 2 series bien ejecutadas refuerzan el patrón motor sin fatigarte. <strong>Extensión terminal de rodilla (TKE) incluida esta semana</strong> — fue omitida en S11, es parte del protocolo de rodilla y no puede saltearse dos semanas seguidas. <strong>Goblet squat regla absoluta:</strong> máx 90° de rodilla.</div>
+</div>
+
+<!-- ══════════ JUEVES · Z2 CAMINADORA 30 MIN ══════════ -->
+<div id="p-jue" class="panel">
+  <div class="day-title-row">
+    <div>
+      <div class="day-title">Z2 Caminadora 30 min · Jueves 23/4</div>
+      <div class="day-focus">Deload cardio · Base aeróbica mantenida · FC 118–138</div>
+    </div>
+  </div>
+
+  <div class="alert blue">
+    <span>💙</span>
+    <span class="alert-text"><strong>30 minutos totales — deload cardio (era 47 min).</strong> Protocolo igual: 8km/h con 3.5% de pendiente. Menos tiempo, mismo estímulo aeróbico. Esta semana el cuerpo absorbe el trabajo acumulado de 11 semanas — no hay que sobrecargar.</span>
+  </div>
+
+  <div class="section-title">Protocolo Jueves 23/4</div>
+  <div class="cardio-block">
+    <div class="cb-item">
+      <div class="cb-label">Velocidad</div>
+      <div class="cb-value blue">8 km/h</div>
+      <div class="cb-note">Mismo ritmo que las semanas anteriores — sin cambios</div>
+    </div>
+    <div class="cb-item">
+      <div class="cb-label">Pendiente</div>
+      <div class="cb-value blue">3.5%</div>
+      <div class="cb-note">Inclinación constante durante toda la sesión</div>
+    </div>
+    <div class="cb-item">
+      <div class="cb-label">Duración total</div>
+      <div class="cb-value blue">30 min</div>
+      <div class="cb-note">Deload — era 47 min en S11. –17 min de volumen.</div>
+    </div>
+    <div class="cb-item">
+      <div class="cb-label">FC objetivo</div>
+      <div class="cb-value blue">118–138</div>
+      <div class="cb-note">bpm · agua cada 10 min · Garmin ajustado en muñeca</div>
+    </div>
+  </div>
+
+  <div class="ex-note"><strong>30 minutos es suficiente en semana de descarga.</strong> El cardio Z2 en caminadora mantiene la adaptación aeróbica sin acumular volumen adicional. Esta semana el foco es recuperar, no progresar. La semana 13 retomas los 47 min.</div>
+
+  <div class="section-title">Post-cardio · Protocolo rodilla/tobillo · 10 min</div>
+  <div class="warmup-grid">
+    <div class="warmup-item"><div class="wi-icon">🔄</div><div class="wi-text"><strong>Foam roller ITB</strong>60 seg c/pierna · lateral</div></div>
+    <div class="warmup-item"><div class="wi-icon">🔄</div><div class="wi-text"><strong>Foam roller cuádriceps</strong>60 seg c/pierna</div></div>
+    <div class="warmup-item"><div class="wi-icon">🔄</div><div class="wi-text"><strong>Foam roller gemelos</strong>60 seg c/pierna</div></div>
+    <div class="warmup-item"><div class="wi-icon">🦵</div><div class="wi-text"><strong>Estiramiento isquio</strong>2×45 seg c/pierna</div></div>
+    <div class="warmup-item"><div class="wi-icon">🐶</div><div class="wi-text"><strong>Glute bridge + clamshell</strong>2×15</div></div>
+    <div class="warmup-item"><div class="wi-icon">🦩</div><div class="wi-text"><strong>Equilibrio monopodal</strong>3×30 seg c/u</div></div>
+  </div>
+</div>
+
+<!-- ══════════ VIERNES · PULL A DELOAD ══════════ -->
+<div id="p-vie" class="panel">
+  <div class="day-title-row">
+    <div>
+      <div class="day-title">Pull A Deload · Viernes 24/4</div>
+      <div class="day-focus">Lats · Romboides · Bíceps · Deltoides posterior — mismos pesos, menos series</div>
+    </div>
+  </div>
+
+  <div class="alert blue">
+    <span>💙</span>
+    <span class="alert-text"><strong>Semana de descarga activa — mismos pesos, menos series. No intentes PRs esta semana.</strong> Dominadas: 3 series de 3–4 reps, sin banda. El objetivo para la semana 13 es llegar a 5 reps. Esta semana consolida el patrón motor sin acumular fatiga de espalda.</span>
+  </div>
+
+  <div class="section-title">Calentamiento · 8 min</div>
+  <div class="warmup-grid">
+    <div class="warmup-item"><div class="wi-icon">🔄</div><div class="wi-text"><strong>Rotación escapular</strong>2×15, activar dorsales</div></div>
+    <div class="warmup-item"><div class="wi-icon">🎯</div><div class="wi-text"><strong>Band pull-apart</strong>2×20, banda ligera</div></div>
+    <div class="warmup-item"><div class="wi-icon">💪</div><div class="wi-text"><strong>Remo con banda</strong>2×15, activar romboides</div></div>
+    <div class="warmup-item"><div class="wi-icon">🤸</div><div class="wi-text"><strong>Colgarse de la barra</strong>3×20 seg, descomprimir</div></div>
+  </div>
+
+  <div class="section-title">Ejercicios · Deload (mismos pesos, –40% series)</div>
+  <table class="ex-table">
+    <thead>
+      <tr>
+        <th style="width:32px"></th>
+        <th>Ejercicio</th>
+        <th class="c">Series</th>
+        <th class="c">Reps</th>
+        <th class="r">S11 (pasada)</th>
+        <th class="r">S12 (deload)</th>
+        <th class="c">Estado</th>
+        <th class="r">Descanso</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-letter">A</td>
+        <td>
+          <div class="td-name">Dominadas sin banda</div>
+          <div class="td-muscle">Dorsal ancho · Teres mayor — objetivo 5 reps S13</div>
+        </td>
+        <td class="td-sets">3</td>
+        <td class="td-reps">3–4</td>
+        <td class="td-prev">Sin banda · 4×5</td>
+        <td class="td-weight"><div class="w-badge same">Sin banda</div></td>
+        <td class="td-status"><span class="status-badge deload">DELOAD</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">3 min</td>
+      </tr>
+      <tr>
+        <td class="td-letter">B</td>
+        <td>
+          <div class="td-name">T-bar row</div>
+          <div class="td-muscle">Dorsal · Romboides · Trapecio medio</div>
+        </td>
+        <td class="td-sets">2</td>
+        <td class="td-reps">8</td>
+        <td class="td-prev">35 kg · 4×10</td>
+        <td class="td-weight"><div class="w-badge same">35 kg</div></td>
+        <td class="td-status"><span class="status-badge deload">DELOAD</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">2:30 min</td>
+      </tr>
+      <tr>
+        <td class="td-letter">C</td>
+        <td>
+          <div class="td-name">Remo unilateral con mancuerna</div>
+          <div class="td-muscle">Dorsal · Control unilateral · Romboides</div>
+        </td>
+        <td class="td-sets">2</td>
+        <td class="td-reps">8</td>
+        <td class="td-prev">28 kg c/u · 3×12</td>
+        <td class="td-weight"><div class="w-badge same">28 kg c/u</div></td>
+        <td class="td-status"><span class="status-badge deload">DELOAD</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">90 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">D</td>
+        <td>
+          <div class="td-name">Face pulls (polea o banda)</div>
+          <div class="td-muscle">Deltoides posterior · Manguito rotador · Postura</div>
+        </td>
+        <td class="td-sets">2</td>
+        <td class="td-reps">15</td>
+        <td class="td-prev">25 kg · 4×20</td>
+        <td class="td-weight"><div class="w-badge same">25 kg</div></td>
+        <td class="td-status"><span class="status-badge deload">DELOAD</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">E</td>
+        <td>
+          <div class="td-name">Curl EZ en banco predicador</div>
+          <div class="td-muscle">Bíceps braquial — técnica aislada sin balanceo</div>
+        </td>
+        <td class="td-sets">2</td>
+        <td class="td-reps">10</td>
+        <td class="td-prev">20 kg · 3×12</td>
+        <td class="td-weight"><div class="w-badge same">20 kg</div></td>
+        <td class="td-status"><span class="status-badge deload">DELOAD</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+      <tr>
+        <td class="td-letter">F</td>
+        <td>
+          <div class="td-name">Curl martillo con mancuernas</div>
+          <div class="td-muscle">Braquialis · Grosor del brazo</div>
+        </td>
+        <td class="td-sets">2</td>
+        <td class="td-reps">10</td>
+        <td class="td-prev">15 kg c/u · 3×10</td>
+        <td class="td-weight"><div class="w-badge same">15 kg c/u</div></td>
+        <td class="td-status"><span class="status-badge deload">DELOAD</span></td>
+        <td style="text-align:right; font-family:var(--mono); font-size:11px; color:var(--text3);">60 seg</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="ex-note"><strong>Dominadas:</strong> 3×3–4 reps es el objetivo esta semana. Sin banda, sin forzar. El objetivo concreto es llegar a 5 reps limpias la semana 13. <strong>T-bar y remo unilateral:</strong> consolida el patrón motor con 2 series — la calidad supera a la cantidad en deload. <strong>Bíceps:</strong> 2 series limpias, sin balanceo. Técnica perfecta esta semana.</div>
+</div>
+
+<!-- ══════════ SÁBADO · CARRERA MODERADA 8KM ══════════ -->
+<div id="p-sab" class="panel">
+  <div class="day-title-row">
+    <div>
+      <div class="day-title">Carrera Moderada 8km · Sábado 25/4</div>
+      <div class="day-focus">No es tirada larga — carrera cómoda · FC &lt; 145 · Pace libre</div>
+    </div>
+  </div>
+
+  <div class="alert green">
+    <span>✅</span>
+    <span class="alert-text"><strong>No es tirada larga — es una carrera cómoda. Sin presión de tiempo ni distancia. Para en 8 km o antes si sientes fatiga.</strong> Esta semana el sábado no tiene el rol de sesión principal — es solo mantener el hábito de correr el fin de semana. Disfrútala.</span>
+  </div>
+
+  <div class="section-title">Protocolo Sábado 25/4</div>
+  <div class="cardio-block">
+    <div class="cb-item">
+      <div class="cb-label">Calentamiento</div>
+      <div class="cb-value green">10 min</div>
+      <div class="cb-note">5 min caminata + movilidad dinámica antes de arrancar</div>
+    </div>
+    <div class="cb-item">
+      <div class="cb-label">Distancia</div>
+      <div class="cb-value green">8 km</div>
+      <div class="cb-note">Deload — era 12km en S11. Para antes si hay fatiga o molestia.</div>
+    </div>
+    <div class="cb-item">
+      <div class="cb-label">FC objetivo</div>
+      <div class="cb-value green">&lt;145</div>
+      <div class="cb-note">bpm · ritmo conversacional · no se mide el tiempo esta semana</div>
+    </div>
+    <div class="cb-item">
+      <div class="cb-label">Pace</div>
+      <div class="cb-value green">Libre</div>
+      <div class="cb-note">Lo que el cuerpo pida — sin objetivo de pace. FC manda.</div>
+    </div>
+    <div class="cb-item">
+      <div class="cb-label">Post carrera</div>
+      <div class="cb-value green">15 min</div>
+      <div class="cb-note">Estiramiento + hidratación · no hace falta proteína inmediata</div>
+    </div>
+    <div class="cb-item">
+      <div class="cb-label">Actitud</div>
+      <div class="cb-value green">Disfruta</div>
+      <div class="cb-note">Sin presión. Esta es la sesión más relajada de la semana de deload.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Logística</div>
+  <div class="warmup-grid">
+    <div class="warmup-item"><div class="wi-icon">🌅</div><div class="wi-text"><strong>Temprano en la mañana</strong>Antes de las 9am si es posible</div></div>
+    <div class="warmup-item"><div class="wi-icon">💧</div><div class="wi-text"><strong>Hidratación</strong>500ml antes · llevar agua o paradas planificadas</div></div>
+    <div class="warmup-item"><div class="wi-icon">🛣️</div><div class="wi-text"><strong>Ruta conocida</strong>Costanera u otro terreno plano familiar</div></div>
+    <div class="warmup-item"><div class="wi-icon">⌚</div><div class="wi-text"><strong>Garmin activado</strong>Registrar FC — el tiempo es secundario esta semana</div></div>
+  </div>
+
+  <div class="ex-note"><strong>Esta es una carrera cómoda, no una tirada larga.</strong> El rol del sábado en semana de deload es mantener el hábito y el volumen mínimo de running, no construir base aeróbica. 8km a ritmo tranquilo es exactamente lo que corresponde. La semana 13 retomas la tirada larga progresiva.</div>
+</div>
+
+<!-- ══════════ DOMINGO · DESCANSO TOTAL ══════════ -->
+<div id="p-dom" class="panel">
+  <div class="day-title-row">
+    <div>
+      <div class="day-title">Descanso Total · Domingo 26/4</div>
+      <div class="day-focus">Recuperación completa · Preparar semana 13 · Batch cooking</div>
+    </div>
+  </div>
+
+  <div class="section-title">El domingo de deload es sagrado</div>
+  <div class="warmup-grid">
+    <div class="warmup-item"><div class="wi-icon">🚶</div><div class="wi-text"><strong>Caminata suave (opcional)</strong>Máx 20 min · Pace muy tranquilo · Sin trotar</div></div>
+    <div class="warmup-item"><div class="wi-icon">🔄</div><div class="wi-text"><strong>Foam rolling completo</strong>15 min · piernas, glúteos, espalda baja</div></div>
+    <div class="warmup-item"><div class="wi-icon">🍳</div><div class="wi-text"><strong>Batch cooking</strong>Proteína + carbohidratos para la semana 13</div></div>
+    <div class="warmup-item"><div class="wi-icon">😴</div><div class="wi-text"><strong>Dormir 7–8 hrs</strong>La adaptación al deload pasa en el sueño</div></div>
+  </div>
+
+  <div class="ex-note" style="margin-top:24px;"><strong>El deload termina hoy — mañana arranca la semana 13 con toda la energía.</strong> Esta semana el cuerpo absorbió 11 semanas de trabajo acumulado. Los nervios están frescos, los músculos recuperados. La semana 13 puedes buscar PRs en todos los ejercicios. <strong>Batch cooking:</strong> arroz integral + proteína magra (pollo, atún, huevos). Objetivo 150-160g de proteína diaria para 90kg.</div>
+
+  <!-- MARATHON PLAN TABLE -->
+  <div class="progress-section">
+    <div class="section-title">Plan media maratón · La Serena 16 agosto 2026 · 17 semanas</div>
+
+    <table class="plan-table">
+      <thead>
+        <tr>
+          <th>Semana</th>
+          <th>Tirada Larga</th>
+          <th>Foco</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="week-num">S11</td>
+          <td style="font-family:var(--mono); font-size:13px;">12 km</td>
+          <td style="font-size:12px; color:var(--text2);">Base PPL — primera tirada larga formal.</td>
+          <td style="font-family:var(--mono); font-size:9px;"><span class="status-badge ok">HECHO</span></td>
+        </tr>
+        <tr class="current-week">
+          <td class="current-week-num">S12 ← HOY</td>
+          <td style="font-family:var(--mono); font-size:13px; font-weight:700; color:var(--blue);">8 km</td>
+          <td style="font-size:12px; color:var(--text2);">Deload activo — consolida. Volumen –40%.</td>
+          <td style="font-family:var(--mono); font-size:9px;"><span class="status-badge deload">DELOAD</span></td>
+        </tr>
+        <tr>
+          <td class="week-num">S13</td>
+          <td style="font-family:var(--mono); font-size:13px;">14 km</td>
+          <td style="font-size:12px; color:var(--text2);">Base PPL — retoma volumen. +2km vs S11.</td>
+          <td style="font-family:var(--mono); font-size:9px; color:var(--text3);">Próxima</td>
+        </tr>
+        <tr>
+          <td class="week-num">S14</td>
+          <td style="font-family:var(--mono); font-size:13px;">15 km</td>
+          <td style="font-size:12px; color:var(--text2);">Base PPL — +1km. Dosificar esfuerzo por tramos.</td>
+          <td style="font-family:var(--mono); font-size:9px; color:var(--text3);">Próxima</td>
+        </tr>
+        <tr>
+          <td class="week-num">S15</td>
+          <td style="font-family:var(--mono); font-size:13px;">16 km</td>
+          <td style="font-size:12px; color:var(--text2);">Running volume up — hidratación estratégica.</td>
+          <td style="font-family:var(--mono); font-size:9px; color:var(--text3);">Vol. up</td>
+        </tr>
+        <tr>
+          <td class="week-num">S16</td>
+          <td style="font-family:var(--mono); font-size:13px;">17 km</td>
+          <td style="font-size:12px; color:var(--text2);">Running volume up — el más largo del ciclo base.</td>
+          <td style="font-family:var(--mono); font-size:9px; color:var(--text3);">Vol. up</td>
+        </tr>
+        <tr>
+          <td class="week-num">S17</td>
+          <td style="font-family:var(--mono); font-size:13px;">18 km</td>
+          <td style="font-size:12px; color:var(--text2);">Running volume up — pico de volumen de running.</td>
+          <td style="font-family:var(--mono); font-size:9px; color:var(--text3);">Vol. up</td>
+        </tr>
+        <tr>
+          <td class="week-num">S18</td>
+          <td style="font-family:var(--mono); font-size:13px;">19 km</td>
+          <td style="font-size:12px; color:var(--text2);">Running volume up — aproximación a la distancia.</td>
+          <td style="font-family:var(--mono); font-size:9px; color:var(--text3);">Vol. up</td>
+        </tr>
+        <tr>
+          <td class="week-num">S19</td>
+          <td style="font-family:var(--mono); font-size:13px;">20 km</td>
+          <td style="font-size:12px; color:var(--text2);">Running volume up — máximo del ciclo.</td>
+          <td style="font-family:var(--mono); font-size:9px; color:var(--text3);">Vol. up</td>
+        </tr>
+        <tr>
+          <td class="week-num">S20</td>
+          <td style="font-family:var(--mono); font-size:13px;">18 km</td>
+          <td style="font-size:12px; color:var(--text2);">Running volume up — deload ligero.</td>
+          <td style="font-family:var(--mono); font-size:9px; color:var(--text3);">Vol. up</td>
+        </tr>
+        <tr>
+          <td class="week-num">S21</td>
+          <td style="font-family:var(--mono); font-size:13px;">16 km</td>
+          <td style="font-size:12px; color:var(--text2);">Tempo work — incorporar rodadas a ritmo umbral.</td>
+          <td style="font-family:var(--mono); font-size:9px; color:var(--text3);">Tempo</td>
+        </tr>
+        <tr>
+          <td class="week-num">S22</td>
+          <td style="font-family:var(--mono); font-size:13px;">16 km</td>
+          <td style="font-size:12px; color:var(--text2);">Tempo work — aumentar tramos a pace objetivo.</td>
+          <td style="font-family:var(--mono); font-size:9px; color:var(--text3);">Tempo</td>
+        </tr>
+        <tr>
+          <td class="week-num">S23</td>
+          <td style="font-family:var(--mono); font-size:13px;">16 km</td>
+          <td style="font-size:12px; color:var(--text2);">Tempo work — rodada larga a pace carrera (5:41).</td>
+          <td style="font-family:var(--mono); font-size:9px; color:var(--text3);">Tempo</td>
+        </tr>
+        <tr>
+          <td class="week-num">S24</td>
+          <td style="font-family:var(--mono); font-size:13px;">14 km</td>
+          <td style="font-size:12px; color:var(--text2);">Tempo work — deload antes del taper.</td>
+          <td style="font-family:var(--mono); font-size:9px; color:var(--text3);">Tempo</td>
+        </tr>
+        <tr>
+          <td class="week-num">S25</td>
+          <td style="font-family:var(--mono); font-size:13px;">14 km</td>
+          <td style="font-size:12px; color:var(--text2);">Taper — reducción gradual de volumen.</td>
+          <td style="font-family:var(--mono); font-size:9px; color:var(--text3);">Taper</td>
+        </tr>
+        <tr>
+          <td class="week-num">S26</td>
+          <td style="font-family:var(--mono); font-size:13px;">12 km</td>
+          <td style="font-size:12px; color:var(--text2);">Taper — legs frescos, mantener ritmo.</td>
+          <td style="font-family:var(--mono); font-size:9px; color:var(--text3);">Taper</td>
+        </tr>
+        <tr>
+          <td class="week-num">S27</td>
+          <td style="font-family:var(--mono); font-size:13px;">8 km</td>
+          <td style="font-size:12px; color:var(--text2);">Taper final — llegar fresco a race day.</td>
+          <td style="font-family:var(--mono); font-size:9px; color:var(--text3);">Taper</td>
+        </tr>
+        <tr>
+          <td class="week-num" style="color:var(--gold); font-weight:700;">S28 · 16/8</td>
+          <td style="font-family:var(--mono); font-size:13px; font-weight:700; color:var(--gold);">21.1 km</td>
+          <td style="font-size:12px; color:var(--text2);">RACE DAY — Media maratón La Serena. Sub-2h (5:41/km).</td>
+          <td style="font-family:var(--mono); font-size:9px;"><span class="status-badge" style="background:var(--gold-dim); color:var(--gold);">RACE DAY</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="progress-grid" style="margin-top:24px;">
+      <div class="prog-card">
+        <div class="prog-label">Tirada S12 (deload)</div>
+        <div class="prog-val" style="color:var(--blue)">8 km</div>
+        <div class="prog-sub">Cómoda · sin presión</div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-label">Distancia carrera</div>
+        <div class="prog-val" style="color:var(--green)">21.1 km</div>
+        <div class="prog-sub">La Serena 16 ago 2026</div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-label">Pace objetivo</div>
+        <div class="prog-val" style="color:var(--blue)">5:41</div>
+        <div class="prog-sub">min/km para sub-2h</div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-label">Semanas restantes</div>
+        <div class="prog-val" style="color:var(--orange)">17</div>
+        <div class="prog-sub">Hasta race day</div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-label">Semanas completadas</div>
+        <div class="prog-val" style="color:var(--green)">12</div>
+        <div class="prog-sub">11 carga + 1 deload</div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-label">Z2 Caminadora</div>
+        <div class="prog-val" style="color:var(--blue)">30 min</div>
+        <div class="prog-sub">Deload (era 47 min)</div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-label">Hip thrust PR</div>
+        <div class="prog-val" style="color:var(--green)">60 kg</div>
+        <div class="prog-sub">Consolidando esta semana</div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-label">Dominadas</div>
+        <div class="prog-val" style="color:var(--green)">3–4</div>
+        <div class="prog-sub">Obj S13: 5 reps limpias</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const days = ['lun','mar','mie','jue','vie','sab','dom'];
+
+function go(id) {
+  days.forEach(d => {
+    document.getElementById('p-' + d).classList.remove('active');
+  });
+  document.querySelectorAll('.ws-day').forEach(el => el.classList.remove('active'));
+  document.getElementById('p-' + id).classList.add('active');
+  const idx = days.indexOf(id);
+  document.querySelectorAll('.ws-day')[idx].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Auto-detect current day: week starts Mon Apr 20, 2026
+(function() {
+  const now = new Date();
+  const weekStart = new Date(2026, 3, 20); // Apr 20 = Monday
+  const weekEnd = new Date(2026, 3, 26);   // Apr 26 = Sunday
+  if (now >= weekStart && now <= weekEnd) {
+    const diff = Math.floor((now - weekStart) / 86400000);
+    const dayId = days[Math.min(diff, 6)];
+    go(dayId);
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,512 @@
+{
+    "weeklyConsistency":  [
+                              {
+                                  "label":  "S1",
+                                  "value":  4
+                              },
+                              {
+                                  "label":  "S2",
+                                  "value":  6
+                              },
+                              {
+                                  "label":  "S3",
+                                  "value":  5
+                              },
+                              {
+                                  "label":  "S4",
+                                  "value":  5
+                              },
+                              {
+                                  "label":  "S5",
+                                  "value":  1
+                              },
+                              {
+                                  "label":  "S9",
+                                  "value":  3
+                              },
+                              {
+                                  "label":  "S10",
+                                  "value":  3
+                              },
+                              {
+                                  "label":  "S11",
+                                  "value":  6
+                              },
+                              {
+                                  "label":  "S12",
+                                  "value":  1
+                              }
+                          ],
+    "sessionHistory":  [
+                           {
+                               "id":  "session-1",
+                               "date":  "11 feb.",
+                               "week":  "S1",
+                               "session":  "Pierna",
+                               "summary":  "Goblet 20kg",
+                               "notes":  "Goblet 20kg · RDL 20kg · Hip thrust 40kg",
+                               "details":  [
+
+                                           ]
+                           },
+                           {
+                               "id":  "session-2",
+                               "date":  "12 feb.",
+                               "week":  "S1",
+                               "session":  "Cardio Z2",
+                               "summary":  "35 min",
+                               "notes":  "7.5 km/h · 3.5% · switch FC min 21",
+                               "details":  [
+
+                                           ]
+                           },
+                           {
+                               "id":  "session-3",
+                               "date":  "13 feb.",
+                               "week":  "S1",
+                               "session":  "Push B",
+                               "summary":  "Press inclinado 38kg",
+                               "notes":  "Press inclinado 38kg · Dips 5 reps s4 · Military 15kg",
+                               "details":  [
+
+                                           ]
+                           },
+                           {
+                               "id":  "session-4",
+                               "date":  "14 feb.",
+                               "week":  "S1",
+                               "session":  "Deporte",
+                               "summary":  "180 min",
+                               "notes":  "Moto Valle del Elqui 3h (isométrico no planificado)",
+                               "details":  [
+
+                                           ]
+                           },
+                           {
+                               "id":  "session-5",
+                               "date":  "17 feb.",
+                               "week":  "S2",
+                               "session":  "Push A",
+                               "summary":  "Bench 45kg 4x10",
+                               "notes":  "Bench 45kg 4x10 · Military 30kg · Aperturas 16kg",
+                               "details":  [
+                                               "Bench press barra: series 4 · reps 10 · carga 45.0 · Subio de 42.5 kg",
+                                               "Press inclinado DB: series 3 · reps 12 · carga 20.0",
+                                               "Military press barra: series 4 · reps 10 · carga 30.0 · Bajo de 33.6 kg por tecnica",
+                                               "Laterales DB: series 4 · reps 12 · carga 10.0",
+                                               "Aperturas DB: series 3 · reps 12 · carga 16.0 · Subio de 15 kg"
+                                           ]
+                           },
+                           {
+                               "id":  "session-6",
+                               "date":  "18 feb.",
+                               "week":  "S2",
+                               "session":  "Pull A",
+                               "summary":  "Remo 50kg",
+                               "notes":  "Remo 50kg · Curl barra 25kg · Curl martillo 15kg",
+                               "details":  [
+                                               "Dominadas: series 4 · reps 5-6 · Con banda · carga: banda asistida",
+                                               "Remo barra: series 4 · reps 10 · carga 50.0 · 110 libras",
+                                               "Remo unilateral DB: series 4 · reps 10 · carga 25.0",
+                                               "Face pulls: series 4 · reps 10 · carga 22.5",
+                                               "Curl barra: series 3 · reps 10 · carga 25.0 · Bajo de 32.5 kg por tecnica",
+                                               "Curl martillo DB: series 3 · reps 10 · carga 15.0 · Bajo de 17.5 kg por tecnica"
+                                           ]
+                           },
+                           {
+                               "id":  "session-7",
+                               "date":  "19 feb.",
+                               "week":  "S2",
+                               "session":  "Pierna",
+                               "summary":  "Goblet 20kg",
+                               "notes":  "Goblet 20kg · RDL 20kg · Hip thrust 51.7kg 4x15 · Abductor/Aductor 75lbs",
+                               "details":  [
+                                               "Goblet squat: series 4 · reps 12 · carga 20.0",
+                                               "RDL mancuernas: series 4 · reps 12 · carga 20.0 · carga: 2x20 kg",
+                                               "Hip thrust barra: series 4 · reps 15 · carga 51.7",
+                                               "Curl isquio maquina: series 3 · reps 12 · Nuevo ejercicio · carga: 50 lbs",
+                                               "Elevaciones talon: series 4 · reps 15 · carga: corporal",
+                                               "TKE banda: series 3 · reps 15 · carga: banda"
+                                           ]
+                           },
+                           {
+                               "id":  "session-8",
+                               "date":  "20 feb.",
+                               "week":  "S2",
+                               "session":  "Cardio Z2",
+                               "summary":  "38 min",
+                               "notes":  "Garmin: switch FC min 21 · 4.3 km",
+                               "details":  [
+                                               "Cinta: series 1 · reps 38 min · 4.3 km - Switch FC min 21 - Garmin registrado · velocidad: 7.5 km/h + 3.5%"
+                                           ]
+                           },
+                           {
+                               "id":  "session-9",
+                               "date":  "21 feb.",
+                               "week":  "S2",
+                               "session":  "Push B",
+                               "summary":  "Press inclinado 38kg",
+                               "notes":  "Press inclinado 38kg · Dips 8 reps · Skullcrusher 20kg",
+                               "details":  [
+                                               "Press inclinado barra: series 4 · reps 10 · carga 38.0",
+                                               "Dips: series 3 · reps 8 · Mejoro de 5 reps · carga: corporal",
+                                               "Press hombro DB: series 3 · reps 12 · carga 15.0",
+                                               "Laterales sentado: series 4 · reps 15 · carga 7.5",
+                                               "Skullcrusher barra EZ: series 3 · reps 10 · carga 20.0 · Con barra en gym Iquique"
+                                           ]
+                           },
+                           {
+                               "id":  "session-10",
+                               "date":  "22 feb.",
+                               "week":  "S2",
+                               "session":  "Deporte",
+                               "summary":  "30 min",
+                               "notes":  "Nado mar abierto desde el muelle",
+                               "details":  [
+
+                                           ]
+                           },
+                           {
+                               "id":  "session-11",
+                               "date":  "24 feb.",
+                               "week":  "S3",
+                               "session":  "Push A",
+                               "summary":  "Bench 50kg 4x10",
+                               "notes":  "Bench 50kg 4x10 · Military 30kg 4x10 · Aperturas 15-17.5kg",
+                               "details":  [
+                                               "Bench press barra: series 4 · reps 10 · carga 50.0",
+                                               "Press inclinado DB: series 4 · reps 8 · carga 20.0",
+                                               "Military press barra: series 4 · reps 10 · carga 30.0",
+                                               "Laterales DB: series 4 · reps 12 · carga 10.0",
+                                               "Aperturas DB: series 4 · reps 15 · carga 17.5 · Salto de 15 a 17.5 directo"
+                                           ]
+                           },
+                           {
+                               "id":  "session-12",
+                               "date":  "25 feb.",
+                               "week":  "S3",
+                               "session":  "Pull A",
+                               "summary":  "Dominadas sin banda 4x3-4 reps",
+                               "notes":  "Dominadas sin banda 4x3-4 reps · T-bar 30kg · Curl EZ predicador 18kg",
+                               "details":  [
+                                               "Dominadas: series 4 · reps 3-4 · Primera vez sin banda · carga: sin banda",
+                                               "T-bar row: series 4 · reps 12 · carga 30.0 · Nuevo ejercicio - gym Iquique",
+                                               "Remo unilateral DB: series 3 · reps 12 · carga 28.0 · Subio de 25 kg",
+                                               "Face pulls: series 4 · reps 20 · carga 25.0",
+                                               "Curl EZ banco predicador: series 3 · reps 12 · carga 18.0 · Cambio tecnica - sin balanceo",
+                                               "Curl martillo DB: series 3 · reps 10 · carga 15.0"
+                                           ]
+                           },
+                           {
+                               "id":  "session-13",
+                               "date":  "26 feb.",
+                               "week":  "S3",
+                               "session":  "Pierna",
+                               "summary":  "Goblet 22.5kg",
+                               "notes":  "Goblet 22.5kg · RDL 22.5kg · Hip thrust 55kg · Curl 50lbs · Abductor 82lbs 18 reps",
+                               "details":  [
+                                               "Goblet squat: series 4 · reps 12 · carga 22.5 · Subio de 20 kg",
+                                               "RDL mancuernas: series 4 · reps 12 · carga 22.5 · Subio de 20 kg · carga: 2x22.5 kg",
+                                               "Hip thrust barra: series 4 · reps 12 · carga 55.0",
+                                               "Curl isquio maquina: series 4 · reps 15 · carga: 50 lbs",
+                                               "Elevaciones talon: series 4 · reps 15 · carga: corporal",
+                                               "TKE banda: series 3 · reps 15 · carga: banda"
+                                           ]
+                           },
+                           {
+                               "id":  "session-14",
+                               "date":  "27 feb.",
+                               "week":  "S3",
+                               "session":  "Cardio Z2",
+                               "summary":  "42 min",
+                               "notes":  "FC media 120ppm · Training effect 2.5 aerobico",
+                               "details":  [
+                                               "Cinta: series 1 · reps 42 min · FC media 120 ppm - Training effect 2.5 · velocidad: 7.5 km/h + 3.5%"
+                                           ]
+                           },
+                           {
+                               "id":  "session-15",
+                               "date":  "28 feb.",
+                               "week":  "S3",
+                               "session":  "Push B",
+                               "summary":  "Press inclinado 38kg 4x10",
+                               "notes":  "Press inclinado 38kg 4x10 · Dips 8 reps · Press hombro 15kg 3x12",
+                               "details":  [
+                                               "Press inclinado barra: series 4 · reps 10 · carga 38.0",
+                                               "Dips: series 3 · reps 8 · carga: corporal",
+                                               "Press hombro DB: series 3 · reps 9 · carga 15.0",
+                                               "Laterales sentado: series 4 · reps 15 · carga 7.5",
+                                               "Skullcrusher superset: series 3 · reps 10+10 · carga 20.0 · Superset con press agarre cerrado"
+                                           ]
+                           },
+                           {
+                               "id":  "session-16",
+                               "date":  "03 mar.",
+                               "week":  "S4",
+                               "session":  "Push A",
+                               "summary":  "Bench 50kg 3x12+1x10",
+                               "notes":  "Bench 50kg 3x12+1x10 · Military 30kg 10/8/8/8 · Aperturas 15kg - Viaje Iquique",
+                               "details":  [
+
+                                           ]
+                           },
+                           {
+                               "id":  "session-17",
+                               "date":  "04 mar.",
+                               "week":  "S4",
+                               "session":  "Pull A",
+                               "summary":  "Dominadas asistida 36kg 4x10",
+                               "notes":  "Dominadas asistida 36kg 4x10 · T-bar 30kg · Remo unilateral 28kg · Curl EZ 18kg",
+                               "details":  [
+
+                                           ]
+                           },
+                           {
+                               "id":  "session-18",
+                               "date":  "05 mar.",
+                               "week":  "S4",
+                               "session":  "Pierna",
+                               "summary":  "Goblet 20kg",
+                               "notes":  "Goblet 20kg · RDL 20kg · Hip thrust 50kg · Curl 44lbs (cargas reducidas por viaje)",
+                               "details":  [
+
+                                           ]
+                           },
+                           {
+                               "id":  "session-19",
+                               "date":  "06 mar.",
+                               "week":  "S4",
+                               "session":  "Cardio Z2",
+                               "summary":  "30 min",
+                               "notes":  "Iquique · 6.6 km/h · FC 111ppm",
+                               "details":  [
+
+                                           ]
+                           },
+                           {
+                               "id":  "session-20",
+                               "date":  "07 mar.",
+                               "week":  "S4",
+                               "session":  "Push B",
+                               "summary":  "Gastroenteritis severa",
+                               "notes":  "Gastroenteritis severa",
+                               "details":  [
+
+                                           ]
+                           },
+                           {
+                               "id":  "session-21",
+                               "date":  "08 mar.",
+                               "week":  "S4",
+                               "session":  "Cardio Z2",
+                               "summary":  "42 min",
+                               "notes":  "8 km/h · FC 120ppm · switch mejoro",
+                               "details":  [
+
+                                           ]
+                           },
+                           {
+                               "id":  "session-22",
+                               "date":  "31 mar.",
+                               "week":  "S5",
+                               "session":  "Push B",
+                               "summary":  "Press inclinado 38kg 4x12",
+                               "notes":  "Press inclinado 38kg 4x12 · Dips 7/6/5 · Press hombro 9 rep · Skullcrusher · Core pallof 10kg",
+                               "details":  [
+                                               "Press inclinado barra: series 4 · reps 12 · carga 38.0 · Completo - sube a 40 kg proxima",
+                                               "Dips: series 3 · reps 7 · 7/6/5 · carga: corporal",
+                                               "Press hombro DB: series 3 · reps 9 · carga 15.0",
+                                               "Laterales sentado: series 4 · reps 15 · carga 7.5 · Quemo bien",
+                                               "Skullcrusher superset: series 3 · reps 10+10 · carga 20.0",
+                                               "Pallof press polea: series 3 · reps 10 · carga 10.0 · Sin banda - uso polea"
+                                           ]
+                           },
+                           {
+                               "id":  "session-29",
+                               "date":  "06 abr.",
+                               "week":  "S9",
+                               "session":  "Push B",
+                               "summary":  "completado",
+                               "notes":  "",
+                               "details":  [
+                                               "Press inclinado barra: series 4 · reps 10-12 · carga 40.0",
+                                               "Dips corporales: series 3 · reps 6-8 · carga 0.0",
+                                               "Press hombro DB: series 3 · reps 12 · carga 15.0",
+                                               "Laterales sentado DB: series 3 · reps 15 · carga 7.5",
+                                               "Skullcrusher barra EZ: series 3 · reps 12 · carga 20.0"
+                                           ]
+                           },
+                           {
+                               "id":  "session-33",
+                               "date":  "07 abr.",
+                               "week":  "S9",
+                               "session":  "Pull A",
+                               "summary":  "No pudo ir",
+                               "notes":  "No pudo ir",
+                               "details":  [
+
+                                           ]
+                           },
+                           {
+                               "id":  "session-31",
+                               "date":  "08 abr.",
+                               "week":  "S9",
+                               "session":  "Pierna",
+                               "summary":  "completado",
+                               "notes":  "",
+                               "details":  [
+                                               "Goblet squat: series 4 · reps 12 · carga 22.5",
+                                               "RDL DB: series 4 · reps 12 · carga 22.5",
+                                               "Hip thrust barra: series 4 · reps 15 · carga 57.5",
+                                               "Curl isquio máquina: series 3 · reps 15 · carga 50.0",
+                                               "Abductor máquina: series 3 · reps 20 · carga 85.0",
+                                               "Aductor máquina: series 3 · reps 20 · carga 80.0"
+                                           ]
+                           },
+                           {
+                               "id":  "session-32",
+                               "date":  "09 abr.",
+                               "week":  "S9",
+                               "session":  "Cardio Z2",
+                               "summary":  "44 min",
+                               "notes":  "44 min · FC 118 ppm",
+                               "details":  [
+
+                                           ]
+                           },
+                           {
+                               "id":  "session-34",
+                               "date":  "10 abr.",
+                               "week":  "S10",
+                               "session":  "Pull A",
+                               "summary":  "Dominadas 4 limpias. T-bar 4x10. Remo 12-12-10. Face pulls 4x20. Curl EZ 12-12-11. Curl martillo 10-10-8.",
+                               "notes":  "Dominadas 4 limpias. T-bar 4x10. Remo 12-12-10. Face pulls 4x20. Curl EZ 12-12-11. Curl martillo 10-10-8.",
+                               "details":  [
+                                               "Dominadas sin banda / Jalón asistido: series 4 · reps 4 · Sin banda, 4 reps limpias",
+                                               "T-bar row: series 4 · reps 10 · carga 35",
+                                               "Remo unilateral con mancuerna: series 3 · reps 11 · carga 28 · 12-12-10",
+                                               "Face pulls (polea o banda): series 4 · reps 20 · carga 25",
+                                               "Curl EZ en banco predicador: series 3 · reps 12 · carga 20 · 12-12-11",
+                                               "Curl martillo con mancuernas: series 3 · reps 9 · carga 15 · 10-10-8"
+                                           ]
+                           },
+                           {
+                               "id":  "session-35",
+                               "date":  "11 abr.",
+                               "week":  "S10",
+                               "session":  "Descanso",
+                               "summary":  "Descanso activo",
+                               "notes":  "Descanso activo",
+                               "details":  [
+
+                                           ]
+                           },
+                           {
+                               "id":  "session-36",
+                               "date":  "12 abr.",
+                               "week":  "S10",
+                               "session":  "Deporte",
+                               "summary":  "Running",
+                               "notes":  "Running",
+                               "details":  [
+                                               "Running: series 1 · Cardio"
+                                           ]
+                           },
+                           {
+                               "id":  "session-37",
+                               "date":  "13 abr.",
+                               "week":  "S11",
+                               "session":  "Push A",
+                               "summary":  "completado",
+                               "notes":  "",
+                               "details":  [
+                                               "Press de banca plano (barra): series 4 · reps 12 · carga 50",
+                                               "Press inclinado con mancuernas (30–45°): series 3 · reps 12 · carga 20 · c/u",
+                                               "Press militar con barra (de pie): series 4 · reps 10 · carga 30 · 4×10 completas",
+                                               "Elevaciones laterales con mancuernas: series 4 · reps 14 · carga 10 · c/u",
+                                               "Aperturas con mancuernas (banco plano): series 3 · reps 10 · carga 17.5 · c/u"
+                                           ]
+                           },
+                           {
+                               "id":  "session-38",
+                               "date":  "14 abr.",
+                               "week":  "S11",
+                               "session":  "Carrera",
+                               "summary":  "Coquimbo",
+                               "notes":  "Coquimbo · ~6 km (5.72 km registrados, batería) · 43:34 · 7:37/km · FC 136 ppm · Ascenso 19 m",
+                               "details":  [
+                                               "Carrera Z2 Coquimbo: series 1 · 5.72 km · 43:34 · 7:37/km · FC media 136 ppm · Ascenso 19 m · llegué a ~6 km (batería)"
+                                           ]
+                           },
+                           {
+                               "id":  "session-39",
+                               "date":  "15 abr.",
+                               "week":  "S11",
+                               "session":  "Pierna",
+                               "summary":  "Hip thrust PR 60 kg (+2.5). Ext. rodilla omitida.",
+                               "notes":  "Hip thrust PR 60 kg (+2.5). Ext. rodilla omitida.",
+                               "details":  [
+                                               "Goblet squat con mancuerna: series 4 · reps 12 · carga 22.5 · 4×12 · ok",
+                                               "Romanian Deadlift con mancuernas: series 4 · reps 12 · carga 22.5 · 4×12 · ok",
+                                               "Hip thrust con barra: series 4 · carga 60 · 60 kg PR (+2.5) · 13,13,10,13 reps",
+                                               "Curl de isquio en máquina: series 3 · reps 15 · carga 25 · 25 kg (~55 lbs) · 3×15",
+                                               "Elevaciones de talón excéntricas: series 4 · reps 15 · Corporal · ok",
+                                               "Abductor en máquina (abrir): series 3 · 20,15,15 reps · ok"
+                                           ]
+                           },
+                           {
+                               "id":  "session-40",
+                               "date":  "17 abr.",
+                               "week":  "S11",
+                               "session":  "Carrera",
+                               "summary":  "5.80 km",
+                               "notes":  "5.80 km · 52:19 · 9:01/km (mov 8:40/km) · FC media 133 ppm · FC máx 145 ppm · 542 kcal · Aeróbica baja (Mantenimiento 2.6)",
+                               "details":  [
+                                               "Carrera Z2: series 1 · 5.80 km · 52:19 total (50:15 mov) · Ritmo 9:01/km · FC 133/145 ppm · Cadencia 149 ppm · Zancada 0.75 m · Oscilación vertical 7.8 cm · Contacto suelo 315 ms · Body Battery -10"
+                                           ]
+                           },
+                           {
+                               "id":  "session-41",
+                               "date":  "18 abr.",
+                               "week":  "S11",
+                               "session":  "Pull A",
+                               "summary":  "E (Curl EZ predicador) omitido",
+                               "notes":  "E (Curl EZ predicador) omitido",
+                               "details":  [
+                                               "Dominadas sin banda: series 4 · 4,3,3,3 reps",
+                                               "T-bar row: reps 10 · 10 reps",
+                                               "Remo unilateral con mancuerna: completado",
+                                               "Face pulls (polea o banda): reps 20 · 20 reps",
+                                               "Curl EZ en banco predicador: series 0 · omitido",
+                                               "Curl martillo con mancuernas: reps 12 · 12 reps"
+                                           ]
+                           },
+                           {
+                               "id":  "session-42",
+                               "date":  "19 abr.",
+                               "week":  "S11",
+                               "session":  "Tirada Larga",
+                               "summary":  "12.02 km",
+                               "notes":  "12.02 km · 1:22:48 · 6:53/km · FC media 145 ppm · FC máx 163 ppm · 997 kcal · Ascenso 23 m · Z3 95% · Training Effect 3.4 Impacto · Body Battery -20 · Esfuerzo 6/10 Difícil",
+                               "details":  [
+                                               "Tirada larga Z3: series 1 · 12.02 km · 1:22:48 · Ritmo 6:53/km (GAP 6:54) · FC 145/163 ppm · Cadencia 160 ppm · Zancada 0.91 m · Oscilación 8.6 cm · Contacto suelo 292 ms · Zona 3 Aeróbica 95% del tiempo · 12 vueltas 1km entre 6:27–7:18 min"
+                                           ]
+                           },
+                           {
+                               "id":  "session-43",
+                               "date":  "20 abr.",
+                               "week":  "S12",
+                               "session":  "Push A",
+                               "summary":  "completado",
+                               "notes":  "",
+                               "details":  [
+                                               "Press de banca plano (barra): series 4 · reps 10 · carga 50",
+                                               "Press inclinado con mancuernas (30–45°): series 3 · reps 10 · carga 20 · c/u",
+                                               "Press militar con barra (de pie): series 4 · reps 10 · carga 30 · 4×10 completas",
+                                               "Elevaciones laterales con mancuernas: series 4 · reps 12 · carga 10 · c/u",
+                                               "Aperturas con mancuernas (banco plano): series 3 · reps 0 · carga 17.5 · c/u"
+                                           ]
+                           }
+                       ]
+}
+

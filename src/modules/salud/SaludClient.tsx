@@ -6,6 +6,7 @@ import {
   healthSummaryStats,
   latestMeasurement,
   routineTemplates,
+  routineHtmlWeeks,
   sessionHistory,
   weeklyConsistency,
   workoutRoutines,
@@ -53,6 +54,7 @@ function SummaryCard(props: {
 export function SaludClient() {
   const [selectedWeekId, setSelectedWeekId] = useState(workoutRoutines[0]?.id ?? "");
   const [selectedDayIndex, setSelectedDayIndex] = useState(4);
+  const [selectedHtmlWeek, setSelectedHtmlWeek] = useState(12);
 
   const selectedWeek =
     workoutRoutines.find((week) => week.id === selectedWeekId) ?? workoutRoutines[0];
@@ -208,6 +210,10 @@ export function SaludClient() {
                 onClick={() => {
                   setSelectedWeekId(week.id);
                   setSelectedDayIndex(0);
+                  const weekNumber = Number(week.label.replace("Semana ", ""));
+                  if (routineHtmlWeeks.includes(weekNumber)) {
+                    setSelectedHtmlWeek(weekNumber);
+                  }
                 }}
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                   week.id === selectedWeek.id
@@ -308,6 +314,53 @@ export function SaludClient() {
             ))}
           </div>
         </aside>
+      </section>
+
+      <section className="app-card p-6">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="text-2xl font-semibold text-[var(--ink)]">
+              HTML original de rutina
+            </h2>
+            <p className="mt-1 text-sm text-[var(--muted)]">
+              Rescatado desde tu dashboard anterior para que sigas viendo la version que ya te gustaba.
+            </p>
+          </div>
+          <a
+            href={`/rutina_semana${selectedHtmlWeek}.html`}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-2xl border border-[var(--line)] bg-white/80 px-4 py-2.5 text-sm font-semibold text-[var(--ink)]"
+          >
+            Abrir en pestaña
+          </a>
+        </div>
+
+        <div className="mt-6 flex flex-wrap gap-2">
+          {routineHtmlWeeks.map((week) => (
+            <button
+              key={week}
+              type="button"
+              onClick={() => setSelectedHtmlWeek(week)}
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                selectedHtmlWeek === week
+                  ? "bg-[var(--accent)] text-white"
+                  : "border border-[var(--line)] bg-white/85 text-[var(--ink)]"
+              }`}
+            >
+              S{week}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-5 overflow-hidden rounded-[1.75rem] border border-[var(--line)] bg-white">
+          <iframe
+            key={selectedHtmlWeek}
+            src={`/rutina_semana${selectedHtmlWeek}.html`}
+            title={`Rutina semana ${selectedHtmlWeek}`}
+            className="h-[820px] w-full"
+          />
+        </div>
       </section>
 
       <section className="app-card p-6">
