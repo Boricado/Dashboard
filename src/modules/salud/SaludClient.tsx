@@ -17,6 +17,22 @@ import {
   type WorkoutDay,
 } from "@/modules/salud/data";
 
+const SEGMENT_LABELS = [
+  { key: "leftArm", label: "Brazo izq." },
+  { key: "rightArm", label: "Brazo der." },
+  { key: "trunk", label: "Tronco" },
+  { key: "leftLeg", label: "Pierna izq." },
+  { key: "rightLeg", label: "Pierna der." },
+] as const;
+
+const IMPEDANCE_COLUMNS = [
+  { key: "bd", label: "BD" },
+  { key: "bi", label: "BI" },
+  { key: "tr", label: "TR" },
+  { key: "pd", label: "PD" },
+  { key: "pi", label: "PI" },
+] as const;
+
 const STATUS_STYLE: Record<WorkoutDay["status"], string> = {
   completed: "bg-emerald-100 text-emerald-900",
   today: "bg-[var(--accent-soft)] text-[var(--accent-strong)]",
@@ -124,6 +140,52 @@ export function SaludClient() {
   const selectedScan =
     inbodyScans.find((scan) => scan.id === selectedScanId) ??
     inbodyScans[inbodyScans.length - 1];
+  const selectedLeanSegments = SEGMENT_LABELS.map((segment) => ({
+    label: segment.label,
+    value: selectedScan.segmentalLean[segment.key],
+  }));
+  const selectedFatSegments = SEGMENT_LABELS.map((segment) => ({
+    label: segment.label,
+    value: selectedScan.segmentalFat[segment.key],
+  }));
+  const scanDetails = [
+    { label: "Agua corporal", value: `${selectedScan.bodyWaterL.toFixed(1)} L` },
+    { label: "Proteinas", value: `${selectedScan.proteinsKg.toFixed(1)} kg` },
+    { label: "Minerales", value: `${selectedScan.mineralsKg.toFixed(2)} kg` },
+    {
+      label: "Masa libre de grasa",
+      value: `${selectedScan.fatFreeMassKg.toFixed(1)} kg`,
+    },
+    { label: "IMC", value: selectedScan.bmi.toFixed(1) },
+    { label: "PGC", value: `${selectedScan.bodyFatPercent.toFixed(1)}%` },
+    { label: "Cintura-cadera", value: selectedScan.waistHipRatio.toFixed(2) },
+    { label: "Grasa visceral", value: `${selectedScan.visceralFatLevel}` },
+    {
+      label: "Grado de obesidad",
+      value: selectedScan.obesityDegree ? `${selectedScan.obesityDegree}%` : "n/d",
+    },
+    { label: "Peso objetivo", value: `${selectedScan.targetWeightKg.toFixed(1)} kg` },
+    { label: "Control de peso", value: `${selectedScan.weightControlKg.toFixed(1)} kg` },
+    { label: "Control de grasa", value: `${selectedScan.fatControlKg.toFixed(1)} kg` },
+    {
+      label: "Control muscular",
+      value: `${selectedScan.muscleControlKg.toFixed(1)} kg`,
+    },
+    {
+      label: "Tasa metab. basal",
+      value: `${selectedScan.basalMetabolicRateKcal} kcal`,
+    },
+    {
+      label: "Ingesta sugerida",
+      value: selectedScan.recommendedIntakeKcal
+        ? `${selectedScan.recommendedIntakeKcal} kcal`
+        : "n/d",
+    },
+    {
+      label: "IME",
+      value: selectedScan.imeKgM2 ? `${selectedScan.imeKgM2.toFixed(1)} kg/m²` : "n/d",
+    },
+  ];
 
   const maxConsistency = Math.max(...weeklyConsistency.map((item) => item.value));
   const maxWeight = Math.max(...weightTrend.map((item) => item.value));
@@ -432,8 +494,21 @@ export function SaludClient() {
               </div>
             </div>
 
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-[var(--line)] bg-white/70 p-4">
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {scanDetails.map((detail) => (
+                <div
+                  key={`${selectedScan.id}-${detail.label}`}
+                  className="rounded-2xl border border-[var(--line)] bg-white/70 p-4"
+                >
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                    {detail.label}
+                  </div>
+                  <div className="mt-2 text-2xl font-semibold text-[var(--ink)]">
+                    {detail.value}
+                  </div>
+                </div>
+              ))}
+              <div className="hidden rounded-2xl border border-[var(--line)] bg-white/70 p-4">
                 <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
                   Agua corporal
                 </div>
@@ -441,7 +516,7 @@ export function SaludClient() {
                   {selectedScan.bodyWaterL.toFixed(1)} L
                 </div>
               </div>
-              <div className="rounded-2xl border border-[var(--line)] bg-white/70 p-4">
+              <div className="hidden rounded-2xl border border-[var(--line)] bg-white/70 p-4">
                 <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
                   Proteinas
                 </div>
@@ -449,7 +524,7 @@ export function SaludClient() {
                   {selectedScan.proteinsKg.toFixed(1)} kg
                 </div>
               </div>
-              <div className="rounded-2xl border border-[var(--line)] bg-white/70 p-4">
+              <div className="hidden rounded-2xl border border-[var(--line)] bg-white/70 p-4">
                 <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
                   Minerales
                 </div>
@@ -459,7 +534,80 @@ export function SaludClient() {
               </div>
             </div>
 
-            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            <div className="mt-5 grid gap-4 xl:grid-cols-2">
+              <div className="rounded-[1.5rem] border border-[var(--line)] bg-white/75 p-5">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                  Masa magra segmental
+                </div>
+                <div className="mt-4 grid gap-3">
+                  {selectedLeanSegments.map((segment) => (
+                    <div
+                      key={`${selectedScan.id}-lean-${segment.label}`}
+                      className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 rounded-2xl bg-[var(--surface-strong)] px-4 py-3"
+                    >
+                      <div className="font-medium text-[var(--ink)]">{segment.label}</div>
+                      <div className="text-sm text-[var(--muted)]">
+                        {segment.value.kg.toFixed(2)} kg
+                      </div>
+                      <div className="text-sm font-semibold text-[var(--ink)]">
+                        {segment.value.percent.toFixed(1)}%
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-[1.5rem] border border-[var(--line)] bg-white/75 p-5">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                  Grasa segmental
+                </div>
+                <div className="mt-4 grid gap-3">
+                  {selectedFatSegments.map((segment) => (
+                    <div
+                      key={`${selectedScan.id}-fat-${segment.label}`}
+                      className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 rounded-2xl bg-[var(--surface-strong)] px-4 py-3"
+                    >
+                      <div className="font-medium text-[var(--ink)]">{segment.label}</div>
+                      <div className="text-sm text-[var(--muted)]">
+                        {segment.value.kg.toFixed(1)} kg
+                      </div>
+                      <div className="text-sm font-semibold text-[var(--ink)]">
+                        {segment.value.percent.toFixed(1)}%
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-[1.5rem] border border-[var(--line)] bg-white/75 p-5">
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                Impedancia
+              </div>
+              <div className="mt-4 overflow-hidden rounded-2xl border border-[var(--line)]">
+                <div className="grid grid-cols-[110px_repeat(5,minmax(0,1fr))] bg-[var(--surface-strong)] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
+                  <div>Frecuencia</div>
+                  {IMPEDANCE_COLUMNS.map((column) => (
+                    <div key={column.key}>{column.label}</div>
+                  ))}
+                </div>
+                {(["z20", "z100"] as const).map((band) => (
+                  <div
+                    key={`${selectedScan.id}-${band}`}
+                    className="grid grid-cols-[110px_repeat(5,minmax(0,1fr))] border-t border-[var(--line)] px-4 py-3 text-sm text-[var(--ink)] first:border-t-0"
+                  >
+                    <div className="font-medium">{band === "z20" ? "20 kHz" : "100 kHz"}</div>
+                    {IMPEDANCE_COLUMNS.map((column) => (
+                      <div key={`${band}-${column.key}`}>
+                        {selectedScan.impedance[band][column.key].toFixed(1)}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-3 hidden gap-3 sm:grid-cols-3">
               <div className="rounded-2xl border border-[var(--line)] bg-white/70 p-4">
                 <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
                   Cintura-cadera

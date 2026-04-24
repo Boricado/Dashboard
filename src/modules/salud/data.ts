@@ -64,6 +64,36 @@ export type InBodyComparisonRow = {
   betterWhen: "higher" | "lower";
 };
 
+export type InBodySegmentPoint = {
+  kg: number;
+  percent: number;
+};
+
+export type InBodySegmentalAnalysis = {
+  leftArm: InBodySegmentPoint;
+  rightArm: InBodySegmentPoint;
+  trunk: InBodySegmentPoint;
+  leftLeg: InBodySegmentPoint;
+  rightLeg: InBodySegmentPoint;
+};
+
+export type InBodyImpedanceSnapshot = {
+  z20: {
+    bd: number;
+    bi: number;
+    tr: number;
+    pd: number;
+    pi: number;
+  };
+  z100: {
+    bd: number;
+    bi: number;
+    tr: number;
+    pd: number;
+    pi: number;
+  };
+};
+
 export type InBodyScan = {
   id: string;
   date: string;
@@ -89,6 +119,10 @@ export type InBodyScan = {
   basalMetabolicRateKcal: number;
   fatFreeMassKg: number;
   imeKgM2: number;
+  recommendedIntakeKcal?: number;
+  segmentalLean: InBodySegmentalAnalysis;
+  segmentalFat: InBodySegmentalAnalysis;
+  impedance: InBodyImpedanceSnapshot;
 };
 
 export const inbodyScans: InBodyScan[] = [
@@ -117,6 +151,25 @@ export const inbodyScans: InBodyScan[] = [
     basalMetabolicRateKcal: 1807,
     fatFreeMassKg: 66.5,
     imeKgM2: 9.0,
+    recommendedIntakeKcal: 2500,
+    segmentalLean: {
+      leftArm: { kg: 4.08, percent: 116.4 },
+      rightArm: { kg: 4.09, percent: 116.8 },
+      trunk: { kg: 30.7, percent: 110.2 },
+      leftLeg: { kg: 9.61, percent: 98.7 },
+      rightLeg: { kg: 9.55, percent: 98.1 },
+    },
+    segmentalFat: {
+      leftArm: { kg: 1.7, percent: 279.8 },
+      rightArm: { kg: 1.7, percent: 276.6 },
+      trunk: { kg: 15.0, percent: 355.0 },
+      leftLeg: { kg: 3.3, percent: 191.2 },
+      rightLeg: { kg: 3.3, percent: 190.5 },
+    },
+    impedance: {
+      z20: { bd: 269.1, bi: 269.4, tr: 21.6, pd: 249.6, pi: 245.0 },
+      z100: { bd: 235.7, bi: 237.4, tr: 17.7, pd: 219.2, pi: 213.4 },
+    },
   },
   {
     id: "2025-06-28",
@@ -143,6 +196,25 @@ export const inbodyScans: InBodyScan[] = [
     basalMetabolicRateKcal: 1752,
     fatFreeMassKg: 64.0,
     imeKgM2: 8.6,
+    recommendedIntakeKcal: 2386,
+    segmentalLean: {
+      leftArm: { kg: 3.81, percent: 111.1 },
+      rightArm: { kg: 3.79, percent: 110.7 },
+      trunk: { kg: 29.1, percent: 106.7 },
+      leftLeg: { kg: 9.32, percent: 97.8 },
+      rightLeg: { kg: 9.25, percent: 97.1 },
+    },
+    segmentalFat: {
+      leftArm: { kg: 1.4, percent: 231.8 },
+      rightArm: { kg: 1.4, percent: 231.8 },
+      trunk: { kg: 12.9, percent: 306.4 },
+      leftLeg: { kg: 3.0, percent: 172.0 },
+      rightLeg: { kg: 2.9, percent: 171.5 },
+    },
+    impedance: {
+      z20: { bd: 285.7, bi: 284.0, tr: 22.2, pd: 260.8, pi: 255.1 },
+      z100: { bd: 252.6, bi: 252.0, tr: 18.2, pd: 228.2, pi: 222.0 },
+    },
   },
   {
     id: "2025-11-23",
@@ -169,6 +241,25 @@ export const inbodyScans: InBodyScan[] = [
     basalMetabolicRateKcal: 1827,
     fatFreeMassKg: 67.5,
     imeKgM2: 9.1,
+    recommendedIntakeKcal: 2480,
+    segmentalLean: {
+      leftArm: { kg: 4.19, percent: 120.0 },
+      rightArm: { kg: 4.16, percent: 119.1 },
+      trunk: { kg: 31.2, percent: 112.0 },
+      leftLeg: { kg: 9.68, percent: 99.7 },
+      rightLeg: { kg: 9.64, percent: 99.3 },
+    },
+    segmentalFat: {
+      leftArm: { kg: 1.5, percent: 248.6 },
+      rightArm: { kg: 1.5, percent: 251.5 },
+      trunk: { kg: 14.2, percent: 336.1 },
+      leftLeg: { kg: 3.1, percent: 179.5 },
+      rightLeg: { kg: 3.1, percent: 179.6 },
+    },
+    impedance: {
+      z20: { bd: 260.4, bi: 258.0, tr: 21.4, pd: 241.5, pi: 237.7 },
+      z100: { bd: 228.8, bi: 226.9, tr: 17.3, pd: 212.2, pi: 207.9 },
+    },
   },
   {
     id: "2026-03-10",
@@ -193,8 +284,26 @@ export const inbodyScans: InBodyScan[] = [
     visceralFatLevel: 9,
     obesityDegree: 134,
     basalMetabolicRateKcal: 1844,
-    fatFreeMassKg: 0,
+    fatFreeMassKg: 68.2,
     imeKgM2: 0,
+    segmentalLean: {
+      leftArm: { kg: 4.11, percent: 124.9 },
+      rightArm: { kg: 4.11, percent: 123.9 },
+      trunk: { kg: 30.7, percent: 111.6 },
+      leftLeg: { kg: 10.11, percent: 100.6 },
+      rightLeg: { kg: 9.9, percent: 98.7 },
+    },
+    segmentalFat: {
+      leftArm: { kg: 1.2, percent: 202.8 },
+      rightArm: { kg: 1.2, percent: 205.3 },
+      trunk: { kg: 12.2, percent: 286.7 },
+      leftLeg: { kg: 2.9, percent: 165.2 },
+      rightLeg: { kg: 2.9, percent: 164.8 },
+    },
+    impedance: {
+      z20: { bd: 260.7, bi: 261.4, tr: 21.3, pd: 229.4, pi: 218.8 },
+      z100: { bd: 227.9, bi: 229.0, tr: 17.8, pd: 200.9, pi: 191.1 },
+    },
   },
   {
     id: "2026-04-16",
@@ -219,8 +328,26 @@ export const inbodyScans: InBodyScan[] = [
     visceralFatLevel: 10,
     obesityDegree: 135,
     basalMetabolicRateKcal: 1861,
-    fatFreeMassKg: 0,
+    fatFreeMassKg: 69.0,
     imeKgM2: 0,
+    segmentalLean: {
+      leftArm: { kg: 4.31, percent: 129.3 },
+      rightArm: { kg: 4.31, percent: 129.7 },
+      trunk: { kg: 31.8, percent: 115.0 },
+      leftLeg: { kg: 9.81, percent: 97.2 },
+      rightLeg: { kg: 9.81, percent: 96.4 },
+    },
+    segmentalFat: {
+      leftArm: { kg: 1.3, percent: 206.9 },
+      rightArm: { kg: 1.2, percent: 205.9 },
+      trunk: { kg: 12.8, percent: 300.2 },
+      leftLeg: { kg: 2.7, percent: 157.8 },
+      rightLeg: { kg: 2.7, percent: 157.4 },
+    },
+    impedance: {
+      z20: { bd: 254.0, bi: 258.3, tr: 21.1, pd: 245.0, pi: 239.8 },
+      z100: { bd: 222.0, bi: 226.4, tr: 17.6, pd: 213.4, pi: 207.4 },
+    },
   },
 ];
 
