@@ -9,10 +9,11 @@ import {
   latestMeasurement,
   routineTemplates,
   routineHtmlWeeks,
-  sessionHistory,
+  sessionHistory as baseSessionHistory,
   weeklyConsistency,
   workoutRoutines,
   weightTrend,
+  type SessionHistoryItem,
   type WorkoutDay,
 } from "@/modules/salud/data";
 
@@ -40,6 +41,45 @@ function formatSignedDelta(value: number) {
   return `${rounded > 0 ? "+" : ""}${rounded.toFixed(Math.abs(rounded) % 1 === 0 ? 0 : 1)}`;
 }
 
+function currentRoutineDayIndex() {
+  const today = new Date().getDay();
+  const map: Record<number, number> = {
+    1: 0,
+    2: 1,
+    3: 2,
+    4: 3,
+    5: 4,
+    6: 5,
+    0: 6,
+  };
+
+  return map[today] ?? 0;
+}
+
+function toInputDate(date: Date) {
+  const offset = date.getTimezoneOffset();
+  const local = new Date(date.getTime() - offset * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
+function formatDateLabel(value: string) {
+  return new Intl.DateTimeFormat("es-CL", {
+    day: "2-digit",
+    month: "short",
+  }).format(new Date(`${value}T00:00:00`));
+}
+
+type RegistrationDraft = {
+  date: string;
+  status: "completado" | "parcial" | "pendiente";
+  notes: string;
+  exercises: {
+    name: string;
+    done: boolean;
+    notes: string;
+  }[];
+};
+
 function SummaryCard(props: {
   label: string;
   value: string;
@@ -66,6 +106,14 @@ export function SaludClient() {
   const [selectedWeekId, setSelectedWeekId] = useState(workoutRoutines[0]?.id ?? "");
   const [selectedDayIndex, setSelectedDayIndex] = useState(4);
   const [selectedHtmlWeek, setSelectedHtmlWeek] = useState(12);
+  const [selectedScanId, setSelectedScanId] = useState(
+    inbodyScans[inbodyScans.length - 1]?.id ?? "",
+  );
+  const [sessionHistory, setSessionHistory] = useState(baseSessionHistory);
+  const [registrationDraft, setRegistrationDraft] = useState<RegistrationDraft | null>(
+    null,
+  );
+  const [registrationMessage, setRegistrationMessage] = useState<string | null>(null);
 
   const selectedWeek =
     workoutRoutines.find((week) => week.id === selectedWeekId) ?? workoutRoutines[0];
@@ -73,11 +121,92 @@ export function SaludClient() {
   const selectedDay = selectedWeek.days[selectedDayIndex] ?? selectedWeek.days[0];
 
   const selectedExercises = routineTemplates[selectedDay.session] ?? [];
+  const selectedScan =
+    inbodyScans.find((scan) => scan.id === selectedScanId) ??
+    inbodyScans[inbodyScans.length - 1];
 
   const maxConsistency = Math.max(...weeklyConsistency.map((item) => item.value));
   const maxWeight = Math.max(...weightTrend.map((item) => item.value));
   const latestScan = inbodyScans[inbodyScans.length - 1];
   const previousScan = inbodyScans[inbodyScans.length - 2];
+
+  function buildDraft(day: WorkoutDay): RegistrationDraft {
+    const exercises = (routineTemplates[day.session] ?? []).map((exercise) => ({
+      name: exercise.name,
+      done: day.status === "completed",
+      notes: exercise.notes ?? "",
+    }));
+
+    return {
+      date: toInputDate(new Date()),
+      status: day.status === "completed" ? "completado" : "pendiente",
+      notes: day.note ?? "",
+      exercises,
+    };
+  }
+
+  function openRegistrationForToday() {
+    const autoIndex = currentRoutineDayIndex();
+    const autoDay = selectedWeek.days[autoIndex] ?? selectedDay;
+    setSelectedDayIndex(autoIndex);
+    setRegistrationDraft(buildDraft(autoDay));
+    setRegistrationMessage(null);
+  }
+
+  function updateDraftExercise(
+    index: number,
+    patch: Partial<RegistrationDraft["exercises"][number]>,
+  ) {
+    setRegistrationDraft((current) => {
+      if (!current) {
+        return current;
+      }
+
+      return {
+        ...current,
+        exercises: current.exercises.map((exercise, exerciseIndex) =>
+          exerciseIndex === index ? { ...exercise, ...patch } : exercise,
+        ),
+      };
+    });
+  }
+
+  function saveRegistration() {
+    if (!registrationDraft) {
+      return;
+    }
+
+    const completedExercises = registrationDraft.exercises.filter((exercise) => exercise.done);
+    const notes = [registrationDraft.notes]
+      .concat(
+        completedExercises
+          .filter((exercise) => exercise.notes.trim())
+          .slice(0, 3)
+          .map((exercise) => `${exercise.name}: ${exercise.notes.trim()}`),
+      )
+      .filter(Boolean)
+      .join(" · ");
+
+    const newEntry: SessionHistoryItem = {
+      id: `local-${selectedWeek.id}-${selectedDay.dayShort}-${registrationDraft.date}`,
+      date: formatDateLabel(registrationDraft.date),
+      week: selectedWeek.label.replace("Semana ", "S"),
+      session: selectedDay.session,
+      summary:
+        registrationDraft.status === "completado"
+          ? `${completedExercises.length} ejercicios marcados`
+          : registrationDraft.status,
+      notes,
+      details: registrationDraft.exercises.map((exercise) =>
+        `${exercise.done ? "OK" : "Pendiente"} · ${exercise.name}${
+          exercise.notes.trim() ? ` · ${exercise.notes.trim()}` : ""
+        }`,
+      ),
+    };
+
+    setSessionHistory((current) => [newEntry, ...current]);
+    setRegistrationMessage("Registro agregado al historial visible.");
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -269,9 +398,13 @@ export function SaludClient() {
             </div>
             <div className="max-h-[340px] overflow-y-auto bg-white/80">
               {inbodyScans.map((scan) => (
-                <div
+                <button
                   key={scan.id}
-                  className="grid grid-cols-[minmax(110px,1.1fr)_repeat(5,minmax(90px,1fr))] border-t border-[var(--line)] px-4 py-3 text-sm text-[var(--ink)] first:border-t-0"
+                  type="button"
+                  onClick={() => setSelectedScanId(scan.id)}
+                  className={`grid w-full grid-cols-[minmax(110px,1.1fr)_repeat(5,minmax(90px,1fr))] border-t border-[var(--line)] px-4 py-3 text-left text-sm text-[var(--ink)] first:border-t-0 ${
+                    selectedScan.id === scan.id ? "bg-[var(--accent)]/8" : "bg-transparent"
+                  }`}
                 >
                   <div className="font-medium">{scan.label}</div>
                   <div>{scan.weightKg.toFixed(1)} kg</div>
@@ -279,8 +412,78 @@ export function SaludClient() {
                   <div>{scan.bodyFatMassKg.toFixed(1)} kg</div>
                   <div>{scan.bodyFatPercent.toFixed(1)}%</div>
                   <div>{scan.score}</div>
-                </div>
+                </button>
               ))}
+            </div>
+          </div>
+
+          <div className="mt-5 rounded-[1.5rem] border border-[var(--line)] bg-white/80 p-5">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                  Escaneo seleccionado
+                </div>
+                <div className="mt-2 text-2xl font-semibold text-[var(--ink)]">
+                  {selectedScan.label}
+                </div>
+              </div>
+              <div className="text-sm text-[var(--muted)]">
+                {selectedScan.heightCm} cm · {selectedScan.age} años
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-[var(--line)] bg-white/70 p-4">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                  Agua corporal
+                </div>
+                <div className="mt-2 text-2xl font-semibold text-[var(--ink)]">
+                  {selectedScan.bodyWaterL.toFixed(1)} L
+                </div>
+              </div>
+              <div className="rounded-2xl border border-[var(--line)] bg-white/70 p-4">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                  Proteinas
+                </div>
+                <div className="mt-2 text-2xl font-semibold text-[var(--ink)]">
+                  {selectedScan.proteinsKg.toFixed(1)} kg
+                </div>
+              </div>
+              <div className="rounded-2xl border border-[var(--line)] bg-white/70 p-4">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                  Minerales
+                </div>
+                <div className="mt-2 text-2xl font-semibold text-[var(--ink)]">
+                  {selectedScan.mineralsKg.toFixed(2)} kg
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-[var(--line)] bg-white/70 p-4">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                  Cintura-cadera
+                </div>
+                <div className="mt-2 text-2xl font-semibold text-[var(--ink)]">
+                  {selectedScan.waistHipRatio.toFixed(2)}
+                </div>
+              </div>
+              <div className="rounded-2xl border border-[var(--line)] bg-white/70 p-4">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                  Peso objetivo
+                </div>
+                <div className="mt-2 text-2xl font-semibold text-[var(--ink)]">
+                  {selectedScan.targetWeightKg.toFixed(1)} kg
+                </div>
+              </div>
+              <div className="rounded-2xl border border-[var(--line)] bg-white/70 p-4">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                  Control de grasa
+                </div>
+                <div className="mt-2 text-2xl font-semibold text-[var(--ink)]">
+                  {selectedScan.fatControlKg.toFixed(1)} kg
+                </div>
+              </div>
             </div>
           </div>
 
@@ -326,6 +529,7 @@ export function SaludClient() {
             </div>
             <button
               type="button"
+              onClick={openRegistrationForToday}
               className="rounded-2xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white"
             >
               Registrar
@@ -442,6 +646,133 @@ export function SaludClient() {
                 ) : null}
               </article>
             ))}
+          </div>
+
+          <div className="mt-6 border-t border-[var(--line)] pt-6">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+                  Registro del dia
+                </div>
+                <div className="mt-2 text-lg font-semibold text-[var(--ink)]">
+                  {selectedDay.session}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setRegistrationDraft(buildDraft(selectedDay));
+                  setRegistrationMessage(null);
+                }}
+                className="rounded-2xl border border-[var(--line)] bg-white/80 px-4 py-2 text-sm font-semibold text-[var(--ink)]"
+              >
+                Usar seleccion
+              </button>
+            </div>
+
+            {registrationDraft ? (
+              <div className="mt-4 space-y-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="grid gap-1.5 text-sm">
+                    <span className="font-medium text-[var(--ink)]">Fecha</span>
+                    <input
+                      type="date"
+                      value={registrationDraft.date}
+                      onChange={(event) =>
+                        setRegistrationDraft((current) =>
+                          current ? { ...current, date: event.target.value } : current,
+                        )
+                      }
+                      className="h-11 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+                    />
+                  </label>
+                  <label className="grid gap-1.5 text-sm">
+                    <span className="font-medium text-[var(--ink)]">Estado</span>
+                    <select
+                      value={registrationDraft.status}
+                      onChange={(event) =>
+                        setRegistrationDraft((current) =>
+                          current
+                            ? {
+                                ...current,
+                                status: event.target.value as RegistrationDraft["status"],
+                              }
+                            : current,
+                        )
+                      }
+                      className="h-11 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+                    >
+                      <option value="pendiente">Pendiente</option>
+                      <option value="parcial">Parcial</option>
+                      <option value="completado">Completado</option>
+                    </select>
+                  </label>
+                </div>
+
+                <label className="grid gap-1.5 text-sm">
+                  <span className="font-medium text-[var(--ink)]">Notas generales</span>
+                  <textarea
+                    value={registrationDraft.notes}
+                    onChange={(event) =>
+                      setRegistrationDraft((current) =>
+                        current ? { ...current, notes: event.target.value } : current,
+                      )
+                    }
+                    className="min-h-24 rounded-2xl border border-[var(--line)] bg-white px-3 py-3 outline-none focus:border-[var(--accent)]"
+                    placeholder="Sensaciones, tiempos, PR, ajustes..."
+                  />
+                </label>
+
+                <div className="space-y-3">
+                  {registrationDraft.exercises.map((exercise, index) => (
+                    <div
+                      key={`${exercise.name}-${index}`}
+                      className="rounded-2xl border border-[var(--line)] bg-white/80 p-4"
+                    >
+                      <label className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          checked={exercise.done}
+                          onChange={(event) =>
+                            updateDraftExercise(index, { done: event.target.checked })
+                          }
+                          className="mt-1 h-4 w-4 rounded border-[var(--line)]"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium text-[var(--ink)]">{exercise.name}</div>
+                          <textarea
+                            value={exercise.notes}
+                            onChange={(event) =>
+                              updateDraftExercise(index, { notes: event.target.value })
+                            }
+                            className="mt-2 min-h-20 w-full rounded-2xl border border-[var(--line)] bg-[var(--surface-strong)] px-3 py-3 text-sm text-[var(--muted)] outline-none focus:border-[var(--accent)]"
+                            placeholder="Carga, reps reales, observaciones..."
+                          />
+                        </div>
+                      </label>
+                    </div>
+                  ))}
+                </div>
+
+                {registrationMessage ? (
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                    {registrationMessage}
+                  </div>
+                ) : null}
+
+                <button
+                  type="button"
+                  onClick={saveRegistration}
+                  className="w-full rounded-2xl bg-[var(--accent)] px-4 py-3 text-sm font-semibold text-white"
+                >
+                  Guardar en historial visible
+                </button>
+              </div>
+            ) : (
+              <div className="mt-4 rounded-2xl border border-dashed border-[var(--line)] bg-white/70 px-4 py-5 text-sm text-[var(--muted)]">
+                Pulsa `Registrar` para cargar automaticamente el dia de hoy con su rutina base.
+              </div>
+            )}
           </div>
         </aside>
       </section>
