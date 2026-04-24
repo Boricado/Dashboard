@@ -19,12 +19,12 @@ export function LoginForm({ nextPath }: LoginFormProps) {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState<null | "email" | "github">(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function signInWithEmail() {
     setError(null);
-    setLoading("email");
+    setLoading(true);
 
     try {
       if (!supabase) {
@@ -47,72 +47,33 @@ export function LoginForm({ nextPath }: LoginFormProps) {
         caughtError instanceof Error ? caughtError.message : "Error desconocido";
       setError(message);
     } finally {
-      setLoading(null);
-    }
-  }
-
-  async function signInWithGithub() {
-    setError(null);
-    setLoading("github");
-
-    try {
-      if (!supabase) {
-        throw new Error("Configura Supabase antes de iniciar sesión.");
-      }
-
-      const origin = window.location.origin;
-      const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: "github",
-        options: {
-          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
-        },
-      });
-
-      if (oauthError) {
-        throw oauthError;
-      }
-
-      if (data.url) {
-        window.location.assign(data.url);
-      }
-    } catch (caughtError) {
-      const message =
-        caughtError instanceof Error ? caughtError.message : "Error desconocido";
-      setError(message);
-      setLoading(null);
+      setLoading(false);
     }
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-4 px-6 py-16">
-      <span className="inline-flex w-fit rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent-strong)]">
-        Acceso
-      </span>
-      <h1 className="text-3xl font-semibold tracking-tight">Iniciar sesión</h1>
-      <p className="text-sm leading-6 text-[var(--muted)]">
-        Entra con correo y clave o usando GitHub.
-      </p>
+    <div className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-16">
+      <div className="app-card p-6 sm:p-8">
+        <h1 className="text-3xl font-semibold tracking-tight text-[var(--ink)]">
+          Dashboard
+        </h1>
+        <p className="mt-2 text-sm text-[var(--muted)]">Inicia sesión para continuar.</p>
 
-      {!isConfigured ? (
-        <div className="rounded-[1.5rem] border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">
-          Primero configura las variables de Supabase en{" "}
-          <code className="rounded bg-black/10 px-1 py-0.5 text-[12px]">
-            .env.local
-          </code>
-          .
-        </div>
-      ) : null}
+        {!isConfigured ? (
+          <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+            Faltan variables de Supabase en Vercel.
+          </div>
+        ) : null}
 
-      {error ? (
-        <div className="rounded-[1.5rem] border border-red-200 bg-red-50 p-3 text-sm text-red-950">
-          {error}
-        </div>
-      ) : null}
+        {error ? (
+          <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-950">
+            {error}
+          </div>
+        ) : null}
 
-      <div className="app-card p-4">
-        <div className="grid gap-3">
-          <label className="grid gap-1">
-            <span className="text-sm font-medium">Email</span>
+        <div className="mt-6 grid gap-4">
+          <label className="grid gap-1.5">
+            <span className="text-sm font-medium text-[var(--ink)]">Email</span>
             <input
               className="h-11 rounded-2xl border border-[var(--line)] bg-white px-3 text-sm outline-none focus:border-[var(--accent)]"
               value={email}
@@ -122,8 +83,8 @@ export function LoginForm({ nextPath }: LoginFormProps) {
             />
           </label>
 
-          <label className="grid gap-1">
-            <span className="text-sm font-medium">Clave</span>
+          <label className="grid gap-1.5">
+            <span className="text-sm font-medium text-[var(--ink)]">Clave</span>
             <input
               className="h-11 rounded-2xl border border-[var(--line)] bg-white px-3 text-sm outline-none focus:border-[var(--accent)]"
               value={password}
@@ -136,22 +97,12 @@ export function LoginForm({ nextPath }: LoginFormProps) {
 
           <button
             onClick={signInWithEmail}
-            disabled={!isConfigured || !email || !password || loading !== null}
-            className="h-11 rounded-2xl bg-[var(--ink)] text-sm font-medium text-[var(--surface-strong)] disabled:opacity-50"
+            disabled={!isConfigured || !email || !password || loading}
+            className="mt-2 h-11 rounded-2xl bg-[var(--ink)] text-sm font-medium text-[var(--surface-strong)] disabled:opacity-50"
           >
-            {loading === "email" ? "Entrando..." : "Entrar"}
+            {loading ? "Entrando..." : "Entrar"}
           </button>
         </div>
-      </div>
-
-      <div className="app-card p-4">
-        <button
-          onClick={signInWithGithub}
-          disabled={!isConfigured || loading !== null}
-          className="h-11 w-full rounded-2xl border border-[var(--line)] bg-white text-sm font-medium hover:bg-[var(--surface-strong)] disabled:opacity-50"
-        >
-          {loading === "github" ? "Abriendo GitHub..." : "Entrar con GitHub"}
-        </button>
       </div>
     </div>
   );
