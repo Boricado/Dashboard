@@ -1,5 +1,5 @@
-import { SectionOverview } from "@/components/SectionOverview";
+import { SaludClient } from "@/modules/salud/SaludClient";
 
 export default function SaludPage() {
-  return <SectionOverview id="salud" />;
+  return <SaludClient />;
 }

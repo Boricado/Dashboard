@@ -1,19 +1,25 @@
 # Contexto: Salud
 
-## Propósito
-Registrar y visualizar métricas de salud, rutinas y hábitos.
+## Proposito
+Registrar metricas de salud, rutinas semanales y sesiones de entrenamiento sin volver a mezclar OCR, scripts y UI en un solo archivo.
 
-## Alcance MVP
-- Registro manual de métricas por fecha
-- Vista de tendencia simple
-- Rutinas básicas
+## MVP actual
+- Tarjetas de estadisticas generales
+- Resumen de composicion corporal
+- Rutinas por semana con detalle por dia
+- Historial de sesiones reales recuperadas del proyecto viejo
 
-## Datos iniciales
+## Fuente actual
+- Datos curados desde `fidel-dashboard`
+- Sin dependencia de Supabase en esta primera pasada
+- Historial parcial: sirve para operar y luego completar
+
+## Datos futuros
 - `health_metrics`
 - `workout_sessions`
-- `habit_logs`
+- `workout_exercises`
 
-## Límites
+## Limites
 - No reinsertar OCR ni parsers dentro del frontend
-- Separar siempre registros manuales e importados
-- No agregar dashboards complejos antes de limpiar datos
+- No inflar esta vista con graficos complejos antes de limpiar datos
+- Separar siempre metricas, rutinas y sesiones como piezas distintas
