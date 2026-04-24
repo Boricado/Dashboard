@@ -378,7 +378,8 @@ export function SaludClient() {
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col gap-3">
+        <div className="mt-6 max-h-[720px] overflow-y-auto pr-2">
+          <div className="flex flex-col gap-3">
           {sessionHistory.map((item) => (
             <details
               key={item.id}
@@ -408,6 +409,7 @@ export function SaludClient() {
               </div>
             </details>
           ))}
+          </div>
         </div>
       </section>
     </div>

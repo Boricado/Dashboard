@@ -56,43 +56,222 @@ export type SessionHistoryItem = {
   details: string[];
 };
 
+export type InBodyScan = {
+  id: string;
+  date: string;
+  label: string;
+  heightCm: number;
+  age: number;
+  weightKg: number;
+  bodyWaterL: number;
+  proteinsKg: number;
+  mineralsKg: number;
+  bodyFatMassKg: number;
+  skeletalMuscleKg: number;
+  bodyFatPercent: number;
+  bmi: number;
+  score: number;
+  targetWeightKg: number;
+  weightControlKg: number;
+  fatControlKg: number;
+  muscleControlKg: number;
+  waistHipRatio: number;
+  visceralFatLevel: number;
+  obesityDegree: number;
+  basalMetabolicRateKcal: number;
+  fatFreeMassKg: number;
+  imeKgM2: number;
+};
+
+export const inbodyScans: InBodyScan[] = [
+  {
+    id: "2024-07-23",
+    date: "2024-07-23",
+    label: "23 jul 2024",
+    heightCm: 174,
+    age: 36,
+    weightKg: 92.8,
+    bodyWaterL: 48.8,
+    proteinsKg: 13.3,
+    mineralsKg: 4.4,
+    bodyFatMassKg: 26.3,
+    skeletalMuscleKg: 38.0,
+    bodyFatPercent: 28.3,
+    bmi: 30.7,
+    score: 75,
+    targetWeightKg: 78.3,
+    weightControlKg: -14.5,
+    fatControlKg: -14.5,
+    muscleControlKg: 0,
+    waistHipRatio: 1.01,
+    visceralFatLevel: 11,
+    obesityDegree: 0,
+    basalMetabolicRateKcal: 1807,
+    fatFreeMassKg: 66.5,
+    imeKgM2: 9.0,
+  },
+  {
+    id: "2025-06-28",
+    date: "2025-06-28",
+    label: "28 jun 2025",
+    heightCm: 174,
+    age: 37,
+    weightKg: 86.9,
+    bodyWaterL: 46.9,
+    proteinsKg: 12.7,
+    mineralsKg: 4.36,
+    bodyFatMassKg: 22.9,
+    skeletalMuscleKg: 36.5,
+    bodyFatPercent: 26.4,
+    bmi: 28.7,
+    score: 76,
+    targetWeightKg: 75.3,
+    weightControlKg: -11.6,
+    fatControlKg: -11.6,
+    muscleControlKg: 0,
+    waistHipRatio: 0.98,
+    visceralFatLevel: 10,
+    obesityDegree: 0,
+    basalMetabolicRateKcal: 1752,
+    fatFreeMassKg: 64.0,
+    imeKgM2: 8.6,
+  },
+  {
+    id: "2025-11-23",
+    date: "2025-11-23",
+    label: "23 nov 2025",
+    heightCm: 174,
+    age: 37,
+    weightKg: 92.2,
+    bodyWaterL: 49.5,
+    proteinsKg: 13.5,
+    mineralsKg: 4.51,
+    bodyFatMassKg: 24.7,
+    skeletalMuscleKg: 38.6,
+    bodyFatPercent: 26.8,
+    bmi: 30.5,
+    score: 78,
+    targetWeightKg: 79.4,
+    weightControlKg: -12.8,
+    fatControlKg: -12.8,
+    muscleControlKg: 0,
+    waistHipRatio: 1.0,
+    visceralFatLevel: 11,
+    obesityDegree: 0,
+    basalMetabolicRateKcal: 1827,
+    fatFreeMassKg: 67.5,
+    imeKgM2: 9.1,
+  },
+  {
+    id: "2026-03-10",
+    date: "2026-03-10",
+    label: "10 mar 2026",
+    heightCm: 175,
+    age: 38,
+    weightKg: 90.0,
+    bodyWaterL: 50.1,
+    proteinsKg: 13.6,
+    mineralsKg: 4.56,
+    bodyFatMassKg: 21.8,
+    skeletalMuscleKg: 39.0,
+    bodyFatPercent: 24.2,
+    bmi: 29.4,
+    score: 81,
+    targetWeightKg: 80.3,
+    weightControlKg: -9.7,
+    fatControlKg: -9.7,
+    muscleControlKg: 0,
+    waistHipRatio: 0.94,
+    visceralFatLevel: 9,
+    obesityDegree: 134,
+    basalMetabolicRateKcal: 1844,
+    fatFreeMassKg: 0,
+    imeKgM2: 0,
+  },
+  {
+    id: "2026-04-16",
+    date: "2026-04-16",
+    label: "16 abr 2026",
+    heightCm: 175,
+    age: 38,
+    weightKg: 91.2,
+    bodyWaterL: 50.7,
+    proteinsKg: 13.8,
+    mineralsKg: 4.61,
+    bodyFatMassKg: 22.2,
+    skeletalMuscleKg: 39.6,
+    bodyFatPercent: 24.3,
+    bmi: 29.8,
+    score: 81,
+    targetWeightKg: 81.2,
+    weightControlKg: -10.0,
+    fatControlKg: -10.0,
+    muscleControlKg: 0,
+    waistHipRatio: 0.97,
+    visceralFatLevel: 10,
+    obesityDegree: 135,
+    basalMetabolicRateKcal: 1861,
+    fatFreeMassKg: 0,
+    imeKgM2: 0,
+  },
+];
+
+const latestScan = inbodyScans[inbodyScans.length - 1];
+const previousScan = inbodyScans[inbodyScans.length - 2];
+
 export const healthSummaryStats: HealthStat[] = [
-  { label: "Peso actual", value: "81.2 kg", detail: "27.3% grasa corporal" },
-  { label: "Masa muscular", value: "30.7 kg", detail: "BMR: 1861 kcal" },
+  {
+    label: "Peso actual",
+    value: `${latestScan.weightKg.toFixed(1)} kg`,
+    detail: `${latestScan.bodyFatPercent.toFixed(1)}% grasa corporal`,
+  },
+  {
+    label: "Masa muscular",
+    value: `${latestScan.skeletalMuscleKg.toFixed(1)} kg`,
+    detail: `BMR: ${latestScan.basalMetabolicRateKcal} kcal`,
+  },
   {
     label: "Grasa visceral",
-    value: "10",
+    value: `${latestScan.visceralFatLevel}`,
     detail: "Objetivo: 8 o menos",
-    tone: "warning",
+    tone: latestScan.visceralFatLevel > 8 ? "warning" : "default",
   },
   {
     label: "Score InBody",
-    value: "75 pts",
-    detail: "Objetivo: 90+",
-    tone: "warning",
+    value: `${latestScan.score} pts`,
+    detail: `Cambio reciente: ${(latestScan.score - previousScan.score) >= 0 ? "+" : ""}${latestScan.score - previousScan.score}`,
   },
 ];
 
 export const latestMeasurement = {
   title: "Composicion InBody",
-  dateLabel: "Ultima medicion: 16 abr 2026",
-  bodyFat: "27.3%",
+  dateLabel: `Ultima medicion: ${latestScan.label}`,
+  bodyFat: `${latestScan.bodyFatPercent.toFixed(1)}%`,
   bodyFatLabel: "Body fat",
 };
 
 export const compositionMetrics: CompositionMetric[] = [
-  { label: "Masa muscular", value: "30.7 kg", progress: 72 },
-  { label: "Grasa visceral", value: "10 niv", progress: 56 },
-  { label: "Score InBody", value: "75 pts", progress: 75 },
+  {
+    label: "Masa muscular",
+    value: `${latestScan.skeletalMuscleKg.toFixed(1)} kg`,
+    progress: 79,
+  },
+  {
+    label: "Masa grasa",
+    value: `${latestScan.bodyFatMassKg.toFixed(1)} kg`,
+    progress: 52,
+  },
+  {
+    label: "Score InBody",
+    value: `${latestScan.score} pts`,
+    progress: latestScan.score,
+  },
 ];
 
-export const weightTrend: TrendPoint[] = [
-  { label: "Jul 24", value: 78.3 },
-  { label: "Jun 25", value: 75.3 },
-  { label: "Nov 25", value: 79.4 },
-  { label: "Mar 26", value: 80.3 },
-  { label: "Abr 26", value: 81.2 },
-];
+export const weightTrend: TrendPoint[] = inbodyScans.map((scan) => ({
+  label: scan.label,
+  value: scan.weightKg,
+}));
 
 export const weeklyConsistency: ConsistencyPoint[] = [
   ...(generatedHistory.weeklyConsistency as ConsistencyPoint[]),
