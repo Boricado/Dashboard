@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { hasSupabaseEnv } from "@/lib/env";
@@ -22,6 +23,22 @@ export function LoginForm({ nextPath }: LoginFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  function getFriendlyAuthMessage(message: string) {
+    if (message.includes("Email not confirmed")) {
+      return "Tu correo todavía no está confirmado. Revisa tu bandeja o desactiva la confirmación por email en Supabase Auth.";
+    }
+
+    if (message.includes("email_not_confirmed")) {
+      return "Tu correo todavía no está confirmado. Revisa tu bandeja o desactiva la confirmación por email en Supabase Auth.";
+    }
+
+    if (message.includes("Invalid login credentials")) {
+      return "Correo o clave incorrectos.";
+    }
+
+    return message;
+  }
+
   async function signInWithEmail() {
     setError(null);
     setLoading(true);
@@ -43,9 +60,8 @@ export function LoginForm({ nextPath }: LoginFormProps) {
       router.replace(nextPath);
       router.refresh();
     } catch (caughtError) {
-      const message =
-        caughtError instanceof Error ? caughtError.message : "Error desconocido";
-      setError(message);
+      const message = caughtError instanceof Error ? caughtError.message : "Error desconocido";
+      setError(getFriendlyAuthMessage(message));
     } finally {
       setLoading(false);
     }
@@ -102,6 +118,13 @@ export function LoginForm({ nextPath }: LoginFormProps) {
           >
             {loading ? "Entrando..." : "Entrar"}
           </button>
+
+          <Link
+            href="/recuperar-clave"
+            className="text-sm text-[var(--muted)] underline"
+          >
+            Recuperar contraseña
+          </Link>
         </div>
       </div>
     </div>

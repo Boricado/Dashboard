@@ -74,6 +74,7 @@ function formatDate(value: string | null) {
 
 async function readJson<T>(response: Response): Promise<T> {
   const data = (await response.json().catch(() => null)) as T | null;
+
   if (!response.ok) {
     const message =
       data && typeof data === "object" && "error" in data
@@ -89,7 +90,23 @@ async function readJson<T>(response: Response): Promise<T> {
   return data;
 }
 
-export function TasksClient({ initialTasks, initialError = null }: TasksClientProps) {
+function StatCard(props: { label: string; value: number }) {
+  return (
+    <article className="app-card p-5">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+        {props.label}
+      </div>
+      <div className="mt-2 text-4xl font-semibold leading-none text-[var(--ink)]">
+        {props.value}
+      </div>
+    </article>
+  );
+}
+
+export function TasksClient({
+  initialTasks,
+  initialError = null,
+}: TasksClientProps) {
   const [tasks, setTasks] = useState(initialTasks);
   const [form, setForm] = useState<CreateTaskInput>(EMPTY_FORM);
   const [filters, setFilters] = useState<Filters>({
@@ -106,9 +123,11 @@ export function TasksClient({ initialTasks, initialError = null }: TasksClientPr
       if (filters.estado !== "todas" && task.estado !== filters.estado) {
         return false;
       }
+
       if (filters.prioridad !== "todas" && task.prioridad !== filters.prioridad) {
         return false;
       }
+
       if (!filters.busqueda.trim()) {
         return true;
       }
@@ -130,7 +149,10 @@ export function TasksClient({ initialTasks, initialError = null }: TasksClientPr
     };
   }, [tasks]);
 
-  function updateForm<K extends keyof CreateTaskInput>(key: K, value: CreateTaskInput[K]) {
+  function updateForm<K extends keyof CreateTaskInput>(
+    key: K,
+    value: CreateTaskInput[K],
+  ) {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
@@ -152,13 +174,19 @@ export function TasksClient({ initialTasks, initialError = null }: TasksClientPr
         setSuccess("Tarea creada.");
       } catch (caughtError) {
         setError(
-          caughtError instanceof Error ? caughtError.message : "No se pudo crear la tarea.",
+          caughtError instanceof Error
+            ? caughtError.message
+            : "No se pudo crear la tarea.",
         );
       }
     });
   }
 
-  async function updateTask(taskId: number, patch: UpdateTaskInput, successMessage?: string) {
+  async function updateTask(
+    taskId: number,
+    patch: UpdateTaskInput,
+    successMessage?: string,
+  ) {
     setError(null);
     setSuccess(null);
 
@@ -176,7 +204,9 @@ export function TasksClient({ initialTasks, initialError = null }: TasksClientPr
         setSuccess(successMessage ?? "Tarea actualizada.");
       } catch (caughtError) {
         setError(
-          caughtError instanceof Error ? caughtError.message : "No se pudo actualizar la tarea.",
+          caughtError instanceof Error
+            ? caughtError.message
+            : "No se pudo actualizar la tarea.",
         );
       }
     });
@@ -196,7 +226,9 @@ export function TasksClient({ initialTasks, initialError = null }: TasksClientPr
         setSuccess("Tarea eliminada.");
       } catch (caughtError) {
         setError(
-          caughtError instanceof Error ? caughtError.message : "No se pudo eliminar la tarea.",
+          caughtError instanceof Error
+            ? caughtError.message
+            : "No se pudo eliminar la tarea.",
         );
       }
     });
@@ -204,55 +236,49 @@ export function TasksClient({ initialTasks, initialError = null }: TasksClientPr
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="rounded-[2rem] border border-[var(--line)] bg-[var(--panel)] p-6">
+      <section className="rounded-[2rem] border border-[var(--line)] bg-[var(--panel)] p-6 lg:p-7">
         <span className="inline-flex rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent-strong)]">
           Módulo activo
         </span>
-        <h1 className="mt-4 text-3xl font-semibold tracking-tight">Tareas</h1>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--muted)]">
-          Ya quedó conectado para crear, listar, editar estado y borrar tareas
-          reales en Supabase, con validación en servidor y RLS por usuario.
-        </p>
+        <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <h1 className="text-3xl font-semibold tracking-tight text-[var(--ink)]">
+              Tareas
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+              Captura, prioriza y mueve pendientes sin mezclar ruido de otros
+              módulos.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-[var(--line)] bg-white/70 px-4 py-3 text-sm text-[var(--muted)]">
+            {visibleTasks.length} visibles de {tasks.length} tareas
+          </div>
+        </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-4">
-        <article className="app-card p-5">
-          <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
-            Total
-          </div>
-          <div className="mt-2 text-3xl font-semibold">{stats.total}</div>
-        </article>
-        <article className="app-card p-5">
-          <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
-            Pendientes
-          </div>
-          <div className="mt-2 text-3xl font-semibold">{stats.pendientes}</div>
-        </article>
-        <article className="app-card p-5">
-          <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
-            En progreso
-          </div>
-          <div className="mt-2 text-3xl font-semibold">{stats.enProgreso}</div>
-        </article>
-        <article className="app-card p-5">
-          <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
-            Completadas
-          </div>
-          <div className="mt-2 text-3xl font-semibold">{stats.completadas}</div>
-        </article>
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Total" value={stats.total} />
+        <StatCard label="Pendientes" value={stats.pendientes} />
+        <StatCard label="En progreso" value={stats.enProgreso} />
+        <StatCard label="Completadas" value={stats.completadas} />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
-        <form onSubmit={handleCreateTask} className="app-card flex flex-col gap-4 p-5">
+      <section className="grid min-w-0 gap-6 2xl:grid-cols-[minmax(320px,380px)_minmax(0,1fr)]">
+        <form
+          onSubmit={handleCreateTask}
+          className="app-card flex h-fit flex-col gap-5 p-5 lg:p-6"
+        >
           <div>
-            <h2 className="text-lg font-semibold">Nueva tarea</h2>
-            <p className="mt-1 text-sm text-[var(--muted)]">
-              Crea una tarea con lo mínimo útil y evita ruido innecesario.
+            <h2 className="text-xl font-semibold text-[var(--ink)]">
+              Nueva tarea
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+              Solo lo esencial para capturar rápido y seguir avanzando.
             </p>
           </div>
 
           <label className="grid gap-1.5 text-sm">
-            <span className="font-medium">Título</span>
+            <span className="font-medium text-[var(--ink)]">Título</span>
             <input
               value={form.titulo ?? ""}
               onChange={(event) => updateForm("titulo", event.target.value)}
@@ -263,7 +289,7 @@ export function TasksClient({ initialTasks, initialError = null }: TasksClientPr
           </label>
 
           <label className="grid gap-1.5 text-sm">
-            <span className="font-medium">Descripción</span>
+            <span className="font-medium text-[var(--ink)]">Descripción</span>
             <textarea
               value={form.descripcion ?? ""}
               onChange={(event) => updateForm("descripcion", event.target.value)}
@@ -274,7 +300,7 @@ export function TasksClient({ initialTasks, initialError = null }: TasksClientPr
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="grid gap-1.5 text-sm">
-              <span className="font-medium">Prioridad</span>
+              <span className="font-medium text-[var(--ink)]">Prioridad</span>
               <select
                 value={form.prioridad ?? "media"}
                 onChange={(event) =>
@@ -291,7 +317,7 @@ export function TasksClient({ initialTasks, initialError = null }: TasksClientPr
             </label>
 
             <label className="grid gap-1.5 text-sm">
-              <span className="font-medium">Estado inicial</span>
+              <span className="font-medium text-[var(--ink)]">Estado inicial</span>
               <select
                 value={form.estado ?? "pendiente"}
                 onChange={(event) =>
@@ -309,23 +335,23 @@ export function TasksClient({ initialTasks, initialError = null }: TasksClientPr
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="grid gap-1.5 text-sm">
-              <span className="font-medium">Categoría</span>
+            <label className="grid min-w-0 gap-1.5 text-sm">
+              <span className="font-medium text-[var(--ink)]">Categoría</span>
               <input
                 value={form.categoria ?? ""}
                 onChange={(event) => updateForm("categoria", event.target.value)}
                 className="h-11 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
-                placeholder="Trabajo, personal, proveedor..."
+                placeholder="Trabajo, personal..."
               />
             </label>
 
-            <label className="grid gap-1.5 text-sm">
-              <span className="font-medium">Fecha límite</span>
+            <label className="grid min-w-0 gap-1.5 text-sm">
+              <span className="font-medium text-[var(--ink)]">Fecha límite</span>
               <input
                 type="date"
                 value={form.fecha_limite ?? ""}
                 onChange={(event) => updateForm("fecha_limite", event.target.value)}
-                className="h-11 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+                className="h-11 min-w-0 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
               />
             </label>
           </div>
@@ -357,11 +383,22 @@ export function TasksClient({ initialTasks, initialError = null }: TasksClientPr
           </button>
         </form>
 
-        <div className="flex flex-col gap-4">
-          <section className="app-card p-5">
-            <div className="grid gap-4 lg:grid-cols-[1fr_180px_180px]">
-              <label className="grid gap-1.5 text-sm">
-                <span className="font-medium">Buscar</span>
+        <div className="flex min-w-0 flex-col gap-4">
+          <section className="app-card p-5 lg:p-6">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-semibold text-[var(--ink)]">
+                  Bandeja de tareas
+                </h2>
+                <p className="mt-1 text-sm text-[var(--muted)]">
+                  Filtra rápido y actualiza sin salir de esta vista.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(150px,0.8fr)_minmax(150px,0.8fr)]">
+              <label className="grid min-w-0 gap-1.5 text-sm">
+                <span className="font-medium text-[var(--ink)]">Buscar</span>
                 <input
                   value={filters.busqueda}
                   onChange={(event) =>
@@ -370,13 +407,13 @@ export function TasksClient({ initialTasks, initialError = null }: TasksClientPr
                       busqueda: event.target.value,
                     }))
                   }
-                  className="h-11 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+                  className="h-11 min-w-0 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
                   placeholder="Título, categoría o descripción"
                 />
               </label>
 
-              <label className="grid gap-1.5 text-sm">
-                <span className="font-medium">Estado</span>
+              <label className="grid min-w-0 gap-1.5 text-sm">
+                <span className="font-medium text-[var(--ink)]">Estado</span>
                 <select
                   value={filters.estado}
                   onChange={(event) =>
@@ -385,7 +422,7 @@ export function TasksClient({ initialTasks, initialError = null }: TasksClientPr
                       estado: event.target.value as Filters["estado"],
                     }))
                   }
-                  className="h-11 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+                  className="h-11 min-w-0 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
                 >
                   <option value="todas">Todas</option>
                   {TASK_STATUSES.map((status) => (
@@ -396,8 +433,8 @@ export function TasksClient({ initialTasks, initialError = null }: TasksClientPr
                 </select>
               </label>
 
-              <label className="grid gap-1.5 text-sm">
-                <span className="font-medium">Prioridad</span>
+              <label className="grid min-w-0 gap-1.5 text-sm">
+                <span className="font-medium text-[var(--ink)]">Prioridad</span>
                 <select
                   value={filters.prioridad}
                   onChange={(event) =>
@@ -406,7 +443,7 @@ export function TasksClient({ initialTasks, initialError = null }: TasksClientPr
                       prioridad: event.target.value as Filters["prioridad"],
                     }))
                   }
-                  className="h-11 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+                  className="h-11 min-w-0 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
                 >
                   <option value="todas">Todas</option>
                   {TASK_PRIORITIES.map((priority) => (
@@ -419,87 +456,93 @@ export function TasksClient({ initialTasks, initialError = null }: TasksClientPr
             </div>
           </section>
 
-          <section className="flex flex-col gap-3">
+          <section className="flex min-w-0 flex-col gap-3">
             {visibleTasks.length === 0 ? (
-              <div className="app-card p-6 text-sm text-[var(--muted)]">
+              <div className="app-card p-8 text-sm text-[var(--muted)]">
                 {initialError
                   ? "Aplica primero la migración de Supabase para empezar a usar este módulo."
-                  : "No hay tareas que coincidan con los filtros actuales."}
+                  : "Todavía no hay tareas que coincidan con los filtros actuales."}
               </div>
             ) : (
               visibleTasks.map((task) => (
                 <article
                   key={task.id}
-                  className="app-card flex flex-col gap-4 p-5 xl:flex-row xl:items-start xl:justify-between"
+                  className="app-card flex min-w-0 flex-col gap-5 p-5 lg:p-6"
                 >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-lg font-semibold">{task.titulo}</h3>
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_TONE[task.estado]}`}
-                      >
-                        {STATUS_LABELS[task.estado]}
-                      </span>
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${PRIORITY_TONE[task.prioridad]}`}
-                      >
-                        {PRIORITY_LABELS[task.prioridad]}
-                      </span>
+                  <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-lg font-semibold text-[var(--ink)]">
+                          {task.titulo}
+                        </h3>
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_TONE[task.estado]}`}
+                        >
+                          {STATUS_LABELS[task.estado]}
+                        </span>
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-xs font-semibold ${PRIORITY_TONE[task.prioridad]}`}
+                        >
+                          {PRIORITY_LABELS[task.prioridad]}
+                        </span>
+                      </div>
+
+                      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm text-[var(--muted)]">
+                        <span>Categoría: {task.categoria ?? "Sin categoría"}</span>
+                        <span>Fecha límite: {formatDate(task.fecha_limite)}</span>
+                      </div>
+
+                      {task.descripcion ? (
+                        <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--muted)]">
+                          {task.descripcion}
+                        </p>
+                      ) : null}
                     </div>
 
-                    <div className="mt-3 flex flex-wrap gap-4 text-sm text-[var(--muted)]">
-                      <span>Categoría: {task.categoria ?? "Sin categoría"}</span>
-                      <span>Fecha límite: {formatDate(task.fecha_limite)}</span>
-                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2 xl:w-[430px] xl:grid-cols-[1fr_1fr]">
+                      <select
+                        value={task.estado}
+                        onChange={(event) =>
+                          updateTask(
+                            task.id,
+                            { estado: event.target.value as TaskStatus },
+                            "Estado actualizado.",
+                          )
+                        }
+                        className="h-11 min-w-0 rounded-2xl border border-[var(--line)] bg-white px-3 text-sm outline-none focus:border-[var(--accent)]"
+                      >
+                        {TASK_STATUSES.map((status) => (
+                          <option key={status} value={status}>
+                            {STATUS_LABELS[status]}
+                          </option>
+                        ))}
+                      </select>
 
-                    {task.descripcion ? (
-                      <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-                        {task.descripcion}
-                      </p>
-                    ) : null}
+                      <select
+                        value={task.prioridad}
+                        onChange={(event) =>
+                          updateTask(
+                            task.id,
+                            { prioridad: event.target.value as TaskPriority },
+                            "Prioridad actualizada.",
+                          )
+                        }
+                        className="h-11 min-w-0 rounded-2xl border border-[var(--line)] bg-white px-3 text-sm outline-none focus:border-[var(--accent)]"
+                      >
+                        {TASK_PRIORITIES.map((priority) => (
+                          <option key={priority} value={priority}>
+                            {PRIORITY_LABELS[priority]}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-[170px_170px_auto] xl:min-w-[480px]">
-                    <select
-                      value={task.estado}
-                      onChange={(event) =>
-                        updateTask(
-                          task.id,
-                          { estado: event.target.value as TaskStatus },
-                          "Estado actualizado.",
-                        )
-                      }
-                      className="h-11 rounded-2xl border border-[var(--line)] bg-white px-3 text-sm outline-none focus:border-[var(--accent)]"
-                    >
-                      {TASK_STATUSES.map((status) => (
-                        <option key={status} value={status}>
-                          {STATUS_LABELS[status]}
-                        </option>
-                      ))}
-                    </select>
-
-                    <select
-                      value={task.prioridad}
-                      onChange={(event) =>
-                        updateTask(
-                          task.id,
-                          { prioridad: event.target.value as TaskPriority },
-                          "Prioridad actualizada.",
-                        )
-                      }
-                      className="h-11 rounded-2xl border border-[var(--line)] bg-white px-3 text-sm outline-none focus:border-[var(--accent)]"
-                    >
-                      {TASK_PRIORITIES.map((priority) => (
-                        <option key={priority} value={priority}>
-                          {PRIORITY_LABELS[priority]}
-                        </option>
-                      ))}
-                    </select>
-
+                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[var(--line)] pt-4">
                     <button
                       type="button"
                       onClick={() => handleDeleteTask(task.id)}
-                      className="h-11 rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-medium text-rose-900 hover:bg-rose-100"
+                      className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-medium text-rose-900 transition hover:bg-rose-100"
                     >
                       Eliminar
                     </button>
