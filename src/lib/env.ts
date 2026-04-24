@@ -1,5 +1,8 @@
-function required(name: string): string {
-  const value = process.env[name];
+const publicSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const publicSupabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const publicSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+
+function required(value: string | undefined, name: string): string {
   if (!value) {
     throw new Error(`Missing env var: ${name}`);
   }
@@ -8,15 +11,17 @@ function required(name: string): string {
 }
 
 export function hasSupabaseEnv() {
-  return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  );
+  return Boolean(publicSupabaseUrl && publicSupabaseAnonKey);
 }
 
 export const env = {
   supabase: {
-    url: () => required("NEXT_PUBLIC_SUPABASE_URL"),
-    anonKey: () => required("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+    url: () =>
+      required(publicSupabaseUrl, "NEXT_PUBLIC_SUPABASE_URL"),
+    anonKey: () =>
+      required(publicSupabaseAnonKey, "NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+  },
+  site: {
+    url: () => required(publicSiteUrl, "NEXT_PUBLIC_SITE_URL"),
   },
 };
