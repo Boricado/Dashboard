@@ -119,6 +119,7 @@ const INITIAL_SYNC_DAYS = Number(Deno.env.get("INITIAL_SYNC_DAYS") ?? "7");
 const REQUEST_DELAY_MS = Number(Deno.env.get("REQUEST_DELAY_MS") ?? "1500");
 const RETRY_DELAY_MS = Number(Deno.env.get("RETRY_DELAY_MS") ?? "3500");
 const MAX_RETRIES_PER_DAY = Number(Deno.env.get("MAX_RETRIES_PER_DAY") ?? "4");
+const DETAIL_ENRICH_BATCH_SIZE = Number(Deno.env.get("DETAIL_ENRICH_BATCH_SIZE") ?? "25");
 const SYNC_KEY = "licitaciones_mp";
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
@@ -176,6 +177,10 @@ type SyncStateRow = {
   last_run_at: string | null;
   last_result: Record<string, unknown> | null;
   updated_at: string;
+};
+
+type MissingDetailRow = {
+  codigo_licitacion: string;
 };
 
 const ESTADO_PUBLICADA = "5";
@@ -409,6 +414,119 @@ async function fetchByDateWithRetry(date: Date): Promise<MercadoPublicoItem[]> {
   throw lastError instanceof Error ? lastError : new Error(String(lastError));
 }
 
+async function fetchByCodeOnce(code: string): Promise<MercadoPublicoItem | null> {
+  const url = new URL(`${MP_BASE_URL}/licitaciones.json`);
+  url.searchParams.set("codigo", code);
+  url.searchParams.set("ticket", MERCADO_PUBLICO_TICKET);
+
+  const response = await fetch(url.toString(), {
+    headers: { Accept: "application/json" },
+  });
+
+  const text = await response.text();
+
+  if (!response.ok) {
+    throw new Error(
+      `MercadoPublico codigo fallo: ${response.status} ${response.statusText}. Body: ${text}`,
+    );
+  }
+
+  let json: Record<string, unknown>;
+  try {
+    json = JSON.parse(text);
+  } catch {
+    throw new Error(`MercadoPublico codigo devolvio texto no JSON: ${text}`);
+  }
+
+  return extractItems(json)[0] ?? null;
+}
+
+async function fetchByCodeWithRetry(code: string): Promise<MercadoPublicoItem | null> {
+  let attempt = 0;
+  let lastError: unknown = null;
+
+  while (attempt < MAX_RETRIES_PER_DAY) {
+    try {
+      return await fetchByCodeOnce(code);
+    } catch (error) {
+      lastError = error;
+      const message = error instanceof Error ? error.message : String(error);
+      const isTooManyRequests = message.includes("429");
+
+      if (!isTooManyRequests) {
+        throw error;
+      }
+
+      attempt += 1;
+
+      if (attempt >= MAX_RETRIES_PER_DAY) {
+        break;
+      }
+
+      console.warn(
+        `429 en detalle ${code}. Reintento ${attempt}/${MAX_RETRIES_PER_DAY} tras ${RETRY_DELAY_MS}ms`,
+      );
+      await sleep(RETRY_DELAY_MS);
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error(String(lastError));
+}
+
+async function enrichMissingDetails(supabase: ReturnType<typeof createClient>) {
+  const { data, error } = await supabase
+    .from("licitaciones")
+    .select("codigo_licitacion")
+    .or("region.is.null,monto_estimado.is.null,categoria.is.null")
+    .eq("estado_api", "publicada")
+    .order("fecha_cierre", { ascending: true, nullsFirst: false })
+    .limit(DETAIL_ENRICH_BATCH_SIZE);
+
+  if (error) {
+    throw new Error(`No se pudo leer licitaciones incompletas: ${error.message}`);
+  }
+
+  const rows = ((data ?? []) as MissingDetailRow[]).filter((row) => row.codigo_licitacion);
+  const enriched: LicitacionUpsert[] = [];
+  const failedCodes: string[] = [];
+
+  for (const row of rows) {
+    try {
+      const detailed = await fetchByCodeWithRetry(row.codigo_licitacion);
+      const mapped = detailed ? mapToUpsert(detailed) : null;
+
+      if (mapped) {
+        enriched.push(mapped);
+      }
+    } catch (error) {
+      console.error(
+        `Codigo omitido ${row.codigo_licitacion}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      failedCodes.push(row.codigo_licitacion);
+    }
+
+    await sleep(REQUEST_DELAY_MS);
+  }
+
+  if (enriched.length > 0) {
+    const { error: upsertError } = await supabase
+      .from("licitaciones")
+      .upsert(enriched, { onConflict: "codigo_licitacion" });
+
+    if (upsertError) {
+      throw new Error(`No se pudo enriquecer detalle de licitaciones: ${upsertError.message}`);
+    }
+  }
+
+  return {
+    attempted: rows.length,
+    updated: enriched.length,
+    failed: failedCodes,
+  };
+}
+
 async function runSync() {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false },
@@ -493,6 +611,8 @@ async function runSync() {
     throw new Error(`Supabase cierre fallo: ${closeError.message}`);
   }
 
+  const detailEnrichment = await enrichMissingDetails(supabase);
+
   const result = {
     total_fetched: rawItems.length,
     total_kept: mapped.length,
@@ -501,6 +621,9 @@ async function runSync() {
     keyword_count: KEYWORD_FILTERS.length,
     matched_priority_region: priorityRegionCount,
     matched_keywords: keywordMatchCount,
+    detail_enrichment_attempted: detailEnrichment.attempted,
+    detail_enrichment_updated: detailEnrichment.updated,
+    detail_enrichment_failed: detailEnrichment.failed,
     from_last_success: Boolean(state?.last_success_at),
     last_success_at_before: state?.last_success_at ?? null,
     failed_dates: failedDates,
