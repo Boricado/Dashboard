@@ -229,6 +229,10 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
     return items.filter((item) => {
       const stage = drafts[item.id]?.stage ?? "sin_revisar";
 
+      if (stage === "descartada" && filters.stage !== "descartada") {
+        return false;
+      }
+
       if (filters.stage !== "todas" && stage !== filters.stage) {
         return false;
       }
