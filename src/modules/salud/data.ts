@@ -56,6 +56,13 @@ export type SessionHistoryItem = {
   details: string[];
 };
 
+export type HealthPagePayload = {
+  inbodyScans: InBodyScan[];
+  sessionHistory: SessionHistoryItem[];
+  weeklyConsistency: ConsistencyPoint[];
+  workoutRoutines: WorkoutWeek[];
+};
+
 export type InBodyComparisonRow = {
   label: string;
   latestValue: number;

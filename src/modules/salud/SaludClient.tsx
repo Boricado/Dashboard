@@ -2,16 +2,9 @@
 
 import { useMemo, useState } from "react";
 import {
-  compositionMetrics,
-  inbodyComparisonRows,
-  inbodyScans,
-  latestMeasurement,
   routineTemplates,
   routineHtmlWeeks,
-  sessionHistory as baseSessionHistory,
-  weeklyConsistency,
-  workoutRoutines,
-  weightTrend,
+  type HealthPagePayload,
   type SessionHistoryItem,
   type WorkoutDay,
 } from "@/modules/salud/data";
@@ -166,31 +159,79 @@ function ModalField(props: {
   );
 }
 
-export function SaludClient() {
-  const [selectedWeekId, setSelectedWeekId] = useState(workoutRoutines[0]?.id ?? "");
+export function SaludClient(props: { initialData: HealthPagePayload }) {
+  const [selectedWeekId, setSelectedWeekId] = useState(
+    props.initialData.workoutRoutines[0]?.id ?? "",
+  );
   const [selectedDayIndex, setSelectedDayIndex] = useState(4);
   const [selectedHtmlWeek, setSelectedHtmlWeek] = useState(12);
   const [selectedScanId, setSelectedScanId] = useState(
-    inbodyScans[inbodyScans.length - 1]?.id ?? "",
+    props.initialData.inbodyScans[props.initialData.inbodyScans.length - 1]?.id ?? "",
   );
-  const [sessionHistory, setSessionHistory] = useState(baseSessionHistory);
+  const [sessionHistory, setSessionHistory] = useState(props.initialData.sessionHistory);
   const [registrationDraft, setRegistrationDraft] = useState<RegistrationDraft | null>(null);
   const [registrationMessage, setRegistrationMessage] = useState<string | null>(null);
 
   const selectedWeek =
-    workoutRoutines.find((week) => week.id === selectedWeekId) ?? workoutRoutines[0];
+    props.initialData.workoutRoutines.find((week) => week.id === selectedWeekId) ??
+    props.initialData.workoutRoutines[0];
   const selectedDay = selectedWeek.days[selectedDayIndex] ?? selectedWeek.days[0];
   const selectedExercises = routineTemplates[selectedDay.session] ?? [];
   const selectedScan =
-    inbodyScans.find((scan) => scan.id === selectedScanId) ??
-    inbodyScans[inbodyScans.length - 1];
-  const latestScan = inbodyScans[inbodyScans.length - 1];
-  const previousScan = inbodyScans[inbodyScans.length - 2];
+    props.initialData.inbodyScans.find((scan) => scan.id === selectedScanId) ??
+    props.initialData.inbodyScans[props.initialData.inbodyScans.length - 1];
+  const latestScan = props.initialData.inbodyScans[props.initialData.inbodyScans.length - 1];
+  const previousScan =
+    props.initialData.inbodyScans[props.initialData.inbodyScans.length - 2] ?? latestScan;
 
+  const weightTrend = props.initialData.inbodyScans.map((scan) => ({
+    label: scan.label,
+    value: scan.weightKg,
+  }));
   const weightMin = Math.min(...weightTrend.map((point) => point.value));
   const weightMax = Math.max(...weightTrend.map((point) => point.value));
   const consistencyMin = 0;
-  const consistencyMax = Math.max(...weeklyConsistency.map((point) => point.value), 1);
+  const consistencyMax = Math.max(...props.initialData.weeklyConsistency.map((point) => point.value), 1);
+  const latestMeasurement = {
+    title: "Composicion InBody",
+    dateLabel: `Ultima medicion: ${latestScan.label}`,
+    bodyFat: `${latestScan.bodyFatPercent.toFixed(1)}%`,
+  };
+  const compositionMetrics = [
+    {
+      label: "Masa muscular",
+      value: `${latestScan.skeletalMuscleKg.toFixed(1)} kg`,
+      progress: Math.min(100, Math.round((latestScan.skeletalMuscleKg / 45) * 100)),
+    },
+    {
+      label: "Masa grasa",
+      value: `${latestScan.bodyFatMassKg.toFixed(1)} kg`,
+      progress: Math.min(100, Math.round((latestScan.bodyFatMassKg / 30) * 100)),
+    },
+    {
+      label: "Score InBody",
+      value: `${latestScan.score} pts`,
+      progress: Math.min(100, latestScan.score),
+    },
+  ];
+  const inbodyComparisonRows = useMemo(
+    () =>
+      [
+        { label: "Peso", latestValue: latestScan.weightKg, previousValue: previousScan.weightKg, unit: "kg", betterWhen: "lower" as const },
+        { label: "Masa muscular", latestValue: latestScan.skeletalMuscleKg, previousValue: previousScan.skeletalMuscleKg, unit: "kg", betterWhen: "higher" as const },
+        { label: "Masa grasa", latestValue: latestScan.bodyFatMassKg, previousValue: previousScan.bodyFatMassKg, unit: "kg", betterWhen: "lower" as const },
+        { label: "PGC", latestValue: latestScan.bodyFatPercent, previousValue: previousScan.bodyFatPercent, unit: "%", betterWhen: "lower" as const },
+        { label: "Grasa visceral", latestValue: latestScan.visceralFatLevel, previousValue: previousScan.visceralFatLevel, unit: "niv", betterWhen: "lower" as const },
+        { label: "BMR", latestValue: latestScan.basalMetabolicRateKcal, previousValue: previousScan.basalMetabolicRateKcal, unit: "kcal", betterWhen: "higher" as const },
+        { label: "Brazo izq. magro", latestValue: latestScan.segmentalLean.leftArm.kg, previousValue: previousScan.segmentalLean.leftArm.kg, unit: "kg", betterWhen: "higher" as const },
+        { label: "Brazo der. magro", latestValue: latestScan.segmentalLean.rightArm.kg, previousValue: previousScan.segmentalLean.rightArm.kg, unit: "kg", betterWhen: "higher" as const },
+        { label: "Tronco magro", latestValue: latestScan.segmentalLean.trunk.kg, previousValue: previousScan.segmentalLean.trunk.kg, unit: "kg", betterWhen: "higher" as const },
+        { label: "Pierna izq. grasa", latestValue: latestScan.segmentalFat.leftLeg.kg, previousValue: previousScan.segmentalFat.leftLeg.kg, unit: "kg", betterWhen: "lower" as const },
+        { label: "Pierna der. grasa", latestValue: latestScan.segmentalFat.rightLeg.kg, previousValue: previousScan.segmentalFat.rightLeg.kg, unit: "kg", betterWhen: "lower" as const },
+        { label: "Score InBody", latestValue: latestScan.score, previousValue: previousScan.score, unit: "pts", betterWhen: "higher" as const },
+      ],
+    [latestScan, previousScan],
+  );
 
   const selectedLeanSegments = SEGMENT_LABELS.map((segment) => ({
     label: segment.label,
@@ -232,7 +273,7 @@ export function SaludClient() {
 
   const visibleComparisonRows = useMemo(
     () => inbodyComparisonRows.filter((row) => row.latestValue !== row.previousValue),
-    [],
+    [inbodyComparisonRows],
   );
 
   function buildDraft(day: WorkoutDay) {
@@ -315,7 +356,7 @@ export function SaludClient() {
     });
   }
 
-  function saveRegistration() {
+  async function saveRegistration() {
     if (!registrationDraft) {
       return;
     }
@@ -338,8 +379,36 @@ export function SaludClient() {
       return blocks.join(" · ");
     });
 
+    const response = await fetch("/api/health/sessions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        routineWeekId: selectedWeek.id,
+        sessionDate: registrationDraft.date,
+        sessionType: registrationDraft.type,
+        status: registrationDraft.status,
+        notes: registrationDraft.notes,
+        exercises: registrationDraft.exercises.map((exercise) => ({
+          name: exercise.name,
+          setsText: exercise.sets,
+          repsText: exercise.reps,
+          loadText: exercise.load,
+          completed: exercise.done,
+        })),
+      }),
+    });
+
+    const payload = await response.json();
+
+    if (!response.ok) {
+      setRegistrationMessage(payload.error ?? "No se pudo guardar la sesión.");
+      return;
+    }
+
     const newEntry: SessionHistoryItem = {
-      id: `local-${registrationDraft.type}-${registrationDraft.date}`,
+      id: payload.session.id,
       date: formatDateLabel(registrationDraft.date),
       week: selectedWeek.label.replace("Semana ", "S"),
       session: registrationDraft.type,
@@ -349,7 +418,7 @@ export function SaludClient() {
     };
 
     setSessionHistory((current) => [newEntry, ...current]);
-    setRegistrationMessage("Sesion agregada al historial visible.");
+    setRegistrationMessage("Sesion guardada en Supabase y agregada al historial.");
     setRegistrationDraft(null);
   }
 
@@ -466,7 +535,7 @@ export function SaludClient() {
                   <span className="self-end">0</span>
                 </div>
                 <div className="grid h-[176px] grid-cols-8 gap-3 overflow-hidden">
-                  {weeklyConsistency.map((point) => (
+                  {props.initialData.weeklyConsistency.map((point) => (
                     <div key={point.label} className="grid grid-rows-[1fr_auto_auto] gap-2 overflow-hidden">
                       <div className="flex items-end">
                         <div
@@ -568,7 +637,7 @@ export function SaludClient() {
                     </tr>
                   </thead>
                   <tbody>
-                    {inbodyScans.map((scan) => (
+                    {props.initialData.inbodyScans.map((scan) => (
                       <tr
                         key={scan.id}
                         onClick={() => setSelectedScanId(scan.id)}
@@ -715,7 +784,7 @@ export function SaludClient() {
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
-              {workoutRoutines.map((week) => (
+              {props.initialData.workoutRoutines.map((week) => (
                 <button
                   key={week.id}
                   type="button"
