@@ -412,26 +412,26 @@ export function SaludClient() {
                 ))}
               </div>
 
-              <div className="rounded-[2rem] bg-[#f2f0fb] p-6">
+              <div className="overflow-hidden rounded-[2rem] bg-[#f2f0fb] p-6">
                 <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
                   Tendencia de peso
                 </div>
-                <div className="mt-6 grid h-[220px] grid-cols-5 gap-3">
+                <div className="mt-6 grid h-[188px] grid-cols-5 gap-3">
                   {weightTrend.map((point) => (
-                    <div key={point.label} className="grid grid-rows-[auto_1fr_auto] gap-2">
-                      <div className="text-center text-sm font-medium text-[var(--ink)]">
-                        {point.value.toFixed(1)}
-                      </div>
+                    <div key={point.label} className="grid grid-rows-[1fr_auto_auto] gap-2 overflow-hidden">
                       <div className="flex items-end rounded-[1.5rem] bg-white/70 px-1.5 pb-1.5">
                         <div
                           className="w-full rounded-[1rem] bg-gradient-to-t from-[#4d9c8b] to-[#67aa7b]"
                           style={{
-                            height: `${chartHeight(point.value, weightMin, weightMax, 150)}px`,
+                            height: `${chartHeight(point.value, weightMin, weightMax, 126)}px`,
                           }}
                         />
                       </div>
                       <div className="text-center text-xs leading-4 text-[var(--muted)]">
                         {point.label}
+                      </div>
+                      <div className="text-center text-sm font-medium text-[var(--ink)]">
+                        {point.value.toFixed(1)} kg
                       </div>
                     </div>
                   ))}
@@ -448,7 +448,7 @@ export function SaludClient() {
             <h2 className="text-3xl font-semibold text-[var(--ink)]">Consistencia</h2>
             <p className="mt-2 text-base text-[var(--muted)]">Sesiones por semana</p>
 
-            <div className="relative mt-8 rounded-[1.5rem] border border-[#e7e4f4] bg-white p-5">
+            <div className="relative mt-8 overflow-hidden rounded-[1.5rem] border border-[#e7e4f4] bg-white p-5">
               <div className="pointer-events-none absolute inset-x-5 top-5 bottom-11 grid grid-rows-4">
                 {[0, 1, 2, 3].map((line) => (
                   <div
@@ -465,21 +465,21 @@ export function SaludClient() {
                   <span className="self-center">{Math.round(consistencyMax / 3)}</span>
                   <span className="self-end">0</span>
                 </div>
-                <div className="grid h-[190px] grid-cols-8 gap-3">
+                <div className="grid h-[176px] grid-cols-8 gap-3 overflow-hidden">
                   {weeklyConsistency.map((point) => (
-                    <div key={point.label} className="grid grid-rows-[auto_1fr_auto] gap-2">
-                      <div className="text-center text-sm font-semibold text-[var(--ink)]">
-                        {point.value}
-                      </div>
+                    <div key={point.label} className="grid grid-rows-[1fr_auto_auto] gap-2 overflow-hidden">
                       <div className="flex items-end">
                         <div
                           className="w-full rounded-t-[1rem] bg-[#147a3d]"
                           style={{
-                            height: `${chartHeight(point.value, consistencyMin, consistencyMax, 145)}px`,
+                            height: `${chartHeight(point.value, consistencyMin, consistencyMax, 132)}px`,
                           }}
                         />
                       </div>
                       <div className="text-center text-xs text-[var(--muted)]">{point.label}</div>
+                      <div className="text-center text-sm font-semibold text-[var(--ink)]">
+                        {point.value}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -697,7 +697,7 @@ export function SaludClient() {
         </section>
 
         <section className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.9fr)]">
-          <article className="app-card p-8">
+          <article className="relative app-card p-8">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-3xl font-semibold text-[var(--ink)]">Semana {selectedWeek.label.replace("Semana ", "")} — {selectedWeek.focus}</h2>
@@ -773,6 +773,197 @@ export function SaludClient() {
                 })}
               </div>
             </div>
+
+            {registrationDraft ? (
+              <div className="mt-6 xl:absolute xl:right-6 xl:top-24 xl:z-20 xl:mt-0 xl:w-[min(560px,calc(100%-3rem))]">
+                <div className="max-h-[78vh] overflow-y-auto rounded-[2rem] border border-[var(--line)] bg-white shadow-[0_30px_100px_rgba(27,25,39,0.22)]">
+                  <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--line)] bg-white px-6 py-5">
+                    <h2 className="text-2xl font-semibold text-[var(--ink)]">Registrar sesion</h2>
+                    <button
+                      type="button"
+                      onClick={closeRegistrationModal}
+                      className="h-10 w-10 rounded-full text-xl text-[var(--muted)] transition hover:bg-[#f2f0fb]"
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <div className="space-y-5 px-6 py-6">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <ModalField label="Tipo">
+                        <select
+                          value={registrationDraft.type}
+                          onChange={(event) =>
+                            setRegistrationDraft((current) =>
+                              current
+                                ? {
+                                    ...current,
+                                    type: event.target.value,
+                                    exercises: buildExerciseDraft(event.target.value),
+                                  }
+                                : current,
+                            )
+                          }
+                          className="h-12 rounded-[1.1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
+                        >
+                          {Object.keys(routineTemplates).map((template) => (
+                            <option key={template} value={template}>
+                              {template}
+                            </option>
+                          ))}
+                        </select>
+                      </ModalField>
+
+                      <ModalField label="Estado">
+                        <select
+                          value={registrationDraft.status}
+                          onChange={(event) =>
+                            setRegistrationDraft((current) =>
+                              current
+                                ? {
+                                    ...current,
+                                    status: event.target.value as RegistrationDraft["status"],
+                                  }
+                                : current,
+                            )
+                          }
+                          className="h-12 rounded-[1.1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
+                        >
+                          <option value="completado">Completado</option>
+                          <option value="parcial">Parcial</option>
+                          <option value="pendiente">Pendiente</option>
+                        </select>
+                      </ModalField>
+                    </div>
+
+                    <ModalField label="Notas (opcional)">
+                      <input
+                        type="text"
+                        value={registrationDraft.notes}
+                        onChange={(event) =>
+                          setRegistrationDraft((current) =>
+                            current ? { ...current, notes: event.target.value } : current,
+                          )
+                        }
+                        className="h-12 rounded-[1.1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
+                        placeholder="ej: buen ritmo, subi peso en press..."
+                      />
+                    </ModalField>
+
+                    <ModalField label="Fecha">
+                      <input
+                        type="date"
+                        value={registrationDraft.date}
+                        onChange={(event) =>
+                          setRegistrationDraft((current) =>
+                            current ? { ...current, date: event.target.value } : current,
+                          )
+                        }
+                        className="h-12 rounded-[1.1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
+                      />
+                    </ModalField>
+
+                    <ModalField
+                      label="Ejercicios"
+                      action={
+                        <button
+                          type="button"
+                          onClick={addDraftExercise}
+                          className="text-sm font-semibold text-emerald-700"
+                        >
+                          + Agregar
+                        </button>
+                      }
+                    >
+                      <div className="space-y-4">
+                        {registrationDraft.exercises.map((exercise, index) => (
+                          <div
+                            key={`exercise-${index}`}
+                            className="rounded-[1.5rem] bg-[#f2f0fb] p-4"
+                          >
+                            <div className="flex items-center gap-3">
+                              <input
+                                type="text"
+                                value={exercise.name}
+                                onChange={(event) =>
+                                  updateDraftExercise(index, { name: event.target.value })
+                                }
+                                className="h-12 flex-1 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
+                                placeholder="Nombre del ejercicio"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeDraftExercise(index)}
+                                className="text-lg text-rose-500"
+                              >
+                                ×
+                              </button>
+                            </div>
+
+                            <div className="mt-3 grid gap-3 sm:grid-cols-[110px_1fr_140px_90px]">
+                              <input
+                                type="text"
+                                value={exercise.sets}
+                                onChange={(event) =>
+                                  updateDraftExercise(index, { sets: event.target.value })
+                                }
+                                className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 text-center outline-none focus:border-emerald-600"
+                                placeholder="Series"
+                              />
+                              <input
+                                type="text"
+                                value={exercise.reps}
+                                onChange={(event) =>
+                                  updateDraftExercise(index, { reps: event.target.value })
+                                }
+                                className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 text-center outline-none focus:border-emerald-600"
+                                placeholder="Reps"
+                              />
+                              <input
+                                type="text"
+                                value={exercise.load}
+                                onChange={(event) =>
+                                  updateDraftExercise(index, { load: event.target.value })
+                                }
+                                className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 text-center outline-none focus:border-emerald-600"
+                                placeholder="Carga"
+                              />
+                              <label className="flex items-center justify-center gap-2 rounded-[1rem] border border-[var(--line)] bg-white px-3 text-sm text-[var(--muted)]">
+                                <input
+                                  type="checkbox"
+                                  checked={exercise.done}
+                                  onChange={(event) =>
+                                    updateDraftExercise(index, { done: event.target.checked })
+                                  }
+                                />
+                                OK
+                              </label>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </ModalField>
+                  </div>
+
+                  <div className="sticky bottom-0 flex justify-end gap-3 border-t border-[var(--line)] bg-white px-6 py-5">
+                    <button
+                      type="button"
+                      onClick={closeRegistrationModal}
+                      className="rounded-full border border-[var(--line)] bg-white px-5 py-3 text-sm font-semibold text-[var(--ink)]"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={saveRegistration}
+                      className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white"
+                    >
+                      Guardar en historial visible
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </article>
 
           <aside className="app-card p-8">
@@ -916,198 +1107,7 @@ export function SaludClient() {
         </section>
       </div>
 
-      {registrationDraft ? (
-        <div className="fixed inset-0 z-50 bg-[rgba(35,32,53,0.35)] p-4 backdrop-blur-sm">
-          <div className="mx-auto flex h-full max-w-2xl items-start justify-center pt-4 sm:pt-8">
-            <div className="max-h-[92vh] w-full overflow-y-auto rounded-[2rem] border border-[var(--line)] bg-white shadow-[0_30px_100px_rgba(27,25,39,0.22)]">
-              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--line)] bg-white px-6 py-5">
-                <h2 className="text-2xl font-semibold text-[var(--ink)]">Registrar sesion</h2>
-                <button
-                  type="button"
-                  onClick={closeRegistrationModal}
-                  className="h-10 w-10 rounded-full text-xl text-[var(--muted)] transition hover:bg-[#f2f0fb]"
-                >
-                  ×
-                </button>
-              </div>
-
-              <div className="space-y-5 px-6 py-6">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <ModalField label="Tipo">
-                    <select
-                      value={registrationDraft.type}
-                      onChange={(event) =>
-                        setRegistrationDraft((current) =>
-                          current
-                            ? {
-                                ...current,
-                                type: event.target.value,
-                                exercises: buildExerciseDraft(event.target.value),
-                              }
-                            : current,
-                        )
-                      }
-                      className="h-12 rounded-[1.1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
-                    >
-                      {Object.keys(routineTemplates).map((template) => (
-                        <option key={template} value={template}>
-                          {template}
-                        </option>
-                      ))}
-                    </select>
-                  </ModalField>
-
-                  <ModalField label="Estado">
-                    <select
-                      value={registrationDraft.status}
-                      onChange={(event) =>
-                        setRegistrationDraft((current) =>
-                          current
-                            ? {
-                                ...current,
-                                status: event.target.value as RegistrationDraft["status"],
-                              }
-                            : current,
-                        )
-                      }
-                      className="h-12 rounded-[1.1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
-                    >
-                      <option value="completado">Completado</option>
-                      <option value="parcial">Parcial</option>
-                      <option value="pendiente">Pendiente</option>
-                    </select>
-                  </ModalField>
-                </div>
-
-                <ModalField label="Notas (opcional)">
-                  <input
-                    type="text"
-                    value={registrationDraft.notes}
-                    onChange={(event) =>
-                      setRegistrationDraft((current) =>
-                        current ? { ...current, notes: event.target.value } : current,
-                      )
-                    }
-                    className="h-12 rounded-[1.1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
-                    placeholder="ej: buen ritmo, subi peso en press..."
-                  />
-                </ModalField>
-
-                <ModalField label="Fecha">
-                  <input
-                    type="date"
-                    value={registrationDraft.date}
-                    onChange={(event) =>
-                      setRegistrationDraft((current) =>
-                        current ? { ...current, date: event.target.value } : current,
-                      )
-                    }
-                    className="h-12 rounded-[1.1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
-                  />
-                </ModalField>
-
-                <ModalField
-                  label="Ejercicios"
-                  action={
-                    <button
-                      type="button"
-                      onClick={addDraftExercise}
-                      className="text-sm font-semibold text-emerald-700"
-                    >
-                      + Agregar
-                    </button>
-                  }
-                >
-                  <div className="space-y-4">
-                    {registrationDraft.exercises.map((exercise, index) => (
-                      <div
-                        key={`exercise-${index}`}
-                        className="rounded-[1.5rem] bg-[#f2f0fb] p-4"
-                      >
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="text"
-                            value={exercise.name}
-                            onChange={(event) =>
-                              updateDraftExercise(index, { name: event.target.value })
-                            }
-                            className="h-12 flex-1 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
-                            placeholder="Nombre del ejercicio"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeDraftExercise(index)}
-                            className="text-lg text-rose-500"
-                          >
-                            ×
-                          </button>
-                        </div>
-
-                        <div className="mt-3 grid gap-3 sm:grid-cols-[110px_1fr_140px_90px]">
-                          <input
-                            type="text"
-                            value={exercise.sets}
-                            onChange={(event) =>
-                              updateDraftExercise(index, { sets: event.target.value })
-                            }
-                            className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 text-center outline-none focus:border-emerald-600"
-                            placeholder="Series"
-                          />
-                          <input
-                            type="text"
-                            value={exercise.reps}
-                            onChange={(event) =>
-                              updateDraftExercise(index, { reps: event.target.value })
-                            }
-                            className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 text-center outline-none focus:border-emerald-600"
-                            placeholder="Reps"
-                          />
-                          <input
-                            type="text"
-                            value={exercise.load}
-                            onChange={(event) =>
-                              updateDraftExercise(index, { load: event.target.value })
-                            }
-                            className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 text-center outline-none focus:border-emerald-600"
-                            placeholder="Carga"
-                          />
-                          <label className="flex items-center justify-center gap-2 rounded-[1rem] border border-[var(--line)] bg-white px-3 text-sm text-[var(--muted)]">
-                            <input
-                              type="checkbox"
-                              checked={exercise.done}
-                              onChange={(event) =>
-                                updateDraftExercise(index, { done: event.target.checked })
-                              }
-                            />
-                            OK
-                          </label>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ModalField>
-              </div>
-
-              <div className="sticky bottom-0 flex justify-end gap-3 border-t border-[var(--line)] bg-white px-6 py-5">
-                <button
-                  type="button"
-                  onClick={closeRegistrationModal}
-                  className="rounded-full border border-[var(--line)] bg-white px-5 py-3 text-sm font-semibold text-[var(--ink)]"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={saveRegistration}
-                  className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white"
-                >
-                  Guardar en historial visible
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      
     </>
   );
 }
