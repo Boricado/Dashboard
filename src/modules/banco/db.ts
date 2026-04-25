@@ -6,6 +6,8 @@ import type {
   BankTransactionRecord,
 } from "@/modules/banco/types";
 
+export const BANK_DOCUMENTS_BUCKET = "bank-documents";
+
 const INITIAL_ACCOUNT = {
   name: "Caja · Banco",
   company_name: "Aguirre Ingenieria SpA",
@@ -25,6 +27,9 @@ const INITIAL_TRANSACTIONS = [
     vat_amount: 22511,
     total_amount: 140990,
     file_name: "20260414 Easy2.pdf",
+    file_path: null,
+    file_mime_type: "application/pdf",
+    file_size: null,
     notes: null,
   },
   {
@@ -38,6 +43,9 @@ const INITIAL_TRANSACTIONS = [
     vat_amount: 22988,
     total_amount: 143980,
     file_name: "20260414 Easy.pdf",
+    file_path: null,
+    file_mime_type: "application/pdf",
+    file_size: null,
     notes: null,
   },
 ];
@@ -242,6 +250,9 @@ export async function createBankTransaction(input: BankTransactionInput) {
       vat_amount: input.vat_amount ?? 0,
       total_amount: input.total_amount,
       file_name: input.file_name ?? null,
+      file_path: input.file_path ?? null,
+      file_mime_type: input.file_mime_type ?? null,
+      file_size: input.file_size ?? null,
       notes: input.notes ?? null,
     })
     .select("*")

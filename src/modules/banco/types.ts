@@ -27,6 +27,9 @@ export type BankTransactionRecord = {
   vat_amount: number;
   total_amount: number;
   file_name: string | null;
+  file_path: string | null;
+  file_mime_type: string | null;
+  file_size: number | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -43,6 +46,9 @@ export type BankTransactionInput = {
   vat_amount?: number;
   total_amount: number;
   file_name?: string;
+  file_path?: string;
+  file_mime_type?: string;
+  file_size?: number;
   notes?: string;
 };
 

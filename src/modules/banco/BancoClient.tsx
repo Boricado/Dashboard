@@ -25,7 +25,6 @@ type Draft = {
   net_amount: string;
   vat_amount: string;
   total_amount: string;
-  file_name: string;
   notes: string;
 };
 
@@ -54,23 +53,23 @@ function createDraft(): Draft {
     net_amount: "0",
     vat_amount: "",
     total_amount: "0",
-    file_name: "",
     notes: "",
   };
 }
 
-function getDocumentHref(fileName: string | null) {
-  if (!fileName) {
+function getDocumentHref(transaction: BankTransactionRecord) {
+  if (!transaction.file_name) {
     return null;
   }
 
-  return `/facturas/banco/${encodeURIComponent(fileName)}`;
+  return `/api/bank/transactions/${transaction.id}/file`;
 }
 
 export function BancoClient(props: { initialData: BankPageData }) {
   const [transactions, setTransactions] = useState(props.initialData.transactions);
   const [showForm, setShowForm] = useState(false);
   const [draft, setDraft] = useState<Draft>(createDraft);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -111,12 +110,25 @@ export function BancoClient(props: { initialData: BankPageData }) {
     setError(null);
     setMessage(null);
 
+    const formData = new FormData();
+    formData.set("transaction_date", draft.transaction_date);
+    formData.set("type", draft.type);
+    formData.set("category", draft.category);
+    formData.set("provider", draft.provider);
+    formData.set("description", draft.description);
+    formData.set("document_number", draft.document_number);
+    formData.set("net_amount", draft.net_amount);
+    formData.set("vat_amount", draft.vat_amount);
+    formData.set("total_amount", draft.total_amount);
+    formData.set("notes", draft.notes);
+
+    if (selectedFile) {
+      formData.set("file", selectedFile);
+    }
+
     const response = await fetch("/api/bank/transactions", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(draft),
+      body: formData,
     });
 
     const payload = await response.json();
@@ -129,6 +141,7 @@ export function BancoClient(props: { initialData: BankPageData }) {
 
     setTransactions((current) => [payload.transaction as BankTransactionRecord, ...current]);
     setDraft(createDraft());
+    setSelectedFile(null);
     setShowForm(false);
     setMessage("Transaccion guardada en Supabase.");
   }
@@ -181,7 +194,7 @@ export function BancoClient(props: { initialData: BankPageData }) {
             </div>
           </article>
 
-          <article className="app-card p-5 shadow-[0_8px_24px_rgba(31,27,22,0.04)]">
+          <article className="app-card p-5 shadow-[0_8px_24px_24px_rgba(31,27,22,0.04)]">
             <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
               Saldo disponible
             </div>
@@ -270,16 +283,20 @@ export function BancoClient(props: { initialData: BankPageData }) {
             </label>
           </div>
 
-          <div className="mt-4 grid gap-4 xl:grid-cols-4">
-            <label className="grid gap-2 text-sm xl:col-span-3">
-              <span className="font-medium text-[var(--muted)]">Archivo asociado</span>
+          <div className="mt-4 grid gap-4 xl:grid-cols-2">
+            <label className="grid gap-2 text-sm">
+              <span className="font-medium text-[var(--muted)]">Adjuntar archivo</span>
               <input
-                type="text"
-                value={draft.file_name}
-                onChange={(event) => updateDraft("file_name", event.target.value)}
-                placeholder="20260414 Easy.pdf"
-                className="h-12 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
+                type="file"
+                accept=".pdf,image/*"
+                onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
+                className="rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 outline-none file:mr-4 file:rounded-full file:border-0 file:bg-emerald-700 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
               />
+              <span className="text-xs text-[var(--muted)]">
+                {selectedFile
+                  ? `${selectedFile.name} · ${Math.round(selectedFile.size / 1024)} KB`
+                  : "Se subira a Supabase Storage."}
+              </span>
             </label>
 
             <label className="grid gap-2 text-sm">
@@ -390,7 +407,7 @@ export function BancoClient(props: { initialData: BankPageData }) {
               </thead>
               <tbody>
                 {transactions.map((item) => {
-                  const documentHref = getDocumentHref(item.file_name);
+                  const documentHref = getDocumentHref(item);
 
                   return (
                     <tr
