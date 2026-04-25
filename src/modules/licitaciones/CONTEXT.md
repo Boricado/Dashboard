@@ -1,19 +1,20 @@
 # Contexto: Licitaciones
 
-## Propósito
-Seguimiento y operación de licitaciones.
+## Proposito
+Seguimiento de oportunidades de Mercado Publico para la IV Region, con una capa separada entre datos sincronizados por cron y seguimiento manual del usuario.
 
 ## Alcance MVP
-- Lista de licitaciones
-- Estados y fechas clave
-- Notas o acciones siguientes
+- Tabla `licitaciones` sincronizada por Edge Function
+- Tabla `licitacion_tracking` para notas, prioridad y proximo paso por usuario
+- Vista operativa para filtrar, revisar y decidir rapido
+- Base de cron y sync documentada dentro de `supabase/functions/`
 
 ## Datos iniciales
 - `licitaciones`
-- `licitacion_notas`
-- `licitacion_eventos`
+- `licitacion_tracking`
 
-## Límites
-- No mezclar tareas genéricas que no dependan de una licitación
-- Los scrapers o importadores van fuera del UI principal
-- No meter contabilidad o salud en este módulo
+## Limites
+- No mezclar tareas generales que no dependan de una licitacion
+- El cron y la sincronizacion viven fuera del UI
+- No meter banco, salud o contador dentro del modelo
+- La API de Mercado Publico puede cambiar; conservar el payload crudo en `source_payload`

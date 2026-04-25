@@ -1,5 +1,10 @@
-import { SectionOverview } from "@/components/SectionOverview";
+import { LicitacionesClient } from "@/modules/licitaciones/LicitacionesClient";
+import {
+  getLicitacionesFallbackData,
+  getLicitacionesPageData,
+} from "@/modules/licitaciones/db";
 
-export default function LicitacionesPage() {
-  return <SectionOverview id="licitaciones" />;
+export default async function LicitacionesPage() {
+  const data = await getLicitacionesPageData().catch(() => getLicitacionesFallbackData());
+  return <LicitacionesClient initialData={data} />;
 }
