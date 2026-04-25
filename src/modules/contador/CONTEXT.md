@@ -1,19 +1,22 @@
 # Contexto: Contador
 
-## Propósito
-Registrar y ordenar documentos, vencimientos y coordinación contable.
+## Proposito
+Centralizar el estado tributario de la empresa, sus documentos base y los vencimientos mas importantes.
 
 ## Alcance MVP
-- Documentos tributarios pendientes
-- Fechas de vencimiento
-- Notas de seguimiento
+- Resumen de la empresa y su estado tributario
+- Calendario visual de obligaciones mensuales
+- Tareas de inicio y obligaciones anuales
+- Descarga directa de documentos societarios y tributarios
+- Enlaces rapidos a fuentes oficiales del SII
 
 ## Datos iniciales
-- `tax_documents`
-- `tax_deadlines`
-- `accounting_notes`
+- Perfil base de la empresa
+- Calendario tributario referencial
+- Documentos PDF de constitucion y RUT
+- Logo institucional de la empresa
 
-## Límites
-- No mezclar movimientos bancarios detallados
-- No usar este módulo como chat gigante desde el inicio
-- Automatizaciones documentales después del flujo manual
+## Limites
+- No reemplaza asesoria contable profesional
+- No calcula impuestos reales ni declaraciones automaticas
+- Los plazos condicionales deben revisarse segun regimen y movimientos reales

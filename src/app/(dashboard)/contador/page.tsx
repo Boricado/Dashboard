@@ -1,5 +1,5 @@
-import { SectionOverview } from "@/components/SectionOverview";
+import { ContadorClient } from "@/modules/contador/ContadorClient";
 
 export default function ContadorPage() {
-  return <SectionOverview id="contador" />;
+  return <ContadorClient />;
 }
