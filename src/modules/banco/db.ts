@@ -113,18 +113,58 @@ async function ensureBankSeedData() {
     account = createdAccount as BankAccountRecord;
   }
 
-  const { count, error: countError } = await supabase
-    .from("bank_transactions")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", userId);
+  const initialDocumentNumbers = INITIAL_TRANSACTIONS.map(
+    (transaction) => transaction.document_number,
+  );
 
-  if (countError) {
-    throw new Error(countError.message);
+  const { data: seededTransactions, error: seededTransactionsError } = await supabase
+    .from("bank_transactions")
+    .select("id, document_number, created_at")
+    .eq("user_id", userId)
+    .in("document_number", initialDocumentNumbers)
+    .order("created_at", { ascending: true });
+
+  if (seededTransactionsError) {
+    throw new Error(seededTransactionsError.message);
   }
 
-  if (!count) {
+  const existingByDocument = new Map<string, { id: string }[]>();
+
+  for (const transaction of seededTransactions ?? []) {
+    const documentNumber = transaction.document_number;
+
+    if (!documentNumber) {
+      continue;
+    }
+
+    const bucket = existingByDocument.get(documentNumber) ?? [];
+    bucket.push({ id: transaction.id as string });
+    existingByDocument.set(documentNumber, bucket);
+  }
+
+  const duplicateIds = Array.from(existingByDocument.values()).flatMap((items) =>
+    items.slice(1).map((item) => item.id),
+  );
+
+  if (duplicateIds.length > 0) {
+    const { error: deleteDuplicatesError } = await supabase
+      .from("bank_transactions")
+      .delete()
+      .eq("user_id", userId)
+      .in("id", duplicateIds);
+
+    if (deleteDuplicatesError) {
+      throw new Error(deleteDuplicatesError.message);
+    }
+  }
+
+  const missingTransactions = INITIAL_TRANSACTIONS.filter(
+    (transaction) => !existingByDocument.has(transaction.document_number),
+  );
+
+  if (missingTransactions.length > 0) {
     const { error: seedError } = await supabase.from("bank_transactions").insert(
-      INITIAL_TRANSACTIONS.map((transaction) => ({
+      missingTransactions.map((transaction) => ({
         user_id: userId,
         account_id: account.id,
         ...transaction,
