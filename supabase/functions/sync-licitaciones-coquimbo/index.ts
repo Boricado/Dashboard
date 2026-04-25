@@ -135,7 +135,9 @@ type MercadoPublicoItem = {
   Descripcion?: string;
   MontoEstimado?: number | string | null;
   Moneda?: string | null;
+  CodigoEstado?: number | string | null;
   FechaCreacion?: string | null;
+  FechaCierre?: string | null;
   Fechas?: {
     FechaPublicacion?: string | null;
     FechaCierre?: string | null;
@@ -260,7 +262,7 @@ function matchesKeywords(item: MercadoPublicoItem): boolean {
 }
 
 function hasUsefulClosure(item: MercadoPublicoItem): boolean {
-  const closeAt = parseDate(item.Fechas?.FechaCierre);
+  const closeAt = parseDate(item.FechaCierre ?? item.Fechas?.FechaCierre);
   if (!closeAt) return false;
   return new Date(closeAt).getTime() >= Date.now() - 60 * 60 * 1000;
 }
@@ -268,7 +270,7 @@ function hasUsefulClosure(item: MercadoPublicoItem): boolean {
 function shouldKeep(item: MercadoPublicoItem): boolean {
   const code = item.CodigoExterno?.trim();
   const title = item.Nombre?.trim();
-  const closeAt = parseDate(item.Fechas?.FechaCierre);
+  const closeAt = parseDate(item.FechaCierre ?? item.Fechas?.FechaCierre);
 
   if (!code || !title || !closeAt) {
     return false;
@@ -279,7 +281,7 @@ function shouldKeep(item: MercadoPublicoItem): boolean {
 function mapToUpsert(item: MercadoPublicoItem): LicitacionUpsert | null {
   const code = item.CodigoExterno?.trim();
   const title = item.Nombre?.trim();
-  const closeAt = parseDate(item.Fechas?.FechaCierre);
+  const closeAt = parseDate(item.FechaCierre ?? item.Fechas?.FechaCierre);
 
   if (!code || !title || !closeAt) {
     return null;
@@ -293,7 +295,7 @@ function mapToUpsert(item: MercadoPublicoItem): LicitacionUpsert | null {
     moneda: item.Moneda?.trim() || null,
     region: normalizeRegion(item),
     estado_api: "publicada",
-    codigo_estado: ESTADO_PUBLICADA,
+    codigo_estado: String(item.CodigoEstado ?? ESTADO_PUBLICADA),
     fecha_publicacion: parseDate(item.Fechas?.FechaPublicacion ?? item.FechaCreacion),
     fecha_cierre: closeAt,
     organismo: item.Comprador?.NombreOrganismo?.trim() || null,
