@@ -1,8 +1,7 @@
 export const LICITACION_TRACKING_STAGES = [
   "sin_revisar",
-  "revisando",
-  "postular",
-  "seguimiento",
+  "revisada",
+  "postulada",
   "descartada",
 ] as const;
 
@@ -62,7 +61,7 @@ export type LicitacionesPageData = {
 
 export type LicitacionTrackingInput = {
   stage: LicitacionTrackingStage;
-  priority: LicitacionPriorityLevel;
+  priority?: LicitacionPriorityLevel;
   next_step?: string;
   notes?: string;
   follow_up_at?: string | null;
