@@ -120,6 +120,7 @@ const REQUEST_DELAY_MS = Number(Deno.env.get("REQUEST_DELAY_MS") ?? "1500");
 const RETRY_DELAY_MS = Number(Deno.env.get("RETRY_DELAY_MS") ?? "3500");
 const MAX_RETRIES_PER_DAY = Number(Deno.env.get("MAX_RETRIES_PER_DAY") ?? "4");
 const DETAIL_ENRICH_BATCH_SIZE = Number(Deno.env.get("DETAIL_ENRICH_BATCH_SIZE") ?? "25");
+const DETAIL_ENRICH_MAX_PER_RUN = Number(Deno.env.get("DETAIL_ENRICH_MAX_PER_RUN") ?? "100");
 const SYNC_KEY = "licitaciones_mp";
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
@@ -474,55 +475,85 @@ async function fetchByCodeWithRetry(code: string): Promise<MercadoPublicoItem | 
 }
 
 async function enrichMissingDetails(supabase: ReturnType<typeof createClient>) {
-  const { data, error } = await supabase
-    .from("licitaciones")
-    .select("codigo_licitacion")
-    .or("region.is.null,monto_estimado.is.null,categoria.is.null")
-    .eq("estado_api", "publicada")
-    .order("fecha_cierre", { ascending: true, nullsFirst: false })
-    .limit(DETAIL_ENRICH_BATCH_SIZE);
-
-  if (error) {
-    throw new Error(`No se pudo leer licitaciones incompletas: ${error.message}`);
-  }
-
-  const rows = ((data ?? []) as MissingDetailRow[]).filter((row) => row.codigo_licitacion);
-  const enriched: LicitacionUpsert[] = [];
+  const attemptedCodes = new Set<string>();
   const failedCodes: string[] = [];
+  let attempted = 0;
+  let updated = 0;
 
-  for (const row of rows) {
-    try {
-      const detailed = await fetchByCodeWithRetry(row.codigo_licitacion);
-      const mapped = detailed ? mapToUpsert(detailed) : null;
+  while (attempted < DETAIL_ENRICH_MAX_PER_RUN) {
+    const remaining = DETAIL_ENRICH_MAX_PER_RUN - attempted;
+    const batchSize = Math.min(DETAIL_ENRICH_BATCH_SIZE, remaining);
 
-      if (mapped) {
-        enriched.push(mapped);
+    let query = supabase
+      .from("licitaciones")
+      .select("codigo_licitacion")
+      .or("region.is.null,monto_estimado.is.null,categoria.is.null")
+      .eq("estado_api", "publicada")
+      .order("fecha_cierre", { ascending: true, nullsFirst: false })
+      .limit(batchSize);
+
+    if (attemptedCodes.size > 0) {
+      const excluded = Array.from(attemptedCodes)
+        .map((code) => `"${code}"`)
+        .join(",");
+      query = query.not("codigo_licitacion", "in", `(${excluded})`);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      throw new Error(`No se pudo leer licitaciones incompletas: ${error.message}`);
+    }
+
+    const rows = ((data ?? []) as MissingDetailRow[]).filter((row) => row.codigo_licitacion);
+
+    if (rows.length === 0) {
+      break;
+    }
+
+    const enriched: LicitacionUpsert[] = [];
+
+    for (const row of rows) {
+      attemptedCodes.add(row.codigo_licitacion);
+      attempted += 1;
+
+      try {
+        const detailed = await fetchByCodeWithRetry(row.codigo_licitacion);
+        const mapped = detailed ? mapToUpsert(detailed) : null;
+
+        if (mapped) {
+          enriched.push(mapped);
+        }
+      } catch (error) {
+        console.error(
+          `Codigo omitido ${row.codigo_licitacion}: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+        failedCodes.push(row.codigo_licitacion);
       }
-    } catch (error) {
-      console.error(
-        `Codigo omitido ${row.codigo_licitacion}: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-      failedCodes.push(row.codigo_licitacion);
+
+      await sleep(REQUEST_DELAY_MS);
+    }
+
+    if (enriched.length > 0) {
+      const { error: upsertError } = await supabase
+        .from("licitaciones")
+        .upsert(enriched, { onConflict: "codigo_licitacion" });
+
+      if (upsertError) {
+        throw new Error(`No se pudo enriquecer detalle de licitaciones: ${upsertError.message}`);
+      }
+
+      updated += enriched.length;
     }
 
     await sleep(REQUEST_DELAY_MS);
   }
 
-  if (enriched.length > 0) {
-    const { error: upsertError } = await supabase
-      .from("licitaciones")
-      .upsert(enriched, { onConflict: "codigo_licitacion" });
-
-    if (upsertError) {
-      throw new Error(`No se pudo enriquecer detalle de licitaciones: ${upsertError.message}`);
-    }
-  }
-
   return {
-    attempted: rows.length,
-    updated: enriched.length,
+    attempted,
+    updated,
     failed: failedCodes,
   };
 }
