@@ -1,19 +1,26 @@
 # Contexto: Banco
 
-## Propósito
-Control financiero personal/empresa: cuentas, movimientos y consolidación.
+## Proposito
+Control de caja y banco de la empresa, con foco en saldo disponible, gastos e ingresos reales.
 
 ## Alcance MVP
-- Resumen de cuentas
-- Movimientos recientes
-- Filtro por período y categoría
+- Saldo inicial visible
+- Resumen de gastos e ingresos
+- Saldo disponible actualizado
+- Formulario simple para registrar movimientos
+- Tabla de movimientos reales con documento, proveedor y montos
 
 ## Datos iniciales
 - `bank_accounts`
 - `bank_transactions`
-- `bank_categories`
 
-## Límites
-- No mezclar impuestos o documentos tributarios aquí
-- No convertir la vista en una planilla infinita
-- La conciliación avanzada puede venir después
+## Seed actual
+- Cuenta: `Caja · Banco`
+- Empresa: `Aguirre Ingenieria SpA`
+- Capital inicial: `$1.000.000`
+- Dos facturas iniciales de `Easy Retail S.A.` importadas desde CSV
+
+## Limites
+- No mezclar conciliacion bancaria avanzada todavia
+- No convertir la vista en contabilidad completa
+- Impuestos y documentos tributarios avanzados pueden crecer despues
