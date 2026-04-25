@@ -59,6 +59,14 @@ function createDraft(): Draft {
   };
 }
 
+function getDocumentHref(fileName: string | null) {
+  if (!fileName) {
+    return null;
+  }
+
+  return `/facturas/banco/${encodeURIComponent(fileName)}`;
+}
+
 export function BancoClient(props: { initialData: BankPageData }) {
   const [transactions, setTransactions] = useState(props.initialData.transactions);
   const [showForm, setShowForm] = useState(false);
@@ -186,7 +194,7 @@ export function BancoClient(props: { initialData: BankPageData }) {
 
       {showForm ? (
         <section className="app-card p-6">
-          <h2 className="text-2xl font-semibold text-[var(--ink)]">Nueva transacción</h2>
+          <h2 className="text-2xl font-semibold text-[var(--ink)]">Nueva transaccion</h2>
 
           <div className="mt-6 grid gap-4 xl:grid-cols-4">
             <label className="grid gap-2 text-sm">
@@ -212,7 +220,7 @@ export function BancoClient(props: { initialData: BankPageData }) {
             </label>
 
             <label className="grid gap-2 text-sm">
-              <span className="font-medium text-[var(--muted)]">Categoría</span>
+              <span className="font-medium text-[var(--muted)]">Categoria</span>
               <select
                 value={draft.category}
                 onChange={(event) => updateDraft("category", event.target.value)}
@@ -227,7 +235,7 @@ export function BancoClient(props: { initialData: BankPageData }) {
             </label>
 
             <label className="grid gap-2 text-sm">
-              <span className="font-medium text-[var(--muted)]">N° documento</span>
+              <span className="font-medium text-[var(--muted)]">N documento</span>
               <input
                 type="text"
                 value={draft.document_number}
@@ -251,12 +259,36 @@ export function BancoClient(props: { initialData: BankPageData }) {
             </label>
 
             <label className="grid gap-2 text-sm">
-              <span className="font-medium text-[var(--muted)]">Descripción</span>
+              <span className="font-medium text-[var(--muted)]">Descripcion</span>
               <input
                 type="text"
                 value={draft.description}
                 onChange={(event) => updateDraft("description", event.target.value)}
-                placeholder="Qué se compró o cobró"
+                placeholder="Que se compro o cobro"
+                className="h-12 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
+              />
+            </label>
+          </div>
+
+          <div className="mt-4 grid gap-4 xl:grid-cols-4">
+            <label className="grid gap-2 text-sm xl:col-span-3">
+              <span className="font-medium text-[var(--muted)]">Archivo asociado</span>
+              <input
+                type="text"
+                value={draft.file_name}
+                onChange={(event) => updateDraft("file_name", event.target.value)}
+                placeholder="20260414 Easy.pdf"
+                className="h-12 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
+              />
+            </label>
+
+            <label className="grid gap-2 text-sm">
+              <span className="font-medium text-[var(--muted)]">Notas</span>
+              <input
+                type="text"
+                value={draft.notes}
+                onChange={(event) => updateDraft("notes", event.target.value)}
+                placeholder="Opcional"
                 className="h-12 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
               />
             </label>
@@ -318,7 +350,7 @@ export function BancoClient(props: { initialData: BankPageData }) {
       ) : null}
 
       {message ? (
-        <section className="app-card p-6 text-center text-red-500">
+        <section className="app-card p-6 text-center text-emerald-700">
           {message}
         </section>
       ) : null}
@@ -341,47 +373,69 @@ export function BancoClient(props: { initialData: BankPageData }) {
 
         <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-white">
           <div className="overflow-x-auto">
-            <table className="min-w-[980px] table-fixed border-collapse">
+            <table className="min-w-[1120px] table-fixed border-collapse">
               <thead className="bg-[#f2f0fb] text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
                 <tr>
                   <th className="px-4 py-3 text-left">Fecha</th>
                   <th className="px-4 py-3 text-left">Tipo</th>
-                  <th className="px-4 py-3 text-left">Categoría</th>
+                  <th className="px-4 py-3 text-left">Categoria</th>
                   <th className="px-4 py-3 text-left">Proveedor</th>
                   <th className="px-4 py-3 text-left">Documento</th>
-                  <th className="px-4 py-3 text-left">Descripción</th>
+                  <th className="px-4 py-3 text-left">Descripcion</th>
+                  <th className="px-4 py-3 text-left">Archivo</th>
                   <th className="px-4 py-3 text-left">Neto</th>
                   <th className="px-4 py-3 text-left">IVA</th>
                   <th className="px-4 py-3 text-left">Total</th>
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((item) => (
-                  <tr key={item.id} className="border-t border-[var(--line)] text-sm text-[var(--ink)]">
-                    <td className="px-4 py-3">{item.transaction_date}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                          item.type === "gasto"
-                            ? "bg-rose-100 text-rose-700"
-                            : "bg-emerald-100 text-emerald-700"
-                        }`}
-                      >
-                        {item.type}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">{item.category}</td>
-                    <td className="px-4 py-3">{item.provider ?? "-"}</td>
-                    <td className="px-4 py-3">{item.document_number ?? "-"}</td>
-                    <td className="px-4 py-3">{item.description ?? "-"}</td>
-                    <td className="px-4 py-3">{formatClp(item.net_amount)}</td>
-                    <td className="px-4 py-3">{formatClp(item.vat_amount)}</td>
-                    <td className="px-4 py-3 font-semibold">
-                      {item.type === "gasto" ? "-" : "+"}
-                      {formatClp(item.total_amount)}
-                    </td>
-                  </tr>
-                ))}
+                {transactions.map((item) => {
+                  const documentHref = getDocumentHref(item.file_name);
+
+                  return (
+                    <tr
+                      key={item.id}
+                      className="border-t border-[var(--line)] text-sm text-[var(--ink)]"
+                    >
+                      <td className="px-4 py-3">{item.transaction_date}</td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                            item.type === "gasto"
+                              ? "bg-rose-100 text-rose-700"
+                              : "bg-emerald-100 text-emerald-700"
+                          }`}
+                        >
+                          {item.type}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">{item.category}</td>
+                      <td className="px-4 py-3">{item.provider ?? "-"}</td>
+                      <td className="px-4 py-3">{item.document_number ?? "-"}</td>
+                      <td className="px-4 py-3">{item.description ?? "-"}</td>
+                      <td className="px-4 py-3">
+                        {documentHref ? (
+                          <a
+                            href={documentHref}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
+                          >
+                            Ver PDF
+                          </a>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                      <td className="px-4 py-3">{formatClp(item.net_amount)}</td>
+                      <td className="px-4 py-3">{formatClp(item.vat_amount)}</td>
+                      <td className="px-4 py-3 font-semibold">
+                        {item.type === "gasto" ? "-" : "+"}
+                        {formatClp(item.total_amount)}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
