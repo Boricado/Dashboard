@@ -50,6 +50,26 @@ const INITIAL_TRANSACTIONS = [
   },
 ];
 
+type BankContext = {
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>;
+  userId: string;
+};
+
+type FileUpdate =
+  | {
+      mode: "keep";
+    }
+  | {
+      mode: "remove";
+    }
+  | {
+      mode: "replace";
+      file_name: string;
+      file_path: string;
+      file_mime_type: string;
+      file_size: number;
+    };
+
 export function getBankFallbackData(): BankPageData {
   const now = new Date().toISOString();
 
@@ -75,7 +95,7 @@ export function getBankFallbackData(): BankPageData {
   };
 }
 
-async function getCurrentUserId() {
+async function getBankContext(): Promise<BankContext> {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -88,13 +108,14 @@ async function getCurrentUserId() {
   return { supabase, userId: user.id };
 }
 
-async function ensureBankSeedData() {
-  const { supabase, userId } = await getCurrentUserId();
+async function ensurePrimaryAccount(context: BankContext) {
+  const { supabase, userId } = context;
 
   const { data: existingAccount, error: accountError } = await supabase
     .from("bank_accounts")
     .select("*")
     .eq("user_id", userId)
+    .order("created_at", { ascending: true })
     .limit(1)
     .maybeSingle();
 
@@ -102,24 +123,30 @@ async function ensureBankSeedData() {
     throw new Error(accountError.message);
   }
 
-  let account = existingAccount as BankAccountRecord | null;
-
-  if (!account) {
-    const { data: createdAccount, error: createAccountError } = await supabase
-      .from("bank_accounts")
-      .insert({
-        user_id: userId,
-        ...INITIAL_ACCOUNT,
-      })
-      .select("*")
-      .single();
-
-    if (createAccountError) {
-      throw new Error(createAccountError.message);
-    }
-
-    account = createdAccount as BankAccountRecord;
+  if (existingAccount) {
+    return existingAccount as BankAccountRecord;
   }
+
+  const { data: createdAccount, error: createAccountError } = await supabase
+    .from("bank_accounts")
+    .insert({
+      user_id: userId,
+      ...INITIAL_ACCOUNT,
+    })
+    .select("*")
+    .single();
+
+  if (createAccountError) {
+    throw new Error(createAccountError.message);
+  }
+
+  return createdAccount as BankAccountRecord;
+}
+
+async function ensureBankSeedData() {
+  const context = await getBankContext();
+  const { supabase, userId } = context;
+  const account = await ensurePrimaryAccount(context);
 
   const initialDocumentNumbers = INITIAL_TRANSACTIONS.map(
     (transaction) => transaction.document_number,
@@ -170,24 +197,26 @@ async function ensureBankSeedData() {
     (transaction) => !existingByDocument.has(transaction.document_number),
   );
 
-  if (missingTransactions.length > 0) {
-    const { error: seedError } = await supabase.from("bank_transactions").insert(
-      missingTransactions.map((transaction) => ({
-        user_id: userId,
-        account_id: account.id,
-        ...transaction,
-      })),
-    );
+  if (missingTransactions.length === 0) {
+    return;
+  }
 
-    if (seedError) {
-      throw new Error(seedError.message);
-    }
+  const { error: seedError } = await supabase.from("bank_transactions").insert(
+    missingTransactions.map((transaction) => ({
+      user_id: userId,
+      account_id: account.id,
+      ...transaction,
+    })),
+  );
+
+  if (seedError) {
+    throw new Error(seedError.message);
   }
 }
 
 export async function getBankPageData(): Promise<BankPageData> {
   await ensureBankSeedData();
-  const { supabase, userId } = await getCurrentUserId();
+  const { supabase, userId } = await getBankContext();
 
   const [{ data: account, error: accountError }, { data: transactions, error: transactionsError }] =
     await Promise.all([
@@ -221,19 +250,9 @@ export async function getBankPageData(): Promise<BankPageData> {
 }
 
 export async function createBankTransaction(input: BankTransactionInput) {
-  const { supabase, userId } = await getCurrentUserId();
-
-  const { data: account, error: accountError } = await supabase
-    .from("bank_accounts")
-    .select("id")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .single();
-
-  if (accountError) {
-    throw new Error(accountError.message);
-  }
+  const context = await getBankContext();
+  const { supabase, userId } = context;
+  const account = await ensurePrimaryAccount(context);
 
   const { data, error } = await supabase
     .from("bank_transactions")
@@ -263,4 +282,115 @@ export async function createBankTransaction(input: BankTransactionInput) {
   }
 
   return data as BankTransactionRecord;
+}
+
+export async function getBankTransactionById(id: string) {
+  const { supabase, userId } = await getBankContext();
+
+  const { data, error } = await supabase
+    .from("bank_transactions")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? null) as BankTransactionRecord | null;
+}
+
+export async function updateBankTransaction(
+  id: string,
+  input: BankTransactionInput,
+  fileUpdate: FileUpdate = { mode: "keep" },
+) {
+  const { supabase, userId } = await getBankContext();
+  const existing = await getBankTransactionById(id);
+
+  if (!existing) {
+    throw new Error("Transaccion no encontrada.");
+  }
+
+  if (
+    existing.file_path &&
+    (fileUpdate.mode === "remove" || fileUpdate.mode === "replace")
+  ) {
+    const { error: storageDeleteError } = await supabase.storage
+      .from(BANK_DOCUMENTS_BUCKET)
+      .remove([existing.file_path]);
+
+    if (storageDeleteError) {
+      throw new Error(storageDeleteError.message);
+    }
+  }
+
+  const patch: Record<string, unknown> = {
+    transaction_date: input.transaction_date,
+    type: input.type,
+    category: input.category,
+    provider: input.provider ?? null,
+    description: input.description ?? null,
+    document_number: input.document_number ?? null,
+    net_amount: input.net_amount,
+    vat_amount: input.vat_amount ?? 0,
+    total_amount: input.total_amount,
+    notes: input.notes ?? null,
+  };
+
+  if (fileUpdate.mode === "remove") {
+    patch.file_name = null;
+    patch.file_path = null;
+    patch.file_mime_type = null;
+    patch.file_size = null;
+  } else if (fileUpdate.mode === "replace") {
+    patch.file_name = fileUpdate.file_name;
+    patch.file_path = fileUpdate.file_path;
+    patch.file_mime_type = fileUpdate.file_mime_type;
+    patch.file_size = fileUpdate.file_size;
+  }
+
+  const { data, error } = await supabase
+    .from("bank_transactions")
+    .update(patch)
+    .eq("user_id", userId)
+    .eq("id", id)
+    .select("*")
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data as BankTransactionRecord;
+}
+
+export async function deleteBankTransaction(id: string) {
+  const { supabase, userId } = await getBankContext();
+  const existing = await getBankTransactionById(id);
+
+  if (!existing) {
+    throw new Error("Transaccion no encontrada.");
+  }
+
+  if (existing.file_path) {
+    const { error: storageDeleteError } = await supabase.storage
+      .from(BANK_DOCUMENTS_BUCKET)
+      .remove([existing.file_path]);
+
+    if (storageDeleteError) {
+      throw new Error(storageDeleteError.message);
+    }
+  }
+
+  const { error } = await supabase
+    .from("bank_transactions")
+    .delete()
+    .eq("user_id", userId)
+    .eq("id", id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
 }

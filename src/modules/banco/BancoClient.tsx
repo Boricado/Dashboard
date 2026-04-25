@@ -28,6 +28,12 @@ type Draft = {
   notes: string;
 };
 
+type Filters = {
+  search: string;
+  type: "todas" | BankTransactionType;
+  category: string;
+};
+
 function formatClp(value: number) {
   return new Intl.NumberFormat("es-CL", {
     style: "currency",
@@ -57,6 +63,21 @@ function createDraft(): Draft {
   };
 }
 
+function createDraftFromTransaction(transaction: BankTransactionRecord): Draft {
+  return {
+    transaction_date: transaction.transaction_date,
+    type: transaction.type,
+    category: transaction.category,
+    provider: transaction.provider ?? "",
+    description: transaction.description ?? "",
+    document_number: transaction.document_number ?? "",
+    net_amount: String(transaction.net_amount),
+    vat_amount: String(transaction.vat_amount),
+    total_amount: String(transaction.total_amount),
+    notes: transaction.notes ?? "",
+  };
+}
+
 function getDocumentHref(transaction: BankTransactionRecord) {
   if (!transaction.file_name) {
     return null;
@@ -68,11 +89,20 @@ function getDocumentHref(transaction: BankTransactionRecord) {
 export function BancoClient(props: { initialData: BankPageData }) {
   const [transactions, setTransactions] = useState(props.initialData.transactions);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>(createDraft);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [removeCurrentFile, setRemoveCurrentFile] = useState(false);
+  const [previewTransaction, setPreviewTransaction] = useState<BankTransactionRecord | null>(null);
+  const [filters, setFilters] = useState<Filters>({
+    search: "",
+    type: "todas",
+    category: "todas",
+  });
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const totals = useMemo(() => {
     const totalGastos = transactions
@@ -89,6 +119,70 @@ export function BancoClient(props: { initialData: BankPageData }) {
         props.initialData.account.initial_balance + totalIngresos - totalGastos,
     };
   }, [props.initialData.account.initial_balance, transactions]);
+
+  const filteredTransactions = useMemo(() => {
+    const query = filters.search.trim().toLowerCase();
+
+    return transactions.filter((item) => {
+      if (filters.type !== "todas" && item.type !== filters.type) {
+        return false;
+      }
+
+      if (filters.category !== "todas" && item.category !== filters.category) {
+        return false;
+      }
+
+      if (!query) {
+        return true;
+      }
+
+      const haystack = [
+        item.provider,
+        item.description,
+        item.document_number,
+        item.category,
+        item.file_name,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(query);
+    });
+  }, [filters, transactions]);
+
+  const categoryOptions = useMemo(() => {
+    return Array.from(new Set(transactions.map((item) => item.category))).sort();
+  }, [transactions]);
+
+  function resetComposer() {
+    setDraft(createDraft());
+    setSelectedFile(null);
+    setRemoveCurrentFile(false);
+    setEditingId(null);
+  }
+
+  function openCreateForm() {
+    resetComposer();
+    setShowForm(true);
+    setMessage(null);
+    setError(null);
+  }
+
+  function openEditForm(transaction: BankTransactionRecord) {
+    setDraft(createDraftFromTransaction(transaction));
+    setSelectedFile(null);
+    setRemoveCurrentFile(false);
+    setEditingId(transaction.id);
+    setShowForm(true);
+    setMessage(null);
+    setError(null);
+  }
+
+  function closeForm() {
+    setShowForm(false);
+    resetComposer();
+  }
 
   function updateDraft<K extends keyof Draft>(key: K, value: Draft[K]) {
     setDraft((current) => {
@@ -121,13 +215,19 @@ export function BancoClient(props: { initialData: BankPageData }) {
     formData.set("vat_amount", draft.vat_amount);
     formData.set("total_amount", draft.total_amount);
     formData.set("notes", draft.notes);
+    formData.set("remove_file", removeCurrentFile ? "true" : "false");
 
     if (selectedFile) {
       formData.set("file", selectedFile);
     }
 
-    const response = await fetch("/api/bank/transactions", {
-      method: "POST",
+    const endpoint = editingId
+      ? `/api/bank/transactions/${editingId}`
+      : "/api/bank/transactions";
+    const method = editingId ? "PATCH" : "POST";
+
+    const response = await fetch(endpoint, {
+      method,
       body: formData,
     });
 
@@ -139,12 +239,53 @@ export function BancoClient(props: { initialData: BankPageData }) {
       return;
     }
 
-    setTransactions((current) => [payload.transaction as BankTransactionRecord, ...current]);
-    setDraft(createDraft());
-    setSelectedFile(null);
-    setShowForm(false);
-    setMessage("Transaccion guardada en Supabase.");
+    if (editingId) {
+      setTransactions((current) =>
+        current.map((item) =>
+          item.id === editingId ? (payload.transaction as BankTransactionRecord) : item,
+        ),
+      );
+      setMessage("Transaccion actualizada.");
+    } else {
+      setTransactions((current) => [payload.transaction as BankTransactionRecord, ...current]);
+      setMessage("Transaccion guardada en Supabase.");
+    }
+
+    closeForm();
   }
+
+  async function handleDelete(transaction: BankTransactionRecord) {
+    const confirmed = window.confirm(
+      `Eliminar ${transaction.document_number ?? "esta transaccion"}?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setBusyId(transaction.id);
+    setError(null);
+    setMessage(null);
+
+    const response = await fetch(`/api/bank/transactions/${transaction.id}`, {
+      method: "DELETE",
+    });
+
+    const payload = await response.json();
+    setBusyId(null);
+
+    if (!response.ok) {
+      setError(payload.error ?? "No se pudo eliminar la transaccion.");
+      return;
+    }
+
+    setTransactions((current) => current.filter((item) => item.id !== transaction.id));
+    setMessage("Transaccion eliminada.");
+  }
+
+  const editingTransaction = editingId
+    ? transactions.find((item) => item.id === editingId) ?? null
+    : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -161,11 +302,7 @@ export function BancoClient(props: { initialData: BankPageData }) {
 
           <button
             type="button"
-            onClick={() => {
-              setShowForm((current) => !current);
-              setMessage(null);
-              setError(null);
-            }}
+            onClick={() => (showForm ? closeForm() : openCreateForm())}
             className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white"
           >
             {showForm ? "Cancelar" : "+ Registrar"}
@@ -194,7 +331,7 @@ export function BancoClient(props: { initialData: BankPageData }) {
             </div>
           </article>
 
-          <article className="app-card p-5 shadow-[0_8px_24px_24px_rgba(31,27,22,0.04)]">
+          <article className="app-card p-5 shadow-[0_8px_24px_rgba(31,27,22,0.04)]">
             <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
               Saldo disponible
             </div>
@@ -207,7 +344,16 @@ export function BancoClient(props: { initialData: BankPageData }) {
 
       {showForm ? (
         <section className="app-card p-6">
-          <h2 className="text-2xl font-semibold text-[var(--ink)]">Nueva transaccion</h2>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-2xl font-semibold text-[var(--ink)]">
+              {editingId ? "Editar transaccion" : "Nueva transaccion"}
+            </h2>
+            {editingId ? (
+              <span className="rounded-full bg-[#f2f0fb] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                {editingTransaction?.document_number ?? "Sin documento"}
+              </span>
+            ) : null}
+          </div>
 
           <div className="mt-6 grid gap-4 xl:grid-cols-4">
             <label className="grid gap-2 text-sm">
@@ -295,11 +441,13 @@ export function BancoClient(props: { initialData: BankPageData }) {
               <span className="text-xs text-[var(--muted)]">
                 {selectedFile
                   ? `${selectedFile.name} · ${Math.round(selectedFile.size / 1024)} KB`
-                  : "Se subira a Supabase Storage."}
+                  : editingTransaction?.file_name
+                    ? `Actual: ${editingTransaction.file_name}`
+                    : "Se subira a Supabase Storage."}
               </span>
             </label>
 
-            <label className="grid gap-2 text-sm">
+            <div className="grid gap-2 text-sm">
               <span className="font-medium text-[var(--muted)]">Notas</span>
               <input
                 type="text"
@@ -308,7 +456,17 @@ export function BancoClient(props: { initialData: BankPageData }) {
                 placeholder="Opcional"
                 className="h-12 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
               />
-            </label>
+              {editingTransaction?.file_name ? (
+                <label className="flex items-center gap-2 text-xs text-[var(--muted)]">
+                  <input
+                    type="checkbox"
+                    checked={removeCurrentFile}
+                    onChange={(event) => setRemoveCurrentFile(event.target.checked)}
+                  />
+                  Quitar archivo actual
+                </label>
+              ) : null}
+            </div>
           </div>
 
           <div className="mt-4 grid gap-4 xl:grid-cols-3">
@@ -348,7 +506,7 @@ export function BancoClient(props: { initialData: BankPageData }) {
             <div className="flex justify-end gap-3">
               <button
                 type="button"
-                onClick={() => setShowForm(false)}
+                onClick={closeForm}
                 className="rounded-full px-4 py-2 text-sm font-semibold text-[var(--ink)]"
               >
                 Cancelar
@@ -359,7 +517,7 @@ export function BancoClient(props: { initialData: BankPageData }) {
                 disabled={isSaving}
                 className="rounded-full bg-emerald-700 px-5 py-2 text-sm font-semibold text-white disabled:opacity-60"
               >
-                {isSaving ? "Guardando..." : "Guardar"}
+                {isSaving ? "Guardando..." : editingId ? "Guardar cambios" : "Guardar"}
               </button>
             </div>
           </div>
@@ -379,18 +537,88 @@ export function BancoClient(props: { initialData: BankPageData }) {
       ) : null}
 
       <section className="app-card p-6">
-        <div className="flex items-end justify-between gap-3">
+        <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h2 className="text-2xl font-semibold text-[var(--ink)]">Movimientos</h2>
             <p className="mt-1 text-sm text-[var(--muted)]">
               Facturas y registros reales de caja.
             </p>
           </div>
+
+          <div className="grid gap-3 md:grid-cols-3">
+            <label className="grid gap-2 text-sm">
+              <span className="font-medium text-[var(--muted)]">Buscar</span>
+              <input
+                type="text"
+                value={filters.search}
+                onChange={(event) =>
+                  setFilters((current) => ({ ...current, search: event.target.value }))
+                }
+                placeholder="Documento, proveedor o descripcion"
+                className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
+              />
+            </label>
+
+            <label className="grid gap-2 text-sm">
+              <span className="font-medium text-[var(--muted)]">Tipo</span>
+              <select
+                value={filters.type}
+                onChange={(event) =>
+                  setFilters((current) => ({
+                    ...current,
+                    type: event.target.value as Filters["type"],
+                  }))
+                }
+                className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
+              >
+                <option value="todas">Todas</option>
+                <option value="gasto">Gastos</option>
+                <option value="ingreso">Ingresos</option>
+              </select>
+            </label>
+
+            <label className="grid gap-2 text-sm">
+              <span className="font-medium text-[var(--muted)]">Categoria</span>
+              <select
+                value={filters.category}
+                onChange={(event) =>
+                  setFilters((current) => ({ ...current, category: event.target.value }))
+                }
+                className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-emerald-600"
+              >
+                <option value="todas">Todas</option>
+                {categoryOptions.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between gap-3 text-sm text-[var(--muted)]">
+          <span>{filteredTransactions.length} movimientos visibles</span>
+          {(filters.search || filters.type !== "todas" || filters.category !== "todas") ? (
+            <button
+              type="button"
+              onClick={() =>
+                setFilters({
+                  search: "",
+                  type: "todas",
+                  category: "todas",
+                })
+              }
+              className="rounded-full border border-[var(--line)] px-3 py-1 font-medium text-[var(--ink)]"
+            >
+              Limpiar filtros
+            </button>
+          ) : null}
         </div>
 
         <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-white">
           <div className="overflow-x-auto">
-            <table className="min-w-[1120px] table-fixed border-collapse">
+            <table className="min-w-[1320px] table-fixed border-collapse">
               <thead className="bg-[#f2f0fb] text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
                 <tr>
                   <th className="px-4 py-3 text-left">Fecha</th>
@@ -403,10 +631,11 @@ export function BancoClient(props: { initialData: BankPageData }) {
                   <th className="px-4 py-3 text-left">Neto</th>
                   <th className="px-4 py-3 text-left">IVA</th>
                   <th className="px-4 py-3 text-left">Total</th>
+                  <th className="px-4 py-3 text-left">Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((item) => {
+                {filteredTransactions.map((item) => {
                   const documentHref = getDocumentHref(item);
 
                   return (
@@ -432,14 +661,23 @@ export function BancoClient(props: { initialData: BankPageData }) {
                       <td className="px-4 py-3">{item.description ?? "-"}</td>
                       <td className="px-4 py-3">
                         {documentHref ? (
-                          <a
-                            href={documentHref}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
-                          >
-                            Ver PDF
-                          </a>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setPreviewTransaction(item)}
+                              className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
+                            >
+                              Vista previa
+                            </button>
+                            <a
+                              href={documentHref}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex rounded-full border border-[var(--line)] bg-white px-3 py-1 text-xs font-semibold text-[var(--ink)]"
+                            >
+                              Abrir
+                            </a>
+                          </div>
                         ) : (
                           "-"
                         )}
@@ -450,6 +688,25 @@ export function BancoClient(props: { initialData: BankPageData }) {
                         {item.type === "gasto" ? "-" : "+"}
                         {formatClp(item.total_amount)}
                       </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => openEditForm(item)}
+                            className="rounded-full border border-[var(--line)] px-3 py-1 text-xs font-semibold text-[var(--ink)]"
+                          >
+                            Editar
+                          </button>
+                          <button
+                            type="button"
+                            disabled={busyId === item.id}
+                            onClick={() => handleDelete(item)}
+                            className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 disabled:opacity-60"
+                          >
+                            {busyId === item.id ? "Eliminando..." : "Eliminar"}
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
@@ -458,6 +715,37 @@ export function BancoClient(props: { initialData: BankPageData }) {
           </div>
         </div>
       </section>
+
+      {previewTransaction ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(19,16,36,0.42)] p-6">
+          <div className="app-card max-h-[90vh] w-full max-w-6xl overflow-hidden">
+            <div className="flex items-center justify-between border-b border-[var(--line)] px-6 py-4">
+              <div>
+                <h3 className="text-xl font-semibold text-[var(--ink)]">
+                  {previewTransaction.document_number ?? "Documento adjunto"}
+                </h3>
+                <p className="mt-1 text-sm text-[var(--muted)]">
+                  {previewTransaction.file_name ?? "Archivo"}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewTransaction(null)}
+                className="rounded-full border border-[var(--line)] px-4 py-2 text-sm font-semibold text-[var(--ink)]"
+              >
+                Cerrar
+              </button>
+            </div>
+            <div className="h-[75vh] bg-[#f5f4fc] p-4">
+              <iframe
+                title={previewTransaction.file_name ?? "Vista previa"}
+                src={getDocumentHref(previewTransaction) ?? ""}
+                className="h-full w-full rounded-[1.25rem] border border-[var(--line)] bg-white"
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
