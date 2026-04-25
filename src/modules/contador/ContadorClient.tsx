@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import type { ContadorPageData } from "@/modules/contador/types";
 import {
   buildMonthlyTaxCalendar,
   contadorAnnualObligations,
@@ -58,11 +59,66 @@ function SectionPill(props: { label: string; tone?: "green" | "blue" | "orange" 
   );
 }
 
-export function ContadorClient() {
-  const monthlyCalendar = useMemo(() => buildMonthlyTaxCalendar(), []);
+export function ContadorClient(props: { initialData: ContadorPageData }) {
+  const [checkpoints, setCheckpoints] = useState(props.initialData.checkpoints);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [savingKey, setSavingKey] = useState<string | null>(null);
+  const monthlyCalendar = useMemo(
+    () =>
+      buildMonthlyTaxCalendar().map((item) =>
+        checkpoints[item.id]
+          ? {
+              ...item,
+              status: "done" as const,
+              summary:
+                item.status === "done"
+                  ? item.summary
+                  : `Marcado como presentado. ${item.summary}`,
+            }
+          : item,
+      ),
+    [checkpoints],
+  );
   const [selectedCalendarId, setSelectedCalendarId] = useState(monthlyCalendar[0]?.id ?? "");
   const selectedItem =
     monthlyCalendar.find((item) => item.id === selectedCalendarId) ?? monthlyCalendar[0];
+
+  async function toggleCheckpoint(
+    itemKey: string,
+    itemType: "monthly_tax" | "startup_task" | "annual_obligation",
+  ) {
+    const nextValue = !checkpoints[itemKey];
+    setSavingKey(itemKey);
+    setError(null);
+    setMessage(null);
+
+    const response = await fetch("/api/contador/checkpoints", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        itemKey,
+        itemType,
+        isCompleted: nextValue,
+      }),
+    });
+
+    const payload = await response.json();
+    setSavingKey(null);
+
+    if (!response.ok) {
+      setError(payload.error ?? "No se pudo actualizar el estado.");
+      return;
+    }
+
+    setCheckpoints((current) => ({
+      ...current,
+      [itemKey]: nextValue,
+    }));
+    setMessage(nextValue ? "Obligacion marcada como completada." : "Obligacion reabierta.");
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -111,6 +167,14 @@ export function ContadorClient() {
               <span className="text-[var(--muted)]">IVA</span>
               <span className="font-semibold text-[var(--ink)]">{contadorProfile.vatMode}</span>
             </div>
+            <div className="flex items-center justify-between border-b border-[var(--line)] pb-3">
+              <span className="text-[var(--muted)]">Banco</span>
+              <span className="font-semibold text-[var(--ink)]">
+                {props.initialData.bankSummary.hasMovements
+                  ? `${props.initialData.bankSummary.transactionCount} movimientos reales`
+                  : "Sin movimientos reales"}
+              </span>
+            </div>
             <div className="flex items-center justify-between">
               <span className="text-[var(--muted)]">PPM</span>
               <span className="font-semibold text-[var(--ink)]">{contadorProfile.ppm}</span>
@@ -131,6 +195,26 @@ export function ContadorClient() {
               <strong> F29 general vence el dia 20 del mes siguiente</strong>, mientras que
               <strong> sin movimiento y sin pago puede ir el dia 28</strong>.
             </p>
+            <div className="rounded-[1.25rem] border border-[var(--line)] bg-white px-4 py-4 text-sm">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                Lectura desde banco
+              </div>
+              <div className="mt-2 text-[var(--ink)]">
+                {props.initialData.bankSummary.hasMovements ? (
+                  <>
+                    Hay <strong>{props.initialData.bankSummary.transactionCount} movimientos</strong>
+                    {" "}registrados en banco. Ultimo movimiento:
+                    {" "}
+                    <strong>{props.initialData.bankSummary.latestTransactionDate ?? "-"}</strong>.
+                  </>
+                ) : (
+                  <>
+                    Aun no hay movimientos reales en banco. Si el periodo sigue sin actividad ni
+                    pago, revisa si corresponde declarar sin movimiento.
+                  </>
+                )}
+              </div>
+            </div>
             <p>
               Tambien rescate de tu modulo viejo la necesidad de no olvidarse de DTE, RCV,
               patente municipal y la futura F22. Lo deje mas ordenado y con una separacion mas
@@ -169,26 +253,38 @@ export function ContadorClient() {
         <div className="mt-6 grid gap-6 xl:grid-cols-[1.35fr_1fr]">
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {monthlyCalendar.map((item) => (
-              <button
+              <div
                 key={item.id}
-                type="button"
-                onClick={() => setSelectedCalendarId(item.id)}
                 className={`rounded-[1.5rem] border p-4 text-left transition ${
                   statusCardStyles[item.status]
                 } ${selectedCalendarId === item.id ? "ring-2 ring-[var(--accent)]/25" : ""}`}
               >
-                <div className="text-sm font-semibold text-[var(--ink)]">{item.periodLabel}</div>
-                <div className="mt-2 text-xs uppercase tracking-[0.18em]">
-                  {item.status === "done"
-                    ? "Presentado"
-                    : item.status === "attention"
-                      ? "Atencion"
-                      : item.status === "upcoming"
-                        ? "Proximo"
-                        : "Pendiente"}
-                </div>
-                <div className="mt-3 text-sm">{item.dueLabel}</div>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCalendarId(item.id)}
+                  className="w-full text-left"
+                >
+                  <div className="text-sm font-semibold text-[var(--ink)]">{item.periodLabel}</div>
+                  <div className="mt-2 text-xs uppercase tracking-[0.18em]">
+                    {item.status === "done"
+                      ? "Presentado"
+                      : item.status === "attention"
+                        ? "Atencion"
+                        : item.status === "upcoming"
+                          ? "Proximo"
+                          : "Pendiente"}
+                  </div>
+                  <div className="mt-3 text-sm">{item.dueLabel}</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleCheckpoint(item.id, "monthly_tax")}
+                  disabled={savingKey === item.id}
+                  className="mt-4 rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-xs font-semibold text-[var(--ink)] disabled:opacity-60"
+                >
+                  {checkpoints[item.id] ? "Desmarcar" : "Marcar presentado"}
+                </button>
+              </div>
             ))}
           </div>
 
@@ -236,14 +332,28 @@ export function ContadorClient() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h3 className={`text-base font-semibold ${taskStyles[item.status]}`}>
+                    <h3
+                      className={`text-base font-semibold ${
+                        checkpoints[item.id] ? "text-emerald-600 line-through" : taskStyles[item.status]
+                      }`}
+                    >
                       {item.title}
                     </h3>
                     <p className="mt-1 text-sm leading-6 text-[var(--muted)]">{item.note}</p>
                   </div>
-                  <span className="rounded-full bg-[#f2f0fb] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
-                    {item.label}
-                  </span>
+                  <div className="flex flex-col items-end gap-2">
+                    <span className="rounded-full bg-[#f2f0fb] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
+                      {checkpoints[item.id] ? "Completado" : item.label}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => toggleCheckpoint(item.id, "startup_task")}
+                      disabled={savingKey === item.id}
+                      className="rounded-full border border-[var(--line)] px-3 py-1 text-xs font-semibold text-[var(--ink)] disabled:opacity-60"
+                    >
+                      {checkpoints[item.id] ? "Desmarcar" : "Completar"}
+                    </button>
+                  </div>
                 </div>
               </article>
             ))}
@@ -271,18 +381,42 @@ export function ContadorClient() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h3 className="text-base font-semibold text-[var(--ink)]">{item.title}</h3>
+                    <h3
+                      className={`text-base font-semibold ${
+                        checkpoints[item.id] ? "text-emerald-600 line-through" : "text-[var(--ink)]"
+                      }`}
+                    >
+                      {item.title}
+                    </h3>
                     <p className="mt-1 text-sm leading-6 text-[var(--muted)]">{item.note}</p>
                   </div>
-                  <span className="rounded-full bg-[#f2f0fb] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
-                    {item.monthLabel}
-                  </span>
+                  <div className="flex flex-col items-end gap-2">
+                    <span className="rounded-full bg-[#f2f0fb] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
+                      {item.monthLabel}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => toggleCheckpoint(item.id, "annual_obligation")}
+                      disabled={savingKey === item.id}
+                      className="rounded-full border border-[var(--line)] px-3 py-1 text-xs font-semibold text-[var(--ink)] disabled:opacity-60"
+                    >
+                      {checkpoints[item.id] ? "Desmarcar" : "Completar"}
+                    </button>
+                  </div>
                 </div>
               </article>
             ))}
           </div>
         </article>
       </section>
+
+      {message ? (
+        <section className="app-card p-4 text-center text-emerald-700">{message}</section>
+      ) : null}
+
+      {error ? (
+        <section className="app-card p-4 text-center text-rose-700">{error}</section>
+      ) : null}
 
       <section className="app-card p-6">
         <div className="flex items-center gap-2">

@@ -24,6 +24,7 @@ export type ContadorAnnual = {
 
 export type ContadorCalendarItem = {
   id: string;
+  itemType: "monthly_tax";
   periodLabel: string;
   dueLabel: string;
   dueDate: string;
@@ -95,6 +96,7 @@ export function buildMonthlyTaxCalendar() {
 
     items.push({
       id: `f29-${periodDate.getFullYear()}-${periodDate.getMonth() + 1}`,
+      itemType: "monthly_tax",
       periodLabel: `${monthNames[periodDate.getMonth()]} ${periodDate.getFullYear()}`,
       dueLabel: `20 ${monthNames[dueGeneral.getMonth()].slice(0, 3)} ${dueGeneral.getFullYear()}`,
       dueDate: formatDate(dueGeneral),
