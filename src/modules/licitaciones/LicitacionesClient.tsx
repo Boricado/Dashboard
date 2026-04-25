@@ -163,12 +163,112 @@ function getDisplayRegion(item: LicitacionWithTracking) {
   );
 }
 
+function getDisplayOrganismo(item: LicitacionWithTracking) {
+  return (
+    item.organismo ??
+    (getNestedSourcePayloadValue(item.source_payload, "Comprador", "NombreOrganismo") as
+      | string
+      | null) ??
+    null
+  );
+}
+
+function getDisplayUnidad(item: LicitacionWithTracking) {
+  return (
+    item.comprador ??
+    (getNestedSourcePayloadValue(item.source_payload, "Comprador", "NombreUnidad") as
+      | string
+      | null) ??
+    null
+  );
+}
+
 function getDisplayAmount(item: LicitacionWithTracking) {
   return (
     item.monto_estimado ??
     parseNumber(getSourcePayloadValue(item.source_payload, "MontoEstimado")) ??
     null
   );
+}
+
+function getDisplayCategoria(item: LicitacionWithTracking) {
+  return (
+    item.categoria ??
+    (getSourcePayloadValue(item.source_payload, "Categoria") as string | null) ??
+    null
+  );
+}
+
+function getDisplayTipo(item: LicitacionWithTracking) {
+  return (
+    (getSourcePayloadValue(item.source_payload, "Tipo") as string | null) ??
+    (getSourcePayloadValue(item.source_payload, "CodigoTipo") as string | null) ??
+    null
+  );
+}
+
+function getDisplayMoneda(item: LicitacionWithTracking) {
+  return (
+    item.moneda ??
+    (getSourcePayloadValue(item.source_payload, "Moneda") as string | null) ??
+    null
+  );
+}
+
+function getDisplayModalidad(item: LicitacionWithTracking) {
+  return (
+    (getSourcePayloadValue(item.source_payload, "Modalidad") as string | null) ??
+    (getSourcePayloadValue(item.source_payload, "TipoPago") as string | null) ??
+    null
+  );
+}
+
+function getDisplayTiempo(item: LicitacionWithTracking) {
+  const tiempo = getSourcePayloadValue(item.source_payload, "Tiempo");
+  const unidadTiempo =
+    (getSourcePayloadValue(item.source_payload, "UnidadTiempo") as string | number | null) ??
+    (getSourcePayloadValue(item.source_payload, "UnidadTiempoDuracionContrato") as
+      | string
+      | number
+      | null);
+
+  if (!tiempo && !unidadTiempo) {
+    return null;
+  }
+
+  return [tiempo, unidadTiempo].filter(Boolean).join(" ");
+}
+
+function getDisplayVisitaTerreno(item: LicitacionWithTracking) {
+  return (
+    (getSourcePayloadValue(item.source_payload, "FechaVisitaTerreno") as string | null) ??
+    (getNestedSourcePayloadValue(item.source_payload, "Fechas", "FechaVisitaTerreno") as
+      | string
+      | null) ??
+    null
+  );
+}
+
+function getDisplayDireccionVisita(item: LicitacionWithTracking) {
+  return (
+    (getSourcePayloadValue(item.source_payload, "DireccionVisita") as string | null) ?? null
+  );
+}
+
+function getDisplayDireccionEntrega(item: LicitacionWithTracking) {
+  return (
+    (getSourcePayloadValue(item.source_payload, "DireccionEntrega") as string | null) ?? null
+  );
+}
+
+function getDisplayObras(item: LicitacionWithTracking) {
+  const obras = getSourcePayloadValue(item.source_payload, "Obras");
+
+  if (obras == null) {
+    return null;
+  }
+
+  return String(obras);
 }
 
 function getKeywordMatches(item: LicitacionWithTracking, keywords: string[]) {
@@ -374,8 +474,13 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
       const haystack = [
         item.codigo_licitacion,
         item.titulo,
+        getDisplayOrganismo(item),
+        getDisplayUnidad(item),
         getDisplayRegion(item),
-        item.organismo,
+        getDisplayCategoria(item),
+        getDisplayTipo(item),
+        getDisplayDireccionEntrega(item),
+        getDisplayDireccionVisita(item),
       ]
         .filter(Boolean)
         .join(" ")
@@ -619,7 +724,7 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
 
       <article className="overflow-hidden rounded-[28px] border border-stone-200 bg-white shadow-[0_16px_32px_rgba(15,23,42,0.05)]">
         <div className="overflow-x-auto">
-          <table className="min-w-full border-collapse">
+          <table className="min-w-[2200px] border-collapse">
             <thead>
               <tr className="border-b border-stone-200 bg-stone-50 text-left text-xs uppercase tracking-[0.28em] text-stone-500">
                 <th className="px-5 py-4">
@@ -634,7 +739,7 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
                 </th>
                 <th className="px-5 py-4">
                   <button type="button" onClick={() => toggleSort("region")}>
-                    Region {getSortLabel("region")}
+                    Organismo/Unidad {getSortLabel("region")}
                   </button>
                 </th>
                 <th className="px-5 py-4">
@@ -653,12 +758,21 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
                   </button>
                 </th>
                 <th className="px-5 py-4">Accion</th>
+                <th className="px-5 py-4">Categoria</th>
+                <th className="px-5 py-4">Tipo</th>
+                <th className="px-5 py-4">Moneda</th>
+                <th className="px-5 py-4">Modalidad</th>
+                <th className="px-5 py-4">Tiempo</th>
+                <th className="px-5 py-4">Visita Terreno</th>
+                <th className="px-5 py-4">Dir. Visita</th>
+                <th className="px-5 py-4">Dir. Entrega</th>
+                <th className="px-5 py-4">Obras</th>
               </tr>
             </thead>
             <tbody>
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-14 text-center text-sm text-stone-500">
+                  <td colSpan={16} className="px-6 py-14 text-center text-sm text-stone-500">
                     No hay licitaciones para los filtros actuales.
                   </td>
                 </tr>
@@ -709,7 +823,12 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
                       </div>
                     </td>
                     <td className="px-5 py-4 text-sm text-stone-600">
-                      {getDisplayRegion(item) ?? "Sin region"}
+                      <div className="space-y-1">
+                        <p>{getDisplayOrganismo(item) ?? "Sin organismo"}</p>
+                        <p className="text-xs text-stone-500">
+                          {getDisplayUnidad(item) ?? "Sin unidad"}
+                        </p>
+                      </div>
                     </td>
                     <td className="px-5 py-4 text-sm text-stone-600">
                       {formatClp(getDisplayAmount(item))}
@@ -743,6 +862,33 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
                           );
                         })}
                       </div>
+                    </td>
+                    <td className="px-5 py-4 text-sm text-stone-600">
+                      {getDisplayCategoria(item) ?? "Sin dato"}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-stone-600">
+                      {getDisplayTipo(item) ?? "Sin dato"}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-stone-600">
+                      {getDisplayMoneda(item) ?? "Sin dato"}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-stone-600">
+                      {getDisplayModalidad(item) ?? "Sin dato"}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-stone-600">
+                      {getDisplayTiempo(item) ?? "Sin dato"}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-stone-600">
+                      {formatDate(getDisplayVisitaTerreno(item))}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-stone-600">
+                      {getDisplayDireccionVisita(item) ?? "Sin dato"}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-stone-600">
+                      {getDisplayDireccionEntrega(item) ?? "Sin dato"}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-stone-600">
+                      {getDisplayObras(item) ?? "Sin dato"}
                     </td>
                   </tr>
                 );
