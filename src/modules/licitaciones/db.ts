@@ -26,6 +26,7 @@ const FALLBACK_ITEMS: LicitacionWithTracking[] = [
     comprador: "SECPLAN",
     categoria: "Obras menores",
     url: "https://www.mercadopublico.cl/",
+    source_payload: null,
     last_synced_at: "2026-04-25T11:30:00.000Z",
     created_at: "2026-04-25T11:30:00.000Z",
     updated_at: "2026-04-25T11:30:00.000Z",
@@ -60,6 +61,7 @@ const FALLBACK_ITEMS: LicitacionWithTracking[] = [
     comprador: "Adquisiciones",
     categoria: "Suministros",
     url: "https://www.mercadopublico.cl/",
+    source_payload: null,
     last_synced_at: "2026-04-25T11:30:00.000Z",
     created_at: "2026-04-25T11:30:00.000Z",
     updated_at: "2026-04-25T11:30:00.000Z",
@@ -101,7 +103,7 @@ export async function getLicitacionesPageData(): Promise<LicitacionesPageData> {
   const { data, error } = await supabase
     .from("licitaciones")
     .select(
-      "id, codigo_licitacion, titulo, descripcion, monto_estimado, moneda, region, estado_api, codigo_estado, fecha_publicacion, fecha_cierre, organismo, comprador, categoria, url, last_synced_at, created_at, updated_at, tracking:licitacion_tracking(id, licitacion_id, user_id, stage, priority, next_step, notes, follow_up_at, is_favorite, hidden, created_at, updated_at)",
+      "id, codigo_licitacion, titulo, descripcion, monto_estimado, moneda, region, estado_api, codigo_estado, fecha_publicacion, fecha_cierre, organismo, comprador, categoria, url, source_payload, last_synced_at, created_at, updated_at, tracking:licitacion_tracking(id, licitacion_id, user_id, stage, priority, next_step, notes, follow_up_at, is_favorite, hidden, created_at, updated_at)",
     )
     .order("fecha_cierre", { ascending: true, nullsFirst: false })
     .order("updated_at", { ascending: false });

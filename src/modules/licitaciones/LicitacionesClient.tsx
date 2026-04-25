@@ -13,9 +13,83 @@ type Filters = {
   stage: "todas" | LicitacionTrackingStage;
 };
 
+type SortKey =
+  | "codigo_licitacion"
+  | "titulo"
+  | "region"
+  | "monto_estimado"
+  | "fecha_cierre"
+  | "dias_restantes";
+
+type SortState = {
+  key: SortKey;
+  direction: "asc" | "desc";
+};
+
 type Draft = {
   stage: LicitacionTrackingStage;
 };
+
+function getSourcePayloadValue(
+  payload: Record<string, unknown> | null | undefined,
+  key: string,
+) {
+  if (!payload || typeof payload !== "object") {
+    return null;
+  }
+
+  return payload[key] ?? null;
+}
+
+function getNestedSourcePayloadValue(
+  payload: Record<string, unknown> | null | undefined,
+  parentKey: string,
+  childKey: string,
+) {
+  const parent = getSourcePayloadValue(payload, parentKey);
+
+  if (!parent || typeof parent !== "object" || Array.isArray(parent)) {
+    return null;
+  }
+
+  return (parent as Record<string, unknown>)[childKey] ?? null;
+}
+
+function parseNumber(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const cleaned = value.replace(/[^\d.-]/g, "");
+    if (!cleaned) {
+      return null;
+    }
+
+    const parsed = Number(cleaned);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
+}
+
+function getDisplayRegion(item: LicitacionWithTracking) {
+  return (
+    item.region ??
+    (getNestedSourcePayloadValue(item.source_payload, "Comprador", "RegionUnidad") as string | null) ??
+    (getSourcePayloadValue(item.source_payload, "Region") as string | null) ??
+    (getSourcePayloadValue(item.source_payload, "RegionUnidad") as string | null) ??
+    null
+  );
+}
+
+function getDisplayAmount(item: LicitacionWithTracking) {
+  return (
+    item.monto_estimado ??
+    parseNumber(getSourcePayloadValue(item.source_payload, "MontoEstimado")) ??
+    null
+  );
+}
 
 function formatClp(value: number | null) {
   if (value == null) {
@@ -38,6 +112,63 @@ function formatDate(value: string | null) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
+}
+
+function getDaysLeft(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const closeAt = new Date(value).getTime();
+
+  if (Number.isNaN(closeAt)) {
+    return null;
+  }
+
+  const diff = closeAt - Date.now();
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
+
+function formatDaysLeft(value: string | null) {
+  const days = getDaysLeft(value);
+
+  if (days == null) {
+    return "Sin dato";
+  }
+
+  if (days < 0) {
+    return `Cerrada hace ${Math.abs(days)} d`;
+  }
+
+  if (days === 0) {
+    return "Cierra hoy";
+  }
+
+  if (days === 1) {
+    return "1 dia";
+  }
+
+  return `${days} dias`;
+}
+
+function compareValues(
+  left: string | number | null,
+  right: string | number | null,
+  direction: SortState["direction"],
+) {
+  const leftValue = left ?? "";
+  const rightValue = right ?? "";
+
+  if (typeof leftValue === "number" && typeof rightValue === "number") {
+    return direction === "asc" ? leftValue - rightValue : rightValue - leftValue;
+  }
+
+  const comparison = String(leftValue).localeCompare(String(rightValue), "es", {
+    numeric: true,
+    sensitivity: "base",
+  });
+
+  return direction === "asc" ? comparison : -comparison;
 }
 
 function createDraft(item: LicitacionWithTracking): Draft {
@@ -84,6 +215,10 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
     search: "",
     stage: "todas",
   });
+  const [sort, setSort] = useState<SortState>({
+    key: "fecha_cierre",
+    direction: "asc",
+  });
   const [savingId, setSavingId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -105,7 +240,7 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
       const haystack = [
         item.codigo_licitacion,
         item.titulo,
-        item.region,
+        getDisplayRegion(item),
         item.organismo,
       ]
         .filter(Boolean)
@@ -131,20 +266,13 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
     );
   }, [drafts, filteredItems]);
 
-  function updateDraft(id: string, stage: LicitacionTrackingStage) {
+  async function saveTracking(id: string, stage: LicitacionTrackingStage) {
+    const previousStage = drafts[id]?.stage ?? "sin_revisar";
+
     setDrafts((current) => ({
       ...current,
       [id]: { stage },
     }));
-  }
-
-  async function saveTracking(id: string) {
-    const draft = drafts[id];
-
-    if (!draft) {
-      return;
-    }
-
     setSavingId(id);
     setMessage(null);
     setError(null);
@@ -156,7 +284,7 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          stage: draft.stage,
+          stage,
           priority: "media",
           hidden: false,
           is_favorite: false,
@@ -182,14 +310,66 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
             : item,
         ),
       );
-      setMessage("Accion guardada.");
+      setMessage(`Accion actualizada a ${getStageLabel(stage).toLowerCase()}.`);
     } catch (caughtError) {
+      setDrafts((current) => ({
+        ...current,
+        [id]: { stage: previousStage },
+      }));
       setError(
         caughtError instanceof Error ? caughtError.message : "No se pudo guardar la accion.",
       );
     } finally {
       setSavingId(null);
     }
+  }
+
+  const sortedItems = useMemo(() => {
+    return [...filteredItems].sort((left, right) => {
+      switch (sort.key) {
+        case "codigo_licitacion":
+          return compareValues(left.codigo_licitacion, right.codigo_licitacion, sort.direction);
+        case "titulo":
+          return compareValues(left.titulo, right.titulo, sort.direction);
+        case "region":
+          return compareValues(getDisplayRegion(left), getDisplayRegion(right), sort.direction);
+        case "monto_estimado":
+          return compareValues(getDisplayAmount(left), getDisplayAmount(right), sort.direction);
+        case "dias_restantes":
+          return compareValues(
+            getDaysLeft(left.fecha_cierre),
+            getDaysLeft(right.fecha_cierre),
+            sort.direction,
+          );
+        case "fecha_cierre":
+        default:
+          return compareValues(left.fecha_cierre, right.fecha_cierre, sort.direction);
+      }
+    });
+  }, [filteredItems, sort]);
+
+  function toggleSort(key: SortKey) {
+    setSort((current) => {
+      if (current.key === key) {
+        return {
+          key,
+          direction: current.direction === "asc" ? "desc" : "asc",
+        };
+      }
+
+      return {
+        key,
+        direction: key === "fecha_cierre" || key === "dias_restantes" ? "asc" : "desc",
+      };
+    });
+  }
+
+  function getSortLabel(key: SortKey) {
+    if (sort.key !== key) {
+      return "↕";
+    }
+
+    return sort.direction === "asc" ? "↑" : "↓";
   }
 
   return (
@@ -273,13 +453,37 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
           <table className="min-w-full border-collapse">
             <thead>
               <tr className="border-b border-stone-200 bg-stone-50 text-left text-xs uppercase tracking-[0.28em] text-stone-500">
-                <th className="px-5 py-4">Codigo</th>
-                <th className="px-5 py-4">Nombre</th>
-                <th className="px-5 py-4">Region</th>
-                <th className="px-5 py-4">Monto</th>
-                <th className="px-5 py-4">Cierre</th>
+                <th className="px-5 py-4">
+                  <button type="button" onClick={() => toggleSort("codigo_licitacion")}>
+                    Codigo {getSortLabel("codigo_licitacion")}
+                  </button>
+                </th>
+                <th className="px-5 py-4">
+                  <button type="button" onClick={() => toggleSort("titulo")}>
+                    Nombre {getSortLabel("titulo")}
+                  </button>
+                </th>
+                <th className="px-5 py-4">
+                  <button type="button" onClick={() => toggleSort("region")}>
+                    Region {getSortLabel("region")}
+                  </button>
+                </th>
+                <th className="px-5 py-4">
+                  <button type="button" onClick={() => toggleSort("monto_estimado")}>
+                    Monto {getSortLabel("monto_estimado")}
+                  </button>
+                </th>
+                <th className="px-5 py-4">
+                  <button type="button" onClick={() => toggleSort("fecha_cierre")}>
+                    Cierre {getSortLabel("fecha_cierre")}
+                  </button>
+                </th>
+                <th className="px-5 py-4">
+                  <button type="button" onClick={() => toggleSort("dias_restantes")}>
+                    Dias {getSortLabel("dias_restantes")}
+                  </button>
+                </th>
                 <th className="px-5 py-4">Accion</th>
-                <th className="px-5 py-4">Guardar</th>
               </tr>
             </thead>
             <tbody>
@@ -291,7 +495,7 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
                 </tr>
               ) : null}
 
-              {filteredItems.map((item) => {
+              {sortedItems.map((item) => {
                 const draft = drafts[item.id] ?? createDraft(item);
 
                 return (
@@ -318,45 +522,40 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
                       </div>
                     </td>
                     <td className="px-5 py-4 text-sm text-stone-600">
-                      {item.region ?? "Sin region"}
+                      {getDisplayRegion(item) ?? "Sin region"}
                     </td>
                     <td className="px-5 py-4 text-sm text-stone-600">
-                      {formatClp(item.monto_estimado)}
+                      {formatClp(getDisplayAmount(item))}
                     </td>
                     <td className="px-5 py-4 text-sm text-stone-600">
                       {formatDate(item.fecha_cierre)}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-stone-600">
+                      {formatDaysLeft(item.fecha_cierre)}
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex flex-wrap gap-2">
                         {LICITACION_TRACKING_STAGES.map((stage) => {
                           const active = draft.stage === stage;
+                          const isSavingThisStage = savingId === item.id && active;
 
                           return (
                             <button
                               key={stage}
                               type="button"
-                              onClick={() => updateDraft(item.id, stage)}
+                              onClick={() => saveTracking(item.id, stage)}
+                              disabled={savingId === item.id}
                               className={`rounded-full px-3 py-2 text-xs font-medium transition ${
                                 active
                                   ? getStageBadge(stage)
                                   : "border border-stone-200 bg-white text-stone-600 hover:bg-stone-50"
-                              }`}
+                              } ${savingId === item.id ? "cursor-not-allowed opacity-70" : ""}`}
                             >
-                              {getStageLabel(stage)}
+                              {isSavingThisStage ? "Guardando..." : getStageLabel(stage)}
                             </button>
                           );
                         })}
                       </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <button
-                        type="button"
-                        onClick={() => saveTracking(item.id)}
-                        disabled={savingId === item.id}
-                        className="rounded-full bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {savingId === item.id ? "Guardando..." : "Guardar"}
-                      </button>
                     </td>
                   </tr>
                 );

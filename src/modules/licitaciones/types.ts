@@ -30,6 +30,7 @@ export type LicitacionRecord = {
   comprador: string | null;
   categoria: string | null;
   url: string | null;
+  source_payload: Record<string, unknown> | null;
   last_synced_at: string | null;
   created_at: string;
   updated_at: string;
