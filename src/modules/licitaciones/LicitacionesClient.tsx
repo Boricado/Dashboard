@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   LICITACION_TRACKING_STAGES,
   type LicitacionesPageData,
@@ -29,6 +29,71 @@ type SortState = {
 type Draft = {
   stage: LicitacionTrackingStage;
 };
+
+const DEFAULT_KEYWORDS_TEXT = [
+  "constructor civil",
+  "ingeniero constructor",
+  "ingeniero en construccion",
+  "ingeniero en construcción",
+  "topografia",
+  "topografía",
+  "levantamiento topografico",
+  "levantamiento topográfico",
+  "geomensura",
+  "geomensor",
+  "geodesia",
+  "inspeccion tecnica",
+  "inspección técnica",
+  "asesoria tecnica",
+  "asesoría técnica",
+  "ito",
+  "ato",
+  "obra civil",
+  "obras civiles",
+  "construccion",
+  "construcción",
+  "edificacion",
+  "edificación",
+  "infraestructura",
+  "urbanizacion",
+  "urbanización",
+  "pavimentacion",
+  "pavimentación",
+  "vialidad",
+  "movimiento de tierra",
+  "cubicacion",
+  "cubicación",
+  "mensura",
+  "levantamiento planimetrico",
+  "levantamiento planimétrico",
+  "levantamiento altimetrico",
+  "levantamiento altimétrico",
+  "trazado topografico",
+  "trazado topográfico",
+  "cartografia",
+  "cartografía",
+  "sig",
+  "gis",
+  "geomatica",
+  "geomática",
+  "informatica",
+  "informática",
+  "software",
+  "desarrollo de software",
+  "sistemas",
+  "tecnologias de la informacion",
+  "tecnologías de la información",
+  "soporte informatico",
+  "soporte informático",
+  "redes y comunicaciones",
+  "ciberseguridad",
+  "transformacion digital",
+  "transformación digital",
+  "plataforma web",
+].join("\n");
+
+const KEYWORDS_TEXT_STORAGE_KEY = "licitaciones.keyword-text";
+const KEYWORDS_ENABLED_STORAGE_KEY = "licitaciones.keyword-enabled";
 
 function getSourcePayloadValue(
   payload: Record<string, unknown> | null | undefined,
@@ -73,6 +138,21 @@ function parseNumber(value: unknown) {
   return null;
 }
 
+function normalizeText(value: string | null | undefined) {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function parseKeywordText(value: string) {
+  return value
+    .split(/\r?\n|,/)
+    .map((keyword) => normalizeText(keyword))
+    .filter(Boolean);
+}
+
 function getDisplayRegion(item: LicitacionWithTracking) {
   return (
     item.region ??
@@ -89,6 +169,28 @@ function getDisplayAmount(item: LicitacionWithTracking) {
     parseNumber(getSourcePayloadValue(item.source_payload, "MontoEstimado")) ??
     null
   );
+}
+
+function getKeywordMatches(item: LicitacionWithTracking, keywords: string[]) {
+  if (keywords.length === 0) {
+    return [];
+  }
+
+  const haystack = normalizeText(
+    [
+      item.codigo_licitacion,
+      item.titulo,
+      item.descripcion,
+      item.organismo,
+      item.comprador,
+      item.categoria,
+      getDisplayRegion(item),
+    ]
+      .filter(Boolean)
+      .join(" "),
+  );
+
+  return keywords.filter((keyword) => haystack.includes(keyword));
 }
 
 function formatClp(value: number | null) {
@@ -219,9 +321,33 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
     key: "fecha_cierre",
     direction: "asc",
   });
+  const [keywordsText, setKeywordsText] = useState(() => {
+    if (typeof window === "undefined") {
+      return DEFAULT_KEYWORDS_TEXT;
+    }
+
+    return window.localStorage.getItem(KEYWORDS_TEXT_STORAGE_KEY) ?? DEFAULT_KEYWORDS_TEXT;
+  });
+  const [keywordsEnabled, setKeywordsEnabled] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    return window.localStorage.getItem(KEYWORDS_ENABLED_STORAGE_KEY) === "true";
+  });
   const [savingId, setSavingId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    window.localStorage.setItem(KEYWORDS_TEXT_STORAGE_KEY, keywordsText);
+  }, [keywordsText]);
+
+  useEffect(() => {
+    window.localStorage.setItem(KEYWORDS_ENABLED_STORAGE_KEY, String(keywordsEnabled));
+  }, [keywordsEnabled]);
+
+  const parsedKeywords = useMemo(() => parseKeywordText(keywordsText), [keywordsText]);
 
   const filteredItems = useMemo(() => {
     const query = filters.search.trim().toLowerCase();
@@ -234,6 +360,10 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
       }
 
       if (filters.stage !== "todas" && stage !== filters.stage) {
+        return false;
+      }
+
+      if (keywordsEnabled && getKeywordMatches(item, parsedKeywords).length === 0) {
         return false;
       }
 
@@ -253,7 +383,7 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
 
       return haystack.includes(query);
     });
-  }, [drafts, filters, items]);
+  }, [drafts, filters, items, keywordsEnabled, parsedKeywords]);
 
   const summary = useMemo(() => {
     return filteredItems.reduce(
@@ -269,6 +399,12 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
       { total: 0, pending: 0, reviewed: 0, applied: 0, discarded: 0 },
     );
   }, [drafts, filteredItems]);
+
+  const keywordMatchedCount = useMemo(() => {
+    return items.reduce((count, item) => {
+      return count + (getKeywordMatches(item, parsedKeywords).length > 0 ? 1 : 0);
+    }, 0);
+  }, [items, parsedKeywords]);
 
   async function saveTracking(id: string, stage: LicitacionTrackingStage) {
     const previousStage = drafts[id]?.stage ?? "sin_revisar";
@@ -441,6 +577,35 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
           </select>
         </div>
 
+        <div className="mt-4 grid gap-4 lg:grid-cols-[auto_1fr]">
+          <label className="flex items-center gap-3 rounded-2xl border border-stone-200 px-4 py-3 text-sm text-stone-700">
+            <input
+              type="checkbox"
+              checked={keywordsEnabled}
+              onChange={(event) => setKeywordsEnabled(event.target.checked)}
+            />
+            Usar keywords como filtro
+          </label>
+
+          <div className="rounded-2xl border border-stone-200 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-xs uppercase tracking-[0.28em] text-stone-500">
+                Keywords editables
+              </p>
+              <p className="text-xs text-stone-500">
+                {parsedKeywords.length} configuradas · {keywordMatchedCount} con match
+              </p>
+            </div>
+            <textarea
+              value={keywordsText}
+              onChange={(event) => setKeywordsText(event.target.value)}
+              rows={5}
+              placeholder="Una keyword por linea o separadas por coma"
+              className="mt-3 w-full rounded-2xl border border-stone-200 px-4 py-3 text-sm outline-none transition focus:border-emerald-400"
+            />
+          </div>
+        </div>
+
         {message ? (
           <p className="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
             {message}
@@ -501,6 +666,7 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
 
               {sortedItems.map((item) => {
                 const draft = drafts[item.id] ?? createDraft(item);
+                const keywordMatches = getKeywordMatches(item, parsedKeywords);
 
                 return (
                   <tr key={item.id} className="border-b border-stone-100 align-top">
@@ -513,6 +679,23 @@ export function LicitacionesClient(props: { initialData: LicitacionesPageData })
                         <p className="text-xs text-stone-500">
                           {item.organismo ?? "Organismo no informado"}
                         </p>
+                        {keywordMatches.length > 0 ? (
+                          <div className="flex flex-wrap gap-2">
+                            {keywordMatches.slice(0, 3).map((keyword) => (
+                              <span
+                                key={`${item.id}-${keyword}`}
+                                className="rounded-full bg-sky-50 px-3 py-1 text-[11px] font-medium text-sky-700"
+                              >
+                                {keyword}
+                              </span>
+                            ))}
+                            {keywordMatches.length > 3 ? (
+                              <span className="rounded-full bg-stone-100 px-3 py-1 text-[11px] font-medium text-stone-600">
+                                +{keywordMatches.length - 3}
+                              </span>
+                            ) : null}
+                          </div>
+                        ) : null}
                         {item.url ? (
                           <a
                             href={item.url}
