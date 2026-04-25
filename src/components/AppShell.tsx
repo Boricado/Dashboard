@@ -21,7 +21,7 @@ export function AppShell(props: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh text-[var(--ink)]">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 lg:px-6">
+      <div className="flex w-full flex-col gap-6 px-4 py-6 lg:px-6 2xl:px-8">
         <header className="rounded-[2rem] border border-[var(--line)] bg-[var(--panel)] px-6 py-5 shadow-[0_24px_100px_rgba(49,46,37,0.08)] backdrop-blur">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-col">
@@ -51,7 +51,7 @@ export function AppShell(props: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[300px_minmax(0,1fr)]">
           <aside className="h-fit rounded-[2rem] border border-[var(--line)] bg-[var(--panel)] p-4 shadow-[0_20px_60px_rgba(49,46,37,0.08)] backdrop-blur xl:sticky xl:top-6">
             <div className="mb-4 rounded-[1.5rem] border border-[var(--line)] bg-white/80 p-4">
               <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">

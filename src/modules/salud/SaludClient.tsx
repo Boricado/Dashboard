@@ -40,12 +40,12 @@ const STATUS_STYLE: Record<WorkoutDay["status"], string> = {
   rest: "bg-zinc-100 text-zinc-700",
 };
 
-function clamp(value: number, max: number) {
-  if (max === 0) {
-    return 0;
+function scaleBarHeight(value: number, max: number, maxPx: number) {
+  if (max <= 0) {
+    return 18;
   }
 
-  return Math.max(18, Math.round((value / max) * 100));
+  return Math.max(18, Math.round((value / max) * maxPx));
 }
 
 function formatSignedDelta(value: number) {
@@ -270,6 +270,10 @@ export function SaludClient() {
     setRegistrationMessage("Registro agregado al historial visible.");
   }
 
+  const visibleComparisonRows = inbodyComparisonRows.filter(
+    (row) => row.latestValue !== row.previousValue,
+  );
+
   return (
     <div className="flex flex-col gap-6">
       <section className="rounded-[2rem] border border-[var(--line)] bg-[var(--panel)] p-6 shadow-[0_20px_80px_rgba(49,46,37,0.08)]">
@@ -314,7 +318,7 @@ export function SaludClient() {
             </span>
           </div>
 
-          <div className="mt-6 grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)_260px]">
+          <div className="mt-6 grid gap-6 2xl:grid-cols-[220px_minmax(320px,1fr)_minmax(420px,0.95fr)]">
             <div className="flex items-center justify-center">
               <div className="flex h-40 w-40 items-center justify-center rounded-full border-[12px] border-[var(--accent)]/15 bg-white text-center shadow-[inset_0_0_0_1px_rgba(223,212,194,0.65)]">
                 <div>
@@ -349,14 +353,21 @@ export function SaludClient() {
               <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
                 Tendencia de peso
               </div>
-              <div className="mt-6 flex h-36 items-end gap-3">
+              <div className="mt-6 grid h-44 grid-cols-5 gap-3">
                 {weightTrend.map((point) => (
-                  <div key={point.label} className="flex min-w-0 flex-1 flex-col items-center gap-2">
-                    <div
-                      className="w-full rounded-t-2xl bg-[var(--accent)]/75"
-                      style={{ height: `${clamp(point.value, maxWeight)}%` }}
-                    />
-                    <div className="text-[11px] text-[var(--muted)]">{point.label}</div>
+                  <div
+                    key={point.label}
+                    className="grid min-w-0 grid-rows-[1fr_auto] gap-2"
+                  >
+                    <div className="flex items-end">
+                      <div
+                        className="w-full rounded-t-2xl bg-[var(--accent)]/75"
+                        style={{ height: `${scaleBarHeight(point.value, maxWeight, 120)}px` }}
+                      />
+                    </div>
+                    <div className="text-center text-[11px] leading-4 text-[var(--muted)]">
+                      {point.label}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -370,14 +381,21 @@ export function SaludClient() {
         <article className="app-card p-6">
           <h2 className="text-2xl font-semibold text-[var(--ink)]">Consistencia</h2>
           <p className="mt-1 text-sm text-[var(--muted)]">Sesiones por semana</p>
-          <div className="mt-6 flex h-44 items-end gap-3">
+          <div className="mt-6 grid h-48 grid-cols-8 gap-3">
             {weeklyConsistency.map((point) => (
-              <div key={point.label} className="flex min-w-0 flex-1 flex-col items-center gap-2">
-                <div
-                  className="w-full rounded-t-2xl bg-[var(--accent)]"
-                  style={{ height: `${clamp(point.value, maxConsistency)}%` }}
-                />
-                <div className="text-[11px] font-medium text-[var(--muted)]">{point.label}</div>
+              <div
+                key={point.label}
+                className="grid min-w-0 grid-rows-[1fr_auto] gap-2"
+              >
+                <div className="flex items-end">
+                  <div
+                    className="w-full rounded-t-2xl bg-[var(--accent)]"
+                    style={{ height: `${scaleBarHeight(point.value, maxConsistency, 130)}px` }}
+                  />
+                </div>
+                <div className="text-center text-[11px] font-medium text-[var(--muted)]">
+                  {point.label}
+                </div>
               </div>
             ))}
           </div>
@@ -404,11 +422,19 @@ export function SaludClient() {
           </div>
 
           <div className="mt-6 grid gap-3">
-            {inbodyComparisonRows.map((row) => {
+            {visibleComparisonRows.map((row) => {
               const delta = row.latestValue - row.previousValue;
               const positive =
                 row.betterWhen === "higher" ? delta > 0 : delta < 0;
               const neutral = delta === 0;
+              const formatValue = (value: number) => {
+                if (row.unit === "kcal" || row.unit === "niv") {
+                  return `${Math.round(value)}${row.unit ? ` ${row.unit}` : ""}`;
+                }
+
+                const normalized = value.toFixed(1).replace(".0", "");
+                return `${normalized}${row.unit ? ` ${row.unit}` : ""}`;
+              };
 
               return (
                 <div
@@ -417,10 +443,10 @@ export function SaludClient() {
                 >
                   <div className="font-medium text-[var(--ink)]">{row.label}</div>
                   <div className="text-sm text-[var(--muted)]">
-                    Ant: {row.previousValue.toFixed(1).replace(".0", "")} {row.unit}
+                    Ant: {formatValue(row.previousValue)}
                   </div>
                   <div className="text-sm font-semibold text-[var(--ink)]">
-                    Act: {row.latestValue.toFixed(1).replace(".0", "")} {row.unit}
+                    Act: {formatValue(row.latestValue)}
                   </div>
                   <div
                     className={`rounded-full px-3 py-1 text-center text-xs font-semibold ${
@@ -431,7 +457,7 @@ export function SaludClient() {
                           : "bg-rose-100 text-rose-900"
                     }`}
                   >
-                    {formatSignedDelta(delta)} {row.unit}
+                    {formatSignedDelta(delta)}{row.unit ? ` ${row.unit}` : ""}
                   </div>
                 </div>
               );
@@ -449,33 +475,38 @@ export function SaludClient() {
             </p>
           </div>
 
-          <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-[var(--line)]">
-            <div className="grid grid-cols-[minmax(110px,1.1fr)_repeat(5,minmax(90px,1fr))] bg-[var(--surface-strong)] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
-              <div>Fecha</div>
-              <div>Peso</div>
-              <div>Musc.</div>
-              <div>Grasa</div>
-              <div>PGC</div>
-              <div>Score</div>
-            </div>
-            <div className="max-h-[340px] overflow-y-auto bg-white/80">
-              {inbodyScans.map((scan) => (
-                <button
-                  key={scan.id}
-                  type="button"
-                  onClick={() => setSelectedScanId(scan.id)}
-                  className={`grid w-full grid-cols-[minmax(110px,1.1fr)_repeat(5,minmax(90px,1fr))] border-t border-[var(--line)] px-4 py-3 text-left text-sm text-[var(--ink)] first:border-t-0 ${
-                    selectedScan.id === scan.id ? "bg-[var(--accent)]/8" : "bg-transparent"
-                  }`}
-                >
-                  <div className="font-medium">{scan.label}</div>
-                  <div>{scan.weightKg.toFixed(1)} kg</div>
-                  <div>{scan.skeletalMuscleKg.toFixed(1)} kg</div>
-                  <div>{scan.bodyFatMassKg.toFixed(1)} kg</div>
-                  <div>{scan.bodyFatPercent.toFixed(1)}%</div>
-                  <div>{scan.score}</div>
-                </button>
-              ))}
+          <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-white/80">
+            <div className="overflow-x-auto">
+              <table className="min-w-[720px] table-fixed border-collapse">
+                <thead className="bg-[var(--surface-strong)] text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
+                  <tr>
+                    <th className="px-4 py-3 text-left">Fecha</th>
+                    <th className="px-4 py-3 text-left">Peso</th>
+                    <th className="px-4 py-3 text-left">Musc.</th>
+                    <th className="px-4 py-3 text-left">Grasa</th>
+                    <th className="px-4 py-3 text-left">PGC</th>
+                    <th className="px-4 py-3 text-left">Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {inbodyScans.map((scan) => (
+                    <tr
+                      key={scan.id}
+                      onClick={() => setSelectedScanId(scan.id)}
+                      className={`cursor-pointer border-t border-[var(--line)] text-sm text-[var(--ink)] first:border-t-0 ${
+                        selectedScan.id === scan.id ? "bg-[var(--accent)]/8" : "bg-transparent"
+                      }`}
+                    >
+                      <td className="px-4 py-3 font-medium">{scan.label}</td>
+                      <td className="px-4 py-3">{scan.weightKg.toFixed(1)} kg</td>
+                      <td className="px-4 py-3">{scan.skeletalMuscleKg.toFixed(1)} kg</td>
+                      <td className="px-4 py-3">{scan.bodyFatMassKg.toFixed(1)} kg</td>
+                      <td className="px-4 py-3">{scan.bodyFatPercent.toFixed(1)}%</td>
+                      <td className="px-4 py-3">{scan.score}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
