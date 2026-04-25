@@ -78,7 +78,7 @@ export function AppShell(props: { children: React.ReactNode }) {
                     className={cx(
                       "rounded-[1.25rem] border px-4 py-3 text-sm transition",
                       isActive
-                        ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--surface-strong)]"
+                        ? "border-[#d7eee1] bg-white text-emerald-700 shadow-[0_6px_18px_rgba(20,122,61,0.08)]"
                         : "border-transparent text-[var(--ink)] hover:border-[var(--line)] hover:bg-white/80",
                     )}
                   >
@@ -86,9 +86,7 @@ export function AppShell(props: { children: React.ReactNode }) {
                     <div
                       className={cx(
                         "text-xs",
-                        isActive
-                          ? "text-[var(--surface-strong)]/75"
-                          : "text-[var(--muted)]",
+                        isActive ? "text-emerald-700/75" : "text-[var(--muted)]",
                       )}
                     >
                       {s.description}
