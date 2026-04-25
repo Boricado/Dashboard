@@ -121,6 +121,7 @@ const RETRY_DELAY_MS = Number(Deno.env.get("RETRY_DELAY_MS") ?? "3500");
 const MAX_RETRIES_PER_DAY = Number(Deno.env.get("MAX_RETRIES_PER_DAY") ?? "4");
 const DETAIL_ENRICH_BATCH_SIZE = Number(Deno.env.get("DETAIL_ENRICH_BATCH_SIZE") ?? "25");
 const DETAIL_ENRICH_MAX_PER_RUN = Number(Deno.env.get("DETAIL_ENRICH_MAX_PER_RUN") ?? "100");
+const DETAIL_MAX_ATTEMPTS_PER_CODE = Number(Deno.env.get("DETAIL_MAX_ATTEMPTS_PER_CODE") ?? "2");
 const SYNC_KEY = "licitaciones_mp";
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
@@ -181,7 +182,9 @@ type SyncStateRow = {
 };
 
 type MissingDetailRow = {
+  id: string;
   codigo_licitacion: string;
+  detail_attempt_count: number;
 };
 
 const ESTADO_PUBLICADA = "5";
@@ -475,7 +478,6 @@ async function fetchByCodeWithRetry(code: string): Promise<MercadoPublicoItem | 
 }
 
 async function enrichMissingDetails(supabase: ReturnType<typeof createClient>) {
-  const attemptedCodes = new Set<string>();
   const failedCodes: string[] = [];
   let attempted = 0;
   let updated = 0;
@@ -484,22 +486,15 @@ async function enrichMissingDetails(supabase: ReturnType<typeof createClient>) {
     const remaining = DETAIL_ENRICH_MAX_PER_RUN - attempted;
     const batchSize = Math.min(DETAIL_ENRICH_BATCH_SIZE, remaining);
 
-    let query = supabase
+    const { data, error } = await supabase
       .from("licitaciones")
-      .select("codigo_licitacion")
+      .select("id, codigo_licitacion, detail_attempt_count")
       .or("region.is.null,monto_estimado.is.null,categoria.is.null")
       .eq("estado_api", "publicada")
+      .lt("detail_attempt_count", DETAIL_MAX_ATTEMPTS_PER_CODE)
+      .order("detail_last_attempt_at", { ascending: true, nullsFirst: true })
       .order("fecha_cierre", { ascending: true, nullsFirst: false })
       .limit(batchSize);
-
-    if (attemptedCodes.size > 0) {
-      const excluded = Array.from(attemptedCodes)
-        .map((code) => `"${code}"`)
-        .join(",");
-      query = query.not("codigo_licitacion", "in", `(${excluded})`);
-    }
-
-    const { data, error } = await query;
 
     if (error) {
       throw new Error(`No se pudo leer licitaciones incompletas: ${error.message}`);
@@ -514,8 +509,22 @@ async function enrichMissingDetails(supabase: ReturnType<typeof createClient>) {
     const enriched: LicitacionUpsert[] = [];
 
     for (const row of rows) {
-      attemptedCodes.add(row.codigo_licitacion);
       attempted += 1;
+      const attemptTimestamp = new Date().toISOString();
+
+      const { error: markAttemptError } = await supabase
+        .from("licitaciones")
+        .update({
+          detail_last_attempt_at: attemptTimestamp,
+          detail_attempt_count: (row.detail_attempt_count ?? 0) + 1,
+        })
+        .eq("id", row.id);
+
+      if (markAttemptError) {
+        throw new Error(
+          `No se pudo marcar intento de detalle para ${row.codigo_licitacion}: ${markAttemptError.message}`,
+        );
+      }
 
       try {
         const detailed = await fetchByCodeWithRetry(row.codigo_licitacion);
@@ -546,6 +555,18 @@ async function enrichMissingDetails(supabase: ReturnType<typeof createClient>) {
       }
 
       updated += enriched.length;
+
+      const enrichedCodes = enriched.map((item) => item.codigo_licitacion);
+      const { error: markEnrichedError } = await supabase
+        .from("licitaciones")
+        .update({ detail_last_enriched_at: new Date().toISOString() })
+        .in("codigo_licitacion", enrichedCodes);
+
+      if (markEnrichedError) {
+        throw new Error(
+          `No se pudo marcar enriquecimiento de detalle: ${markEnrichedError.message}`,
+        );
+      }
     }
 
     await sleep(REQUEST_DELAY_MS);
