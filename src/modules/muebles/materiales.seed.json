@@ -1,0 +1,170 @@
+{
+  "moneda": "CLP",
+  "ultima_actualizacion": "2026-04-17",
+  "nota": "Precios verificados en Sodimac.cl abril 2026. Sodimac vende pino en 3.2m (no 3m). Madereras locales pueden ser 20-30% más baratas.",
+
+  "pino_estructural": [
+    { "dimension": "1\"x2\" (2.5x5cm)",  "largo_m": 3.2, "precio_sodimac": 1480,  "precio_min": 1480,  "precio_max": 2200  },
+    { "dimension": "1\"x3\" (2.5x7.5cm)","largo_m": 3.2, "precio_sodimac": 2130,  "precio_min": 2130,  "precio_max": 3000  },
+    { "dimension": "1\"x4\" (2.5x10cm)", "largo_m": 3.2, "precio_sodimac": 2580,  "precio_min": 2580,  "precio_max": 3800  },
+    { "dimension": "1\"x6\" (2.5x15cm)", "largo_m": 3.2, "precio_sodimac": 3890,  "precio_min": 3890,  "precio_max": 5500  },
+    { "dimension": "1\"x8\" (2.5x20cm)", "largo_m": 3.2, "precio_sodimac": 6050,  "precio_min": 6050,  "precio_max": 8500  },
+    { "dimension": "2\"x2\" (5x5cm)",    "largo_m": 3.2, "precio_sodimac": 2690,  "precio_min": 2690,  "precio_max": 4000  },
+    {
+      "dimension": "2\"x3\" (5x7.5cm)",
+      "largo_m": 3.2,
+      "precio_sodimac": 3750,
+      "precio_min": 2680,
+      "precio_max": 3750,
+      "nombre_sodimac": "Pino Dimensionado Seco 2x3 3,2 m",
+      "url_sodimac": "https://www.sodimac.cl/sodimac-cl/articulo/110315145/Pino-Dimensionado-Seco-2x3-3,2-m/110315152",
+      "nota_sodimac": "Verde: ~$2.680 / Seco: $3.750 — usar seco para muebles"
+    },
+    {
+      "dimension": "2\"x4\" (5x10cm)",
+      "largo_m": 3.2,
+      "precio_sodimac": 5190,
+      "precio_min": 4500,
+      "precio_max": 5190,
+      "nombre_sodimac": "Pino Dimensionado Seco 2x4 3,2 m",
+      "url_sodimac": "https://www.sodimac.cl/sodimac-cl/articulo/110322356/pino-dimensionado-seco-2x4-3-2-m/110322363"
+    },
+    { "dimension": "2\"x6\" (5x15cm)",   "largo_m": 3.2, "precio_sodimac": 7990,  "precio_min": 7990,  "precio_max": 11000 }
+  ],
+
+  "tableros": [
+    {
+      "tipo": "Plywood 9mm",
+      "dim": "1.22x2.44m", "m2": 2.977,
+      "precio_sodimac": 15990, "precio_min": 15990, "precio_max": 22000
+    },
+    {
+      "tipo": "Plywood 12mm",
+      "dim": "1.22x2.44m", "m2": 2.977,
+      "precio_sodimac": 24500, "precio_min": 24500, "precio_max": 30000,
+      "nombre_sodimac": "Terciado Estructural Pino 12mm 122x244cm",
+      "url_sodimac": "https://www.sodimac.cl/sodimac-cl/articulo/110284022/Terciado-Estructural-Pino-12-mm-122x244-cm/110284026"
+    },
+    {
+      "tipo": "Plywood 15mm",
+      "dim": "1.22x2.44m", "m2": 2.977,
+      "precio_sodimac": 37290, "precio_min": 37290, "precio_max": 44000
+    },
+    {
+      "tipo": "Plywood 18mm (Estructural)",
+      "dim": "1.22x2.44m", "m2": 2.977,
+      "precio_sodimac": 21990, "precio_min": 21990, "precio_max": 28000,
+      "nombre_sodimac": "Terciado Estructural Pino 18mm 122x244cm",
+      "url_sodimac": "https://www.sodimac.cl/sodimac-cl/articulo/110299679/Terciado-estructural-pino-18mm-1,22x2,44./110299700"
+    },
+    {
+      "tipo": "Terciado marino 18mm",
+      "dim": "1.22x2.44m", "m2": 2.977,
+      "precio_sodimac": 53990, "precio_min": 53990, "precio_max": 68000
+    },
+    {
+      "tipo": "MDF 9mm",
+      "dim": "1.52x2.44m", "m2": 3.709,
+      "precio_sodimac": 18690, "precio_min": 18690, "precio_max": 24000
+    },
+    {
+      "tipo": "MDF 12mm",
+      "dim": "1.52x2.44m", "m2": 3.709,
+      "precio_sodimac": 22490, "precio_min": 22490, "precio_max": 28000
+    },
+    {
+      "tipo": "MDF 15mm",
+      "dim": "1.52x2.44m", "m2": 3.709,
+      "precio_sodimac": 26990, "precio_min": 26990, "precio_max": 34000
+    },
+    {
+      "tipo": "MDF 18mm Natural",
+      "dim": "1.52x2.44m", "m2": 3.709,
+      "precio_sodimac": 35990, "precio_min": 35990, "precio_max": 45000,
+      "nombre_sodimac": "MDF Desnudo Natural 18mm 152x244cm",
+      "url_sodimac": "https://www.sodimac.cl/sodimac-cl/articulo/110290134/MDF-Desnudo-Natural-18-mm-152x244-cm/110290142",
+      "nota_sodimac": "Masisa. 152x244cm (más ancho que plywood). Mejor opción para superficie de trabajo."
+    },
+    {
+      "tipo": "OSB 11mm",
+      "dim": "1.22x2.44m", "m2": 2.977,
+      "precio_sodimac": 11890, "precio_min": 11890, "precio_max": 16000
+    },
+    {
+      "tipo": "OSB 15mm",
+      "dim": "1.22x2.44m", "m2": 2.977,
+      "precio_sodimac": 23290, "precio_min": 23290, "precio_max": 30000
+    },
+    {
+      "tipo": "Melamina blanca 18mm",
+      "dim": "1.83x2.50m", "m2": 4.575,
+      "precio_sodimac": 49990, "precio_min": 49990, "precio_max": 62000,
+      "nota": "Dimensión estándar actual en Sodimac: 1.83x2.50m"
+    }
+  ],
+
+  "herrajes_y_fijaciones": [
+    {
+      "tipo": "Rueda giratoria con freno goma 200kg (Fixser)",
+      "precio_u_sodimac": 16490,
+      "precio_u_min": 16490,
+      "precio_u_max": 16490,
+      "url_sodimac": "https://www.sodimac.cl/sodimac-cl/articulo/122567727/Rueda-giratoria-con-freno-goma-200-kg/122567728",
+      "nota": "Azul, placa plana. $16.490 c/u → x4 = $65.960. Capacidad 200kg por rueda."
+    },
+    {
+      "tipo": "Tornillo techo hexagonal madera 3\" caja 100u",
+      "precio_sodimac": 21990,
+      "url_sodimac": "https://www.sodimac.cl/sodimac-cl/articulo/110590658/Tornillo-techo-hexagonal-3-100-unidades/110590660",
+      "nota": "Autoperforante cabeza hexagonal. Sirve para estructura."
+    },
+    {
+      "tipo": "Cola fría maderas 1kg (Topex)",
+      "precio_sodimac": 9990,
+      "url_sodimac": "https://www.sodimac.cl/sodimac-cl/articulo/110283141/Cola-Fria-Profesional-1-kg/110283144",
+      "nota": "Tiempo de trabajo ~10 min, secado 24h."
+    },
+    {
+      "tipo": "Corredera telescópica estándar 450mm (par)",
+      "precio_u_min": 4500, "precio_u_max": 6500,
+      "nota": "Sin cierre suave, zincada"
+    },
+    {
+      "tipo": "Corredera telescópica cierre suave 450mm (par)",
+      "precio_u_min": 7000, "precio_u_max": 12000,
+      "nota": "Con amortiguación soft-close"
+    },
+    {
+      "tipo": "Corredera telescópica push-to-open 450mm (par)",
+      "precio_u_min": 8000, "precio_u_max": 15000,
+      "nota": "Abre al presionar, sin manija visible"
+    },
+    {
+      "tipo": "Corredera oculta cierre suave (par)",
+      "precio_u_min": 15000, "precio_u_max": 30000,
+      "nota": "Instalación premium bajo cajón"
+    }
+  ],
+
+  "acabados": [
+    { "tipo": "Aceite de teca 750ml",       "precio_min": 18000, "precio_max": 28000, "recomendado": true,  "nota": "Acabado natural premium. Xylazel/Sikkens." },
+    { "tipo": "Aceite de linaza crudo 1L",  "precio_min": 8000,  "precio_max": 15000, "recomendado": true,  "nota": "Económico, buen resultado en pino" },
+    { "tipo": "Aceite danés 500ml",         "precio_min": 20000, "precio_max": 30000, "recomendado": true,  "nota": "Minwax / Liberon" },
+    { "tipo": "Cera en pasta 400ml",        "precio_min": 12000, "precio_max": 22000, "recomendado": true,  "nota": "Capa final sobre aceite" },
+    { "tipo": "Resina epoxi 250ml",         "precio_min": 15000, "precio_max": 25000, "recomendado": true,  "nota": "Para fisuras y nudos, efecto wabi-sabi" },
+    { "tipo": "Barniz marino 1L",           "precio_min": 10000, "precio_max": 16000, "recomendado": false, "nota": "" },
+    { "tipo": "Esmalte al agua 1L",         "precio_min": 8500,  "precio_max": 13000, "recomendado": false, "nota": "" },
+    { "tipo": "Tinte acuoso Minwax 250ml",  "precio_min": 12000, "precio_max": 20000, "recomendado": false, "nota": "Para oscurecer veta" }
+  ],
+
+  "proveedores_zona": [
+    { "nombre": "Maderera Arizala",              "ciudad": "La Serena", "zona": "Zona industrial Av. Francisco de Aguirre" },
+    { "nombre": "Maderera El Roble",             "ciudad": "La Serena", "zona": "" },
+    { "nombre": "Sodimac",                       "ciudad": "La Serena", "zona": "Av. del Mar / Las Compras", "precio": "alto",  "ventaja": "stock garantizado, precios verificados online" },
+    { "nombre": "Easy",                          "ciudad": "La Serena", "zona": "", "precio": "alto",  "ventaja": "stock garantizado" },
+    { "nombre": "Construmart",                   "ciudad": "La Serena", "zona": "", "precio": "medio", "ventaja": "tableros y materiales construcción" },
+    { "nombre": "Aserraderos Ovalle/Combarbalá", "ciudad": "Ovalle",    "zona": "", "precio": "bajo",  "ventaja": "eucalipto y pino bruto más barato, vale el viaje para compras grandes" }
+  ],
+
+  "consejo_compra": "Sodimac vende pino en 3.2m (no 3m). Compra con 4-6 semanas de anticipación si usas maderera — pino verde recién aserrado se tuerce al secar. En Sodimac el pino seco está disponible de inmediato."
+}

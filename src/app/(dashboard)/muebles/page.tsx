@@ -1,5 +1,7 @@
-import { SectionOverview } from "@/components/SectionOverview";
+import { MueblesClient } from "@/modules/muebles/MueblesClient";
+import { getFurnitureFallbackData, getFurniturePageData } from "@/modules/muebles/db";
 
-export default function MueblesPage() {
-  return <SectionOverview id="muebles" />;
+export default async function MueblesPage() {
+  const data = await getFurniturePageData().catch(() => getFurnitureFallbackData());
+  return <MueblesClient initialData={data} />;
 }
