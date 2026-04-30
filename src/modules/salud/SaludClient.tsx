@@ -5,6 +5,7 @@ import {
   routineTemplates,
   routineHtmlWeeks,
   routinePlanAnchor,
+  sessionHistory as legacySessionHistory,
   type ConsistencyPoint,
   type HealthPagePayload,
   type SessionHistoryItem,
@@ -247,6 +248,37 @@ function sortConsistencyPoints(points: ConsistencyPoint[]) {
   );
 }
 
+function mergeSessionHistory(
+  primary: SessionHistoryItem[],
+  fallback: SessionHistoryItem[],
+) {
+  const seen = new Set<string>();
+
+  return [...primary, ...fallback].filter((item) => {
+    if (seen.has(item.id)) {
+      return false;
+    }
+
+    seen.add(item.id);
+    return true;
+  });
+}
+
+function buildConsistencyFromHistory(items: SessionHistoryItem[]) {
+  const counts = new Map<string, number>();
+
+  for (const item of items) {
+    counts.set(item.week, (counts.get(item.week) ?? 0) + 1);
+  }
+
+  return sortConsistencyPoints(
+    [...counts.entries()].map(([label, value]) => ({
+      label,
+      value,
+    })),
+  );
+}
+
 function incrementConsistencyPoint(points: ConsistencyPoint[], label: string) {
   const counts = new Map(points.map((point) => [point.label, point.value]));
   counts.set(label, (counts.get(label) ?? 0) + 1);
@@ -306,9 +338,13 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
   const [selectedScanId, setSelectedScanId] = useState(
     props.initialData.inbodyScans[props.initialData.inbodyScans.length - 1]?.id ?? "",
   );
-  const [sessionHistory, setSessionHistory] = useState(props.initialData.sessionHistory);
+  const initialSessionHistory = useMemo(
+    () => mergeSessionHistory(props.initialData.sessionHistory, legacySessionHistory),
+    [props.initialData.sessionHistory],
+  );
+  const [sessionHistory, setSessionHistory] = useState(initialSessionHistory);
   const [weeklyConsistency, setWeeklyConsistency] = useState(
-    props.initialData.weeklyConsistency,
+    () => buildConsistencyFromHistory(initialSessionHistory),
   );
   const [registrationDraft, setRegistrationDraft] = useState<RegistrationDraft | null>(null);
   const [registrationMessage, setRegistrationMessage] = useState<string | null>(null);
