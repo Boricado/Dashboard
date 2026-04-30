@@ -918,25 +918,28 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
                 <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
                   Impedancia
                 </div>
-                <div className="mt-4 overflow-hidden rounded-[1.2rem] border border-[var(--line)] bg-white">
-                  <div className="grid grid-cols-[110px_repeat(5,minmax(0,1fr))] bg-[#f2f0fb] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
-                    <div>Frecuencia</div>
-                    {IMPEDANCE_COLUMNS.map((column) => (
-                      <div key={column.key}>{column.label}</div>
-                    ))}
-                  </div>
+                <div className="mt-4 grid gap-3">
                   {(["z20", "z100"] as const).map((band) => (
-                    <div
-                      key={`${selectedScan.id}-${band}`}
-                      className="grid grid-cols-[110px_repeat(5,minmax(0,1fr))] border-t border-[var(--line)] px-4 py-3 text-sm text-[var(--ink)]"
-                    >
-                      <div className="font-medium">{band === "z20" ? "20 kHz" : "100 kHz"}</div>
-                      {IMPEDANCE_COLUMNS.map((column) => (
-                        <div key={`${band}-${column.key}`}>
-                          {selectedScan.impedance[band][column.key].toFixed(1)}
-                        </div>
-                      ))}
-                    </div>
+                    <article key={`${selectedScan.id}-${band}`} className="rounded-[1.2rem] border border-[var(--line)] bg-white p-4">
+                      <div className="text-sm font-semibold text-[var(--ink)]">
+                        {band === "z20" ? "20 kHz" : "100 kHz"}
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
+                        {IMPEDANCE_COLUMNS.map((column) => (
+                          <div
+                            key={`${band}-${column.key}`}
+                            className="rounded-xl bg-[#f2f0fb] px-3 py-2"
+                          >
+                            <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
+                              {column.label}
+                            </div>
+                            <div className="mt-1 text-base font-semibold tabular-nums text-[var(--ink)]">
+                              {selectedScan.impedance[band][column.key].toFixed(1)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </article>
                   ))}
                 </div>
               </div>
@@ -1274,10 +1277,10 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
           </aside>
         </section>
 
-        <section className="app-card hidden p-8 md:block">
+        <section className="app-card p-8">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="text-3xl font-semibold text-[var(--ink)]">HTML original de rutina</h2>
+              <h2 className="text-3xl font-semibold text-[var(--ink)]">Rutinas HTML</h2>
               <p className="hidden">
                 Rescatado desde tu dashboard anterior para seguir viendo la version que ya te gustaba.
               </p>
@@ -1314,7 +1317,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
               key={selectedHtmlWeek}
               src={`/rutina_semana${selectedHtmlWeek}.html`}
               title={`Rutina semana ${selectedHtmlWeek}`}
-              className="h-[820px] w-full"
+              className="h-[640px] w-full md:h-[820px]"
             />
           </div>
         </section>

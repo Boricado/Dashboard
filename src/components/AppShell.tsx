@@ -168,7 +168,7 @@ export function AppShell(props: { children: React.ReactNode }) {
                 href={section.href}
                 aria-current={isActive ? "page" : undefined}
                 className={cx(
-                  "flex min-w-[72px] snap-center flex-col items-center justify-center gap-1 rounded-2xl px-2 py-1.5 text-[11px] font-semibold leading-none transition",
+                  "flex min-w-[66px] snap-center flex-col items-center justify-center gap-1 rounded-2xl px-1.5 py-1.5 text-center text-[10px] font-semibold leading-none transition",
                   isActive
                     ? "bg-[#edf7f1] text-[var(--accent-strong)]"
                     : "text-[#626b64] active:bg-[#f4f6f4]",
@@ -184,7 +184,7 @@ export function AppShell(props: { children: React.ReactNode }) {
                 >
                   <SectionIcon id={section.id} className="size-5" />
                 </span>
-                <span className="max-w-[68px] truncate">{section.label}</span>
+                <span className="block max-w-[64px] truncate text-current">{section.label}</span>
               </Link>
             );
           })}
