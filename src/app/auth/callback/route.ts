@@ -5,7 +5,7 @@ import { env, hasSupabaseEnv } from "@/lib/env";
 export async function GET(request: NextRequest) {
   const url = request.nextUrl;
   const code = url.searchParams.get("code");
-  const next = url.searchParams.get("next") ?? "/inicio";
+  const next = url.searchParams.get("next") ?? "/salud";
 
   const response = NextResponse.redirect(new URL(next, url.origin));
 

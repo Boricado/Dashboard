@@ -49,9 +49,9 @@ export function UpdatePasswordForm() {
         throw updateError;
       }
 
-      setSuccess("Tu contraseña fue actualizada. Redirigiendo al inicio...");
+      setSuccess("Tu clave fue actualizada. Redirigiendo a salud...");
       window.setTimeout(() => {
-        router.replace("/inicio");
+        router.replace("/salud");
         router.refresh();
       }, 1200);
     } catch (caughtError) {

@@ -24,8 +24,14 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
+  if (pathname === "/inicio") {
+    const saludUrl = request.nextUrl.clone();
+    saludUrl.pathname = "/salud";
+    saludUrl.search = "";
+    return NextResponse.redirect(saludUrl);
+  }
+
   const isDashboard =
-    pathname === "/inicio" ||
     pathname.startsWith("/licitaciones") ||
     pathname.startsWith("/tareas") ||
     pathname.startsWith("/salud") ||

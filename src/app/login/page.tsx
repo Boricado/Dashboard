@@ -8,7 +8,7 @@ type LoginPageProps = {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
-  const nextPath = params?.next ?? "/inicio";
+  const nextPath = params?.next ?? "/salud";
 
   return <LoginForm nextPath={nextPath} />;
 }

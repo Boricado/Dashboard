@@ -41,8 +41,8 @@ export default function ConfiguracionPage() {
             dashboard y conectar cada módulo gradualmente.
           </p>
           <div className="mt-3">
-            <Link className="text-sm font-medium underline" href="/inicio">
-              Ir al inicio
+            <Link className="text-sm font-medium underline" href="/salud">
+              Ir a salud
             </Link>
           </div>
         </div>
