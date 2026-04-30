@@ -92,11 +92,11 @@ async function readJson<T>(response: Response): Promise<T> {
 
 function StatCard(props: { label: string; value: number }) {
   return (
-    <article className="app-card p-5">
-      <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+    <article className="app-card p-4 sm:p-5">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
         {props.label}
       </div>
-      <div className="mt-2 text-4xl font-semibold leading-none text-[var(--ink)]">
+      <div className="mt-2 text-2xl font-semibold leading-none text-[var(--ink)] sm:text-4xl">
         {props.value}
       </div>
     </article>
@@ -235,44 +235,44 @@ export function TasksClient({
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <section className="rounded-[2rem] border border-[var(--line)] bg-[var(--panel)] p-6 lg:p-7">
-        <span className="inline-flex rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent-strong)]">
+    <div className="flex min-w-0 flex-col gap-3 sm:gap-5">
+      <section className="rounded-lg border border-[var(--line)] bg-[var(--panel)] p-4 lg:p-6">
+        <span className="hidden">
           Módulo activo
         </span>
-        <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <h1 className="text-3xl font-semibold tracking-tight text-[var(--ink)]">
+            <h1 className="text-2xl font-semibold tracking-tight text-[var(--ink)] sm:text-3xl">
               Tareas
             </h1>
-            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+            <p className="hidden">
               Captura, prioriza y mueve pendientes sin mezclar ruido de otros
               módulos.
             </p>
           </div>
-          <div className="rounded-2xl border border-[var(--line)] bg-white/70 px-4 py-3 text-sm text-[var(--muted)]">
+          <div className="rounded-lg border border-[var(--line)] bg-white/70 px-3 py-2 text-sm text-[var(--muted)]">
             {visibleTasks.length} visibles de {tasks.length} tareas
           </div>
         </div>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4">
         <StatCard label="Total" value={stats.total} />
         <StatCard label="Pendientes" value={stats.pendientes} />
         <StatCard label="En progreso" value={stats.enProgreso} />
         <StatCard label="Completadas" value={stats.completadas} />
       </section>
 
-      <section className="grid min-w-0 gap-6 2xl:grid-cols-[minmax(320px,380px)_minmax(0,1fr)]">
+      <section className="grid min-w-0 gap-3 sm:gap-5 2xl:grid-cols-[minmax(320px,380px)_minmax(0,1fr)]">
         <form
           onSubmit={handleCreateTask}
-          className="app-card flex h-fit flex-col gap-5 p-5 lg:p-6"
+          className="app-card flex h-fit flex-col gap-4 p-4 lg:p-5"
         >
           <div>
             <h2 className="text-xl font-semibold text-[var(--ink)]">
               Nueva tarea
             </h2>
-            <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+            <p className="hidden">
               Solo lo esencial para capturar rápido y seguir avanzando.
             </p>
           </div>
@@ -282,7 +282,7 @@ export function TasksClient({
             <input
               value={form.titulo ?? ""}
               onChange={(event) => updateForm("titulo", event.target.value)}
-              className="h-11 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+              className="h-11 rounded-lg border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
               placeholder="Ej: llamar al proveedor"
               required
             />
@@ -293,7 +293,7 @@ export function TasksClient({
             <textarea
               value={form.descripcion ?? ""}
               onChange={(event) => updateForm("descripcion", event.target.value)}
-              className="min-h-28 rounded-2xl border border-[var(--line)] bg-white px-3 py-3 outline-none focus:border-[var(--accent)]"
+              className="min-h-24 rounded-lg border border-[var(--line)] bg-white px-3 py-3 outline-none focus:border-[var(--accent)]"
               placeholder="Detalle breve, no una novela."
             />
           </label>
@@ -306,7 +306,7 @@ export function TasksClient({
                 onChange={(event) =>
                   updateForm("prioridad", event.target.value as TaskPriority)
                 }
-                className="h-11 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+                className="h-11 rounded-lg border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
               >
                 {TASK_PRIORITIES.map((priority) => (
                   <option key={priority} value={priority}>
@@ -323,7 +323,7 @@ export function TasksClient({
                 onChange={(event) =>
                   updateForm("estado", event.target.value as TaskStatus)
                 }
-                className="h-11 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+                className="h-11 rounded-lg border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
               >
                 {TASK_STATUSES.map((status) => (
                   <option key={status} value={status}>
@@ -340,7 +340,7 @@ export function TasksClient({
               <input
                 value={form.categoria ?? ""}
                 onChange={(event) => updateForm("categoria", event.target.value)}
-                className="h-11 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+                className="h-11 rounded-lg border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
                 placeholder="Trabajo, personal..."
               />
             </label>
@@ -351,7 +351,7 @@ export function TasksClient({
                 type="date"
                 value={form.fecha_limite ?? ""}
                 onChange={(event) => updateForm("fecha_limite", event.target.value)}
-                className="h-11 min-w-0 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+                className="h-11 min-w-0 rounded-lg border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
               />
             </label>
           </div>
@@ -377,20 +377,20 @@ export function TasksClient({
           <button
             type="submit"
             disabled={isPending || initialError != null}
-            className="h-11 rounded-2xl bg-[var(--ink)] px-4 text-sm font-medium text-[var(--surface-strong)] disabled:opacity-60"
+            className="h-11 rounded-lg bg-[var(--ink)] px-4 text-sm font-medium text-white disabled:opacity-60"
           >
             {isPending ? "Guardando..." : "Crear tarea"}
           </button>
         </form>
 
-        <div className="flex min-w-0 flex-col gap-4">
-          <section className="app-card p-5 lg:p-6">
+        <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
+          <section className="app-card p-4 lg:p-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-xl font-semibold text-[var(--ink)]">
                   Bandeja de tareas
                 </h2>
-                <p className="mt-1 text-sm text-[var(--muted)]">
+                <p className="hidden">
                   Filtra rápido y actualiza sin salir de esta vista.
                 </p>
               </div>
@@ -407,7 +407,7 @@ export function TasksClient({
                       busqueda: event.target.value,
                     }))
                   }
-                  className="h-11 min-w-0 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+                  className="h-11 min-w-0 rounded-lg border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
                   placeholder="Título, categoría o descripción"
                 />
               </label>
@@ -422,7 +422,7 @@ export function TasksClient({
                       estado: event.target.value as Filters["estado"],
                     }))
                   }
-                  className="h-11 min-w-0 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+                  className="h-11 min-w-0 rounded-lg border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
                 >
                   <option value="todas">Todas</option>
                   {TASK_STATUSES.map((status) => (
@@ -443,7 +443,7 @@ export function TasksClient({
                       prioridad: event.target.value as Filters["prioridad"],
                     }))
                   }
-                  className="h-11 min-w-0 rounded-2xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+                  className="h-11 min-w-0 rounded-lg border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
                 >
                   <option value="todas">Todas</option>
                   {TASK_PRIORITIES.map((priority) => (
@@ -467,12 +467,12 @@ export function TasksClient({
               visibleTasks.map((task) => (
                 <article
                   key={task.id}
-                  className="app-card flex min-w-0 flex-col gap-5 p-5 lg:p-6"
+                  className="app-card flex min-w-0 flex-col gap-4 p-4 lg:p-5"
                 >
                   <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-lg font-semibold text-[var(--ink)]">
+                        <h3 className="break-words text-base font-semibold text-[var(--ink)] sm:text-lg">
                           {task.titulo}
                         </h3>
                         <span
@@ -509,7 +509,7 @@ export function TasksClient({
                             "Estado actualizado.",
                           )
                         }
-                        className="h-11 min-w-0 rounded-2xl border border-[var(--line)] bg-white px-3 text-sm outline-none focus:border-[var(--accent)]"
+                        className="h-11 min-w-0 rounded-lg border border-[var(--line)] bg-white px-3 text-sm outline-none focus:border-[var(--accent)]"
                       >
                         {TASK_STATUSES.map((status) => (
                           <option key={status} value={status}>
@@ -527,7 +527,7 @@ export function TasksClient({
                             "Prioridad actualizada.",
                           )
                         }
-                        className="h-11 min-w-0 rounded-2xl border border-[var(--line)] bg-white px-3 text-sm outline-none focus:border-[var(--accent)]"
+                        className="h-11 min-w-0 rounded-lg border border-[var(--line)] bg-white px-3 text-sm outline-none focus:border-[var(--accent)]"
                       >
                         {TASK_PRIORITIES.map((priority) => (
                           <option key={priority} value={priority}>
@@ -542,7 +542,7 @@ export function TasksClient({
                     <button
                       type="button"
                       onClick={() => handleDeleteTask(task.id)}
-                      className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-medium text-rose-900 transition hover:bg-rose-100"
+                      className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-medium text-rose-900 transition hover:bg-rose-100"
                     >
                       Eliminar
                     </button>

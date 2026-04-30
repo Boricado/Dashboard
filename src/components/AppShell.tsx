@@ -13,6 +13,12 @@ function cx(...classes: Array<string | false | null | undefined>) {
 export function AppShell(props: { children: React.ReactNode }) {
   const pathname = usePathname();
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const activeSection = APP_SECTIONS.find(
+    (section) => pathname === section.href || pathname?.startsWith(`${section.href}/`),
+  );
+  const bottomSections = APP_SECTIONS.filter((section) =>
+    ["tareas", "salud"].includes(section.id),
+  );
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -20,30 +26,23 @@ export function AppShell(props: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-dvh text-[var(--ink)]">
-      <div className="app-grid flex w-full flex-col gap-5 px-3 py-4 sm:px-4 lg:px-6 2xl:px-8">
-        <header className="app-shell-surface rounded-[2rem] px-5 py-5 sm:px-6">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex flex-col">
-              <div className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
-                Dashboard modular
+    <div className="min-h-dvh overflow-x-hidden text-[var(--ink)]">
+      <div className="app-grid flex w-full min-w-0 flex-col gap-3 px-2 py-2 pb-24 sm:px-4 sm:py-4 xl:gap-5 xl:px-6 xl:pb-6 2xl:px-8">
+        <header className="app-shell-surface rounded-xl px-3 py-3 sm:px-4 xl:rounded-2xl xl:px-6 xl:py-5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="app-display truncate text-xl font-semibold sm:text-2xl xl:text-4xl">
+                Fidel
               </div>
-              <div className="app-display mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
-                Fidel Dashboard
+              <div className="mt-0.5 truncate text-xs font-medium text-[var(--muted)] xl:text-sm">
+                {activeSection?.label ?? "Dashboard"}
               </div>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)] sm:text-[15px]">
-                Operacion diaria, licitaciones y modulos vivos en una sola base,
-                con estructura clara para escritorio y movil.
-              </p>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="rounded-full border border-[var(--line)] bg-white/80 px-4 py-2 text-sm text-[var(--muted)]">
-                Next.js + TypeScript + Supabase
-              </div>
+            <div className="flex shrink-0 items-center gap-2">
               <button
                 onClick={signOut}
-                className="rounded-full bg-[var(--ink)] px-4 py-2 text-sm font-medium text-[var(--sand)] transition hover:opacity-90"
+                className="rounded-lg bg-[var(--ink)] px-3 py-2 text-xs font-medium text-white transition hover:opacity-90 sm:text-sm"
               >
                 Salir
               </button>
@@ -51,45 +50,8 @@ export function AppShell(props: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
-          <div className="app-shell-surface overflow-x-auto rounded-[1.5rem] px-3 py-3 xl:hidden">
-            <nav className="flex min-w-max gap-2">
-              {APP_SECTIONS.map((section) => {
-                const isActive =
-                  pathname === section.href || pathname?.startsWith(`${section.href}/`);
-
-                return (
-                  <Link
-                    key={section.id}
-                    href={section.href}
-                    className={cx(
-                      "rounded-full border px-4 py-2 text-sm whitespace-nowrap transition",
-                      isActive
-                        ? "border-emerald-200 bg-white text-emerald-700 shadow-[0_8px_20px_rgba(29,123,82,0.12)]"
-                        : "border-[var(--line)] bg-white/75 text-[var(--ink)]",
-                    )}
-                  >
-                    {section.label}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-
-          <aside className="app-shell-surface hidden h-fit rounded-[2rem] p-4 xl:sticky xl:top-6 xl:block">
-            <div className="mb-4 rounded-[1.5rem] border border-[var(--line)] bg-white/85 p-4">
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
-                Regla del proyecto
-              </div>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                Cada seccion vive en su ruta, su metadata y su propio
-                <code className="ml-1 rounded-md bg-[var(--surface-strong)] px-1.5 py-0.5 text-xs text-[var(--ink)]">
-                  CONTEXT.md
-                </code>
-                .
-              </p>
-            </div>
-
+        <div className="grid min-w-0 grid-cols-1 gap-3 xl:grid-cols-[260px_minmax(0,1fr)] xl:gap-5">
+          <aside className="app-shell-surface hidden h-fit rounded-2xl p-3 xl:sticky xl:top-6 xl:block">
             <nav className="flex flex-col gap-1">
               {APP_SECTIONS.map((section) => {
                 const isActive =
@@ -100,32 +62,48 @@ export function AppShell(props: { children: React.ReactNode }) {
                     key={section.id}
                     href={section.href}
                     className={cx(
-                      "rounded-[1.25rem] border px-4 py-3 text-sm transition",
+                      "rounded-xl border px-3 py-2.5 text-sm transition",
                       isActive
-                        ? "border-[#d7eee1] bg-white text-emerald-700 shadow-[0_6px_18px_rgba(20,122,61,0.08)]"
+                        ? "border-[#cfe7d8] bg-white text-emerald-700 shadow-[0_6px_18px_rgba(20,122,61,0.08)]"
                         : "border-transparent text-[var(--ink)] hover:border-[var(--line)] hover:bg-white/80",
                     )}
                   >
                     <div className="font-medium">{section.label}</div>
-                    <div
-                      className={cx(
-                        "text-xs",
-                        isActive ? "text-emerald-700/75" : "text-[var(--muted)]",
-                      )}
-                    >
-                      {section.description}
-                    </div>
                   </Link>
                 );
               })}
             </nav>
           </aside>
 
-          <main className="app-shell-surface rounded-[2rem] p-4 sm:p-5 xl:p-6">
+          <main className="app-content min-w-0">
             {props.children}
           </main>
         </div>
       </div>
+
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--line)] bg-white/94 px-4 pb-[max(0.65rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-12px_30px_rgba(27,34,29,0.12)] backdrop-blur xl:hidden">
+        <div className="mx-auto grid max-w-sm grid-cols-2 gap-2">
+          {bottomSections.map((section) => {
+            const isActive =
+              pathname === section.href || pathname?.startsWith(`${section.href}/`);
+
+            return (
+              <Link
+                key={section.id}
+                href={section.href}
+                className={cx(
+                  "flex h-12 items-center justify-center rounded-xl text-sm font-semibold transition",
+                  isActive
+                    ? "bg-[var(--ink)] text-white"
+                    : "border border-[var(--line)] bg-[var(--card)] text-[var(--ink)]",
+                )}
+              >
+                {section.label}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }

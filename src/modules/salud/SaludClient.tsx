@@ -672,7 +672,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
 
           <article className="app-card p-8 shadow-[0_16px_48px_rgba(31,27,22,0.05)]">
             <h2 className="text-3xl font-semibold text-[var(--ink)]">Consistencia</h2>
-            <p className="mt-2 text-base text-[var(--muted)]">Sesiones por semana</p>
+            <p className="hidden">Sesiones por semana</p>
 
             <div className="relative mt-8 overflow-hidden rounded-[1.5rem] border border-[#e7e4f4] bg-white p-5">
               <div className="pointer-events-none absolute inset-x-5 top-5 bottom-11 grid grid-rows-4">
@@ -712,7 +712,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
               </div>
             </div>
 
-            <div className="mt-5 rounded-[1.5rem] border border-[var(--line)] bg-white px-5 py-4 text-base text-[var(--muted)]">
+            <div className="hidden">
               El patron mas estable del bloque esta entre S10 y S11, con 6 sesiones.
             </div>
           </article>
@@ -723,7 +723,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <h2 className="text-3xl font-semibold text-[var(--ink)]">Ultimo vs anterior</h2>
-                <p className="mt-2 text-base text-[var(--muted)]">
+                <p className="hidden">
                   {previousScan.label} frente a {latestScan.label}
                 </p>
               </div>
@@ -775,7 +775,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
           <article className="app-card p-8">
             <div>
               <h2 className="text-3xl font-semibold text-[var(--ink)]">Timeline InBody</h2>
-              <p className="mt-2 text-base text-[var(--muted)]">
+              <p className="hidden">
                 Lecturas reconstruidas manualmente desde los escaneos originales.
               </p>
             </div>
@@ -927,7 +927,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-3xl font-semibold text-[var(--ink)]">Semana {selectedWeek.label.replace("Semana ", "")} — {selectedWeek.focus}</h2>
-                <p className="mt-2 text-base text-[var(--muted)]">
+                <p className="hidden">
                   Rutinas ordenadas por bloque y listas para registrar.
                 </p>
               </div>
@@ -1239,11 +1239,11 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
           </aside>
         </section>
 
-        <section className="app-card p-8">
+        <section className="app-card hidden p-8 md:block">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <h2 className="text-3xl font-semibold text-[var(--ink)]">HTML original de rutina</h2>
-              <p className="mt-2 text-base text-[var(--muted)]">
+              <p className="hidden">
                 Rescatado desde tu dashboard anterior para seguir viendo la version que ya te gustaba.
               </p>
             </div>
@@ -1288,7 +1288,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <h2 className="text-3xl font-semibold text-[var(--ink)]">Historial de sesiones</h2>
-              <p className="mt-2 text-base text-[var(--muted)]">
+              <p className="hidden">
                 Base parcial rescatada desde scripts antiguos.
               </p>
             </div>
