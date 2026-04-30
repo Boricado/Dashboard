@@ -5,6 +5,7 @@ import {
   routineTemplates,
   routineHtmlWeeks,
   routinePlanAnchor,
+  type ConsistencyPoint,
   type HealthPagePayload,
   type SessionHistoryItem,
   type WorkoutWeek,
@@ -240,6 +241,24 @@ function buildExerciseDraft(session: string) {
   });
 }
 
+function sortConsistencyPoints(points: ConsistencyPoint[]) {
+  return [...points].sort((a, b) =>
+    a.label.localeCompare(b.label, undefined, { numeric: true }),
+  );
+}
+
+function incrementConsistencyPoint(points: ConsistencyPoint[], label: string) {
+  const counts = new Map(points.map((point) => [point.label, point.value]));
+  counts.set(label, (counts.get(label) ?? 0) + 1);
+
+  return sortConsistencyPoints(
+    [...counts.entries()].map(([pointLabel, value]) => ({
+      label: pointLabel,
+      value,
+    })),
+  );
+}
+
 function MiniMetricBar(props: { label: string; value: string; progress: number }) {
   return (
     <div>
@@ -288,6 +307,9 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
     props.initialData.inbodyScans[props.initialData.inbodyScans.length - 1]?.id ?? "",
   );
   const [sessionHistory, setSessionHistory] = useState(props.initialData.sessionHistory);
+  const [weeklyConsistency, setWeeklyConsistency] = useState(
+    props.initialData.weeklyConsistency,
+  );
   const [registrationDraft, setRegistrationDraft] = useState<RegistrationDraft | null>(null);
   const [registrationMessage, setRegistrationMessage] = useState<string | null>(null);
 
@@ -332,7 +354,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
   const weightMin = Math.min(...weightTrend.map((point) => point.value));
   const weightMax = Math.max(...weightTrend.map((point) => point.value));
   const consistencyMin = 0;
-  const consistencyMax = Math.max(...props.initialData.weeklyConsistency.map((point) => point.value), 1);
+  const consistencyMax = Math.max(...weeklyConsistency.map((point) => point.value), 1);
   const latestMeasurement = {
     title: "Composicion InBody",
     dateLabel: `Ultima medicion: ${latestScan.label}`,
@@ -569,6 +591,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
     };
 
     setSessionHistory((current) => [newEntry, ...current]);
+    setWeeklyConsistency((current) => incrementConsistencyPoint(current, newEntry.week));
     setWorkoutRoutines((current) =>
       current.map((week) => {
         if (week.id !== selectedWeek.id) {
@@ -713,9 +736,9 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
                   <span className="self-center">{Math.round(consistencyMax / 3)}</span>
                   <span className="self-end">0</span>
                 </div>
-                <div className="grid h-[176px] grid-cols-8 gap-3 overflow-hidden">
-                  {props.initialData.weeklyConsistency.map((point) => (
-                    <div key={point.label} className="grid grid-rows-[1fr_auto_auto] gap-2 overflow-hidden">
+                <div className="flex h-[176px] gap-3 overflow-x-auto pb-1">
+                  {weeklyConsistency.map((point) => (
+                    <div key={point.label} className="grid min-w-12 flex-1 grid-rows-[1fr_auto_auto] gap-2 overflow-hidden">
                       <div className="flex items-end">
                         <div
                           className="w-full rounded-t-[1rem] bg-[#147a3d]"

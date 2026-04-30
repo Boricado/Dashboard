@@ -387,40 +387,42 @@ export async function getHealthPageData(): Promise<HealthPagePayload> {
     exerciseMap.set(exercise.session_id, current);
   }
 
-  const sessionHistory: SessionHistoryItem[] =
-    sessions.length > 0
-      ? sessions.map((session) => {
-          const relatedExercises = exerciseMap.get(session.id) ?? [];
-          const details = relatedExercises.map((exercise) =>
-            [
-              exercise.completed ? "OK" : "Pendiente",
-              exercise.name,
-              exercise.sets_text ? `${exercise.sets_text} series` : "",
-              exercise.reps_text ? `${exercise.reps_text} reps` : "",
-              exercise.load_text ?? "",
-              exercise.notes ?? "",
-            ]
-              .filter(Boolean)
-              .join(" · "),
-          );
+  const savedSessionHistory: SessionHistoryItem[] = sessions.map((session) => {
+    const relatedExercises = exerciseMap.get(session.id) ?? [];
+    const details = relatedExercises.map((exercise) =>
+      [
+        exercise.completed ? "OK" : "Pendiente",
+        exercise.name,
+        exercise.sets_text ? `${exercise.sets_text} series` : "",
+        exercise.reps_text ? `${exercise.reps_text} reps` : "",
+        exercise.load_text ?? "",
+        exercise.notes ?? "",
+      ]
+        .filter(Boolean)
+        .join(" · "),
+    );
 
-          return {
-            id: session.id,
-            date: formatDateLabel(session.session_date),
-            week: weekMap.get(session.routine_week_id ?? "") ?? "Manual",
-            session: session.session_type,
-            summary:
-              session.status === "completado"
-                ? `${relatedExercises.filter((item) => item.completed).length} ejercicios completados`
-                : session.status,
-            notes: session.notes ?? undefined,
-            details,
-          };
-        })
+    return {
+      id: session.id,
+      date: formatDateLabel(session.session_date),
+      week: weekMap.get(session.routine_week_id ?? "") ?? "Manual",
+      session: session.session_type,
+      summary:
+        session.status === "completado"
+          ? `${relatedExercises.filter((item) => item.completed).length} ejercicios completados`
+          : session.status,
+      notes: session.notes ?? undefined,
+      details,
+    };
+  });
+
+  const sessionHistory =
+    savedSessionHistory.length > 0
+      ? [...savedSessionHistory, ...legacySessionHistory]
       : legacySessionHistory;
 
   const weeklyConsistency =
-    sessions.length > 0
+    sessionHistory.length > 0
       ? buildConsistencyFromSessions(sessionHistory)
       : legacyWeeklyConsistency;
 
