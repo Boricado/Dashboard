@@ -1,11 +1,17 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "@/lib/env";
+import {
+  supabaseServerAuthOptions,
+  supabaseSessionCookieOptions,
+} from "@/lib/supabase/session";
 
 export async function updateSession(request: NextRequest) {
   const response = NextResponse.next({ request });
 
   const supabase = createServerClient(env.supabase.url(), env.supabase.anonKey(), {
+    auth: supabaseServerAuthOptions,
+    cookieOptions: supabaseSessionCookieOptions,
     cookies: {
       getAll() {
         return request.cookies.getAll();
@@ -38,7 +44,8 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/proyectos") ||
     pathname.startsWith("/muebles") ||
     pathname.startsWith("/banco") ||
-    pathname.startsWith("/contador");
+    pathname.startsWith("/contador") ||
+    pathname.startsWith("/perfil");
 
   if (isDashboard && !user) {
     const loginUrl = request.nextUrl.clone();
