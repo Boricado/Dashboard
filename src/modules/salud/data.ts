@@ -135,6 +135,10 @@ export type InBodyScan = {
   segmentalLean: InBodySegmentalAnalysis;
   segmentalFat: InBodySegmentalAnalysis;
   impedance: InBodyImpedanceSnapshot;
+  fileName?: string | null;
+  filePath?: string | null;
+  fileMimeType?: string | null;
+  fileSize?: number | null;
 };
 
 export const inbodyScans: InBodyScan[] = [

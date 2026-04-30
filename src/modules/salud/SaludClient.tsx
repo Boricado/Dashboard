@@ -864,7 +864,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
 
             <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-white">
               <div className="overflow-x-auto">
-                <table className="min-w-[720px] table-fixed border-collapse">
+                <table className="min-w-[860px] table-fixed border-collapse">
                   <thead className="bg-[#f2f0fb] text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
                     <tr>
                       <th className="px-4 py-3 text-left">Fecha</th>
@@ -873,6 +873,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
                       <th className="px-4 py-3 text-left">Grasa</th>
                       <th className="px-4 py-3 text-left">PGC</th>
                       <th className="px-4 py-3 text-left">Score</th>
+                      <th className="px-4 py-3 text-left">Archivo</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -890,6 +891,19 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
                         <td className="px-4 py-3">{scan.bodyFatMassKg.toFixed(1)} kg</td>
                         <td className="px-4 py-3">{scan.bodyFatPercent.toFixed(1)}%</td>
                         <td className="px-4 py-3">{scan.score}</td>
+                        <td className="px-4 py-3">
+                          {scan.filePath ? (
+                            <a
+                              href={`/api/health/inbody/${scan.id}/file`}
+                              onClick={(event) => event.stopPropagation()}
+                              className="rounded-full bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white"
+                            >
+                              Descargar
+                            </a>
+                          ) : (
+                            <span className="text-xs text-[var(--muted)]">Sin archivo</span>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -907,8 +921,16 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
                     {selectedScan.label}
                   </div>
                 </div>
-                <div className="text-sm text-[var(--muted)]">
-                  {selectedScan.heightCm} cm · {selectedScan.age} anos
+                <div className="flex flex-wrap items-center gap-2 text-sm text-[var(--muted)]">
+                  <span>{selectedScan.heightCm} cm · {selectedScan.age} anos</span>
+                  {selectedScan.filePath ? (
+                    <a
+                      href={`/api/health/inbody/${selectedScan.id}/file`}
+                      className="rounded-full bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white"
+                    >
+                      Descargar archivo
+                    </a>
+                  ) : null}
                 </div>
               </div>
 

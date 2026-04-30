@@ -11,6 +11,8 @@ import {
   type WorkoutWeek,
 } from "@/modules/salud/data";
 
+export const HEALTH_INBODY_FILES_BUCKET = "health-inbody-files";
+
 type InbodyRow = {
   id: string;
   scan_date: string;
@@ -40,6 +42,10 @@ type InbodyRow = {
   segmental_lean: Record<string, unknown> | null;
   segmental_fat: Record<string, unknown> | null;
   impedance: Record<string, unknown> | null;
+  file_name: string | null;
+  file_path: string | null;
+  file_mime_type: string | null;
+  file_size: number | null;
 };
 
 type RoutineWeekRow = {
@@ -169,6 +175,10 @@ function mapInbodyRow(row: InbodyRow): InBodyScan {
     segmentalLean: readSegmental(row.segmental_lean),
     segmentalFat: readSegmental(row.segmental_fat),
     impedance: readImpedance(row.impedance),
+    fileName: row.file_name,
+    filePath: row.file_path,
+    fileMimeType: row.file_mime_type,
+    fileSize: row.file_size,
   };
 }
 
@@ -244,6 +254,10 @@ async function ensureHealthSeedData() {
       segmental_lean: scan.segmentalLean,
       segmental_fat: scan.segmentalFat,
       impedance: scan.impedance,
+      file_name: scan.fileName ?? null,
+      file_path: scan.filePath ?? null,
+      file_mime_type: scan.fileMimeType ?? null,
+      file_size: scan.fileSize ?? null,
     }));
 
     const { error } = await supabase.from("health_inbody_scans").insert(payload);
@@ -315,7 +329,7 @@ export async function getHealthPageData(): Promise<HealthPagePayload> {
     supabase
       .from("health_inbody_scans")
       .select(
-        "id, scan_date, source_label, height_cm, age, weight_kg, body_water_l, proteins_kg, minerals_kg, body_fat_mass_kg, skeletal_muscle_kg, body_fat_percent, bmi, score, target_weight_kg, weight_control_kg, fat_control_kg, muscle_control_kg, waist_hip_ratio, visceral_fat_level, obesity_degree, basal_metabolic_rate_kcal, fat_free_mass_kg, ime_kg_m2, recommended_intake_kcal, segmental_lean, segmental_fat, impedance",
+        "id, scan_date, source_label, height_cm, age, weight_kg, body_water_l, proteins_kg, minerals_kg, body_fat_mass_kg, skeletal_muscle_kg, body_fat_percent, bmi, score, target_weight_kg, weight_control_kg, fat_control_kg, muscle_control_kg, waist_hip_ratio, visceral_fat_level, obesity_degree, basal_metabolic_rate_kcal, fat_free_mass_kg, ime_kg_m2, recommended_intake_kcal, segmental_lean, segmental_fat, impedance, file_name, file_path, file_mime_type, file_size",
       )
       .eq("user_id", user.id)
       .order("scan_date", { ascending: true }),
