@@ -4,8 +4,10 @@ import { useMemo, useState } from "react";
 import {
   routineTemplates,
   routineHtmlWeeks,
+  routinePlanAnchor,
   type HealthPagePayload,
   type SessionHistoryItem,
+  type WorkoutWeek,
   type WorkoutDay,
 } from "@/modules/salud/data";
 
@@ -70,6 +72,120 @@ function currentRoutineDayIndex() {
   };
 
   return map[today] ?? 0;
+}
+
+function parseWeekNumber(label: string) {
+  const match = label.match(/(\d+)/);
+  return match ? Number(match[1]) : null;
+}
+
+function startOfDay(date: Date) {
+  const copy = new Date(date);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function startOfWeek(date: Date) {
+  const copy = startOfDay(date);
+  const dayOffset = (copy.getDay() + 6) % 7;
+  copy.setDate(copy.getDate() - dayOffset);
+  return copy;
+}
+
+function diffInWholeWeeks(from: Date, to: Date) {
+  const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+  return Math.floor((startOfWeek(to).getTime() - startOfWeek(from).getTime()) / msPerWeek);
+}
+
+function getPlannedWeekNumber(today: Date) {
+  const anchorDate = new Date(`${routinePlanAnchor.weekStartDate}T00:00:00`);
+  return routinePlanAnchor.weekNumber + diffInWholeWeeks(anchorDate, today);
+}
+
+function buildWeekStatusLabel(weekNumber: number, activeWeekNumber: number) {
+  if (weekNumber < activeWeekNumber) {
+    return "Completada";
+  }
+
+  if (weekNumber === activeWeekNumber) {
+    return "En curso";
+  }
+
+  if (weekNumber === activeWeekNumber + 1) {
+    return "Siguiente bloque";
+  }
+
+  return "Plantilla";
+}
+
+function normalizeRoutineStatus(
+  week: WorkoutWeek,
+  weekNumber: number,
+  activeWeekNumber: number,
+  todayDayIndex: number,
+): WorkoutWeek {
+  return {
+    ...week,
+    statusLabel: buildWeekStatusLabel(weekNumber, activeWeekNumber),
+    days: week.days.map((day, dayIndex) => {
+      if (day.status === "rest" || /descanso/i.test(day.session)) {
+        return {
+          ...day,
+          status: "rest",
+          note: dayIndex === todayDayIndex && weekNumber === activeWeekNumber ? "Recuperacion" : day.note,
+        };
+      }
+
+      if (weekNumber < activeWeekNumber) {
+        return { ...day, status: "completed" };
+      }
+
+      if (weekNumber > activeWeekNumber) {
+        return { ...day, status: "upcoming" };
+      }
+
+      if (dayIndex < todayDayIndex) {
+        return { ...day, status: "completed" };
+      }
+
+      if (dayIndex === todayDayIndex) {
+        return { ...day, status: "today", note: "Hoy" };
+      }
+
+      return { ...day, status: "upcoming" };
+    }),
+  };
+}
+
+function buildRoutineViewModel(routines: WorkoutWeek[], today: Date) {
+  const todayDayIndex = currentRoutineDayIndex();
+  const plannedWeekNumber = getPlannedWeekNumber(today);
+  const numberedWeeks = routines.map((week, index) => ({
+    index,
+    week,
+    weekNumber: parseWeekNumber(week.label) ?? routinePlanAnchor.weekNumber + index,
+  }));
+
+  const activeWeekEntry =
+    numberedWeeks.find((entry) => entry.weekNumber === plannedWeekNumber) ??
+    numberedWeeks.filter((entry) => entry.weekNumber <= plannedWeekNumber).at(-1) ??
+    numberedWeeks[0];
+
+  const activeWeekNumber = activeWeekEntry?.weekNumber ?? plannedWeekNumber;
+  const activeWeekId = activeWeekEntry?.week.id ?? routines[0]?.id ?? "";
+  const activeDayIndex = Math.min(todayDayIndex, Math.max((activeWeekEntry?.week.days.length ?? 1) - 1, 0));
+  const activeHtmlWeek = routineHtmlWeeks.includes(activeWeekNumber)
+    ? activeWeekNumber
+    : activeWeekEntry?.weekNumber ?? routineHtmlWeeks[0] ?? routinePlanAnchor.weekNumber;
+
+  return {
+    activeWeekId,
+    activeDayIndex,
+    activeHtmlWeek,
+    routines: numberedWeeks.map((entry) =>
+      normalizeRoutineStatus(entry.week, entry.weekNumber, activeWeekNumber, todayDayIndex),
+    ),
+  };
 }
 
 function toInputDate(date: Date) {
@@ -160,11 +276,14 @@ function ModalField(props: {
 }
 
 export function SaludClient(props: { initialData: HealthPagePayload }) {
-  const [selectedWeekId, setSelectedWeekId] = useState(
-    props.initialData.workoutRoutines[0]?.id ?? "",
+  const initialRoutineView = useMemo(
+    () => buildRoutineViewModel(props.initialData.workoutRoutines, new Date()),
+    [props.initialData.workoutRoutines],
   );
-  const [selectedDayIndex, setSelectedDayIndex] = useState(4);
-  const [selectedHtmlWeek, setSelectedHtmlWeek] = useState(12);
+  const [workoutRoutines, setWorkoutRoutines] = useState(initialRoutineView.routines);
+  const [selectedWeekId, setSelectedWeekId] = useState(initialRoutineView.activeWeekId);
+  const [selectedDayIndex, setSelectedDayIndex] = useState(initialRoutineView.activeDayIndex);
+  const [selectedHtmlWeek, setSelectedHtmlWeek] = useState(initialRoutineView.activeHtmlWeek);
   const [selectedScanId, setSelectedScanId] = useState(
     props.initialData.inbodyScans[props.initialData.inbodyScans.length - 1]?.id ?? "",
   );
@@ -173,8 +292,8 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
   const [registrationMessage, setRegistrationMessage] = useState<string | null>(null);
 
   const selectedWeek =
-    props.initialData.workoutRoutines.find((week) => week.id === selectedWeekId) ??
-    props.initialData.workoutRoutines[0];
+    workoutRoutines.find((week) => week.id === selectedWeekId) ??
+    workoutRoutines[0];
   const selectedDay = selectedWeek.days[selectedDayIndex] ?? selectedWeek.days[0];
   const selectedExercises = routineTemplates[selectedDay.session] ?? [];
   const selectedScan =
@@ -287,9 +406,19 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
   }
 
   function openRegistrationForToday() {
-    const autoIndex = currentRoutineDayIndex();
-    const autoDay = selectedWeek.days[autoIndex] ?? selectedDay;
+    const freshRoutineView = buildRoutineViewModel(workoutRoutines, new Date());
+    const autoWeek =
+      freshRoutineView.routines.find((week) => week.id === freshRoutineView.activeWeekId) ??
+      selectedWeek;
+    const autoIndex = Math.min(
+      freshRoutineView.activeDayIndex,
+      Math.max(autoWeek.days.length - 1, 0),
+    );
+    const autoDay = autoWeek.days[autoIndex] ?? selectedDay;
+    setWorkoutRoutines(freshRoutineView.routines);
+    setSelectedWeekId(autoWeek.id);
     setSelectedDayIndex(autoIndex);
+    setSelectedHtmlWeek(freshRoutineView.activeHtmlWeek);
     setRegistrationDraft(buildDraft(autoDay));
     setRegistrationMessage(null);
   }
@@ -418,6 +547,34 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
     };
 
     setSessionHistory((current) => [newEntry, ...current]);
+    setWorkoutRoutines((current) =>
+      current.map((week) => {
+        if (week.id !== selectedWeek.id) {
+          return week;
+        }
+
+        return {
+          ...week,
+          statusLabel: "En curso",
+          days: week.days.map((day, dayIndex) => {
+            if (dayIndex !== selectedDayIndex) {
+              return day;
+            }
+
+            return {
+              ...day,
+              status: registrationDraft.status === "pendiente" ? "today" : "completed",
+              note:
+                registrationDraft.status === "completado"
+                  ? "Registrado"
+                  : registrationDraft.status === "parcial"
+                    ? "Avance parcial"
+                    : day.note,
+            };
+          }),
+        };
+      }),
+    );
     setRegistrationMessage("Sesion guardada en Supabase y agregada al historial.");
     setRegistrationDraft(null);
   }
@@ -784,7 +941,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
-              {props.initialData.workoutRoutines.map((week) => (
+              {workoutRoutines.map((week) => (
                 <button
                   key={week.id}
                   type="button"

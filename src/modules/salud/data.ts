@@ -63,6 +63,11 @@ export type HealthPagePayload = {
   workoutRoutines: WorkoutWeek[];
 };
 
+export const routinePlanAnchor = {
+  weekNumber: 12,
+  weekStartDate: "2026-04-20",
+} as const;
+
 export type InBodyComparisonRow = {
   label: string;
   latestValue: number;
