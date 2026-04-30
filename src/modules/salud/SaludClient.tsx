@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   routineTemplates,
   routineHtmlWeeks,
@@ -290,6 +290,28 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
   const [sessionHistory, setSessionHistory] = useState(props.initialData.sessionHistory);
   const [registrationDraft, setRegistrationDraft] = useState<RegistrationDraft | null>(null);
   const [registrationMessage, setRegistrationMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!registrationDraft) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setRegistrationDraft(null);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [registrationDraft]);
 
   const selectedWeek =
     workoutRoutines.find((week) => week.id === selectedWeekId) ??
@@ -1001,20 +1023,32 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
             </div>
 
             {registrationDraft ? (
-              <div className="mt-6 xl:absolute xl:right-6 xl:top-24 xl:z-20 xl:mt-0 xl:w-[min(560px,calc(100%-3rem))]">
-                <div className="max-h-[78vh] overflow-y-auto rounded-[2rem] border border-[var(--line)] bg-white shadow-[0_30px_100px_rgba(27,25,39,0.22)]">
-                  <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--line)] bg-white px-6 py-5">
-                    <h2 className="text-2xl font-semibold text-[var(--ink)]">Registrar sesion</h2>
+              <div
+                className="fixed inset-0 z-50 flex items-end bg-black/35 p-0 backdrop-blur-[2px] sm:items-center sm:justify-center sm:p-6"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="registration-modal-title"
+                onClick={closeRegistrationModal}
+              >
+                <div
+                  className="max-h-[88dvh] w-full overflow-y-auto rounded-t-[1.75rem] border border-[var(--line)] bg-white shadow-[0_30px_100px_rgba(27,25,39,0.28)] sm:max-w-2xl sm:rounded-[2rem]"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--line)] bg-white px-5 py-4 sm:px-6 sm:py-5">
+                    <h2 id="registration-modal-title" className="text-xl font-semibold text-[var(--ink)] sm:text-2xl">
+                      Registrar sesion
+                    </h2>
                     <button
                       type="button"
                       onClick={closeRegistrationModal}
-                      className="h-10 w-10 rounded-full text-xl text-[var(--muted)] transition hover:bg-[#f2f0fb]"
+                      className="h-10 w-10 rounded-full text-[0px] text-[var(--muted)] transition after:text-xl after:content-['x'] hover:bg-[#f2f0fb]"
+                      aria-label="Cerrar registro"
                     >
                       ×
                     </button>
                   </div>
 
-                  <div className="space-y-5 px-6 py-6">
+                  <div className="space-y-5 px-5 py-5 sm:px-6 sm:py-6">
                     <div className="grid gap-4 sm:grid-cols-2">
                       <ModalField label="Tipo">
                         <select
@@ -1120,7 +1154,8 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
                               <button
                                 type="button"
                                 onClick={() => removeDraftExercise(index)}
-                                className="text-lg text-rose-500"
+                                className="text-[0px] text-rose-500 after:text-lg after:content-['x']"
+                                aria-label={`Eliminar ${exercise.name || "ejercicio"}`}
                               >
                                 ×
                               </button>
@@ -1171,7 +1206,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
                     </ModalField>
                   </div>
 
-                  <div className="sticky bottom-0 flex justify-end gap-3 border-t border-[var(--line)] bg-white px-6 py-5">
+                  <div className="sticky bottom-0 flex justify-end gap-3 border-t border-[var(--line)] bg-white px-5 py-4 sm:px-6 sm:py-5">
                     <button
                       type="button"
                       onClick={closeRegistrationModal}
@@ -1184,7 +1219,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
                       onClick={saveRegistration}
                       className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white"
                     >
-                      Guardar en historial visible
+                      Guardar
                     </button>
                   </div>
                 </div>
