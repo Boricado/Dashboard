@@ -683,14 +683,14 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
                 ))}
               </div>
 
-              <div className="overflow-hidden rounded-[2rem] bg-[#f2f0fb] p-6">
+              <div className="overflow-hidden rounded-[2rem] bg-[#f2f0fb] p-4 sm:p-6">
                 <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
                   Tendencia de peso
                 </div>
-                <div className="mt-6 grid h-[188px] grid-cols-5 gap-3">
+                <div className="mt-5 flex h-[188px] gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-5 sm:gap-3 sm:overflow-hidden">
                   {weightTrend.map((point) => (
-                    <div key={point.label} className="grid grid-rows-[1fr_auto_auto] gap-2 overflow-hidden">
-                      <div className="flex items-end rounded-[1.5rem] bg-white/70 px-1.5 pb-1.5">
+                    <div key={point.label} className="grid min-w-[58px] grid-rows-[1fr_auto_auto] gap-1.5 overflow-hidden sm:min-w-0 sm:gap-2">
+                      <div className="flex items-end rounded-[1.2rem] bg-white/70 px-1 pb-1 sm:rounded-[1.5rem] sm:px-1.5 sm:pb-1.5">
                         <div
                           className="w-full rounded-[1rem] bg-gradient-to-t from-[#4d9c8b] to-[#67aa7b]"
                           style={{
@@ -698,16 +698,17 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
                           }}
                         />
                       </div>
-                      <div className="text-center text-xs leading-4 text-[var(--muted)]">
+                      <div className="truncate text-center text-[10px] leading-3 text-[var(--muted)] sm:text-xs sm:leading-4">
                         {point.label}
                       </div>
-                      <div className="text-center text-sm font-medium text-[var(--ink)]">
-                        {point.value.toFixed(1)} kg
+                      <div className="text-center text-[11px] font-semibold leading-3 text-[var(--ink)] sm:text-sm sm:font-medium sm:leading-5">
+                        <span className="block sm:inline">{point.value.toFixed(1)}</span>
+                        <span className="text-[9px] sm:ml-1 sm:text-sm">kg</span>
                       </div>
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 flex items-center justify-between text-sm text-[var(--muted)]">
+                <div className="mt-4 flex items-center justify-between gap-3 text-xs text-[var(--muted)] sm:text-sm">
                   <span>{(latestScan.weightKg - weightTrend[0].value).toFixed(1)} kg de cambio</span>
                   <span className="font-semibold text-emerald-700">Progreso</span>
                 </div>
