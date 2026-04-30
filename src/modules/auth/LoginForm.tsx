@@ -25,11 +25,11 @@ export function LoginForm({ nextPath }: LoginFormProps) {
 
   function getFriendlyAuthMessage(message: string) {
     if (message.includes("Email not confirmed")) {
-      return "Tu correo todavía no está confirmado. Revisa tu bandeja o desactiva la confirmación por email en Supabase Auth.";
+      return "Tu correo todavia no esta confirmado. Revisa tu bandeja o desactiva la confirmacion por email en Supabase Auth.";
     }
 
     if (message.includes("email_not_confirmed")) {
-      return "Tu correo todavía no está confirmado. Revisa tu bandeja o desactiva la confirmación por email en Supabase Auth.";
+      return "Tu correo todavia no esta confirmado. Revisa tu bandeja o desactiva la confirmacion por email en Supabase Auth.";
     }
 
     if (message.includes("Invalid login credentials")) {
@@ -45,7 +45,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
 
     try {
       if (!supabase) {
-        throw new Error("Configura Supabase antes de iniciar sesión.");
+        throw new Error("Configura Supabase antes de iniciar sesion.");
       }
 
       const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -68,63 +68,88 @@ export function LoginForm({ nextPath }: LoginFormProps) {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-16">
-      <div className="app-card p-6 sm:p-8">
-        <h1 className="text-3xl font-semibold tracking-tight text-[var(--ink)]">
-          Dashboard
-        </h1>
-        <p className="mt-2 text-sm text-[var(--muted)]">Inicia sesión para continuar.</p>
+    <div className="app-grid min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto grid w-full max-w-6xl gap-5 lg:grid-cols-[1.05fr_0.95fr]">
+        <section className="app-shell-surface rounded-[2rem] px-6 py-8 sm:px-8 lg:px-10">
+          <span className="rounded-full border border-emerald-200 bg-white/85 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+            Acceso principal
+          </span>
+          <h1 className="app-display mt-5 text-5xl leading-none font-semibold text-[var(--ink)] sm:text-6xl">
+            Entra al centro de mando.
+          </h1>
+          <p className="mt-5 max-w-xl text-base leading-7 text-[var(--muted)]">
+            Licitaciones, proyectos, salud y operacion diaria en una sola interfaz mas clara y
+            mantenible.
+          </p>
 
-        {!isConfigured ? (
-          <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-            Faltan variables de Supabase en Vercel.
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <div className="app-card p-5">
+              <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Arquitectura</p>
+              <p className="mt-3 text-sm leading-6 text-[var(--ink)]">
+                Modulos separados, contexto por dominio y menos arrastre tecnico.
+              </p>
+            </div>
+            <div className="app-card p-5">
+              <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Uso diario</p>
+              <p className="mt-3 text-sm leading-6 text-[var(--ink)]">
+                Optimizado para escritorio y con navegacion mas comoda desde movil.
+              </p>
+            </div>
           </div>
-        ) : null}
+        </section>
 
-        {error ? (
-          <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-950">
-            {error}
+        <div className="app-card p-6 sm:p-8">
+          <h2 className="text-3xl font-semibold tracking-tight text-[var(--ink)]">Dashboard</h2>
+          <p className="mt-2 text-sm text-[var(--muted)]">Inicia sesion para continuar.</p>
+
+          {!isConfigured ? (
+            <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+              Faltan variables de Supabase en Vercel.
+            </div>
+          ) : null}
+
+          {error ? (
+            <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-950">
+              {error}
+            </div>
+          ) : null}
+
+          <div className="mt-6 grid gap-4">
+            <label className="grid gap-1.5">
+              <span className="text-sm font-medium text-[var(--ink)]">Email</span>
+              <input
+                className="h-12 rounded-2xl border border-[var(--line)] bg-white px-4 text-sm outline-none focus:border-[var(--accent)]"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="tu@email.com"
+                autoComplete="email"
+              />
+            </label>
+
+            <label className="grid gap-1.5">
+              <span className="text-sm font-medium text-[var(--ink)]">Clave</span>
+              <input
+                className="h-12 rounded-2xl border border-[var(--line)] bg-white px-4 text-sm outline-none focus:border-[var(--accent)]"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="••••••••"
+                type="password"
+                autoComplete="current-password"
+              />
+            </label>
+
+            <button
+              onClick={signInWithEmail}
+              disabled={!isConfigured || !email || !password || loading}
+              className="mt-2 h-12 rounded-2xl bg-[var(--ink)] text-sm font-medium text-[var(--sand)] disabled:opacity-50"
+            >
+              {loading ? "Entrando..." : "Entrar"}
+            </button>
+
+            <Link href="/recuperar-clave" className="text-sm text-[var(--muted)] underline">
+              Recuperar contrasena
+            </Link>
           </div>
-        ) : null}
-
-        <div className="mt-6 grid gap-4">
-          <label className="grid gap-1.5">
-            <span className="text-sm font-medium text-[var(--ink)]">Email</span>
-            <input
-              className="h-11 rounded-2xl border border-[var(--line)] bg-white px-3 text-sm outline-none focus:border-[var(--accent)]"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="tu@email.com"
-              autoComplete="email"
-            />
-          </label>
-
-          <label className="grid gap-1.5">
-            <span className="text-sm font-medium text-[var(--ink)]">Clave</span>
-            <input
-              className="h-11 rounded-2xl border border-[var(--line)] bg-white px-3 text-sm outline-none focus:border-[var(--accent)]"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="••••••••"
-              type="password"
-              autoComplete="current-password"
-            />
-          </label>
-
-          <button
-            onClick={signInWithEmail}
-            disabled={!isConfigured || !email || !password || loading}
-            className="mt-2 h-11 rounded-2xl bg-[var(--ink)] text-sm font-medium text-[var(--surface-strong)] disabled:opacity-50"
-          >
-            {loading ? "Entrando..." : "Entrar"}
-          </button>
-
-          <Link
-            href="/recuperar-clave"
-            className="text-sm text-[var(--muted)] underline"
-          >
-            Recuperar contraseña
-          </Link>
         </div>
       </div>
     </div>

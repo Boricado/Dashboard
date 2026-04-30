@@ -21,29 +21,29 @@ export function AppShell(props: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh text-[var(--ink)]">
-      <div className="flex w-full flex-col gap-6 px-4 py-6 lg:px-6 2xl:px-8">
-        <header className="rounded-[2rem] border border-[var(--line)] bg-[var(--panel)] px-6 py-5 shadow-[0_24px_100px_rgba(49,46,37,0.08)] backdrop-blur">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="app-grid flex w-full flex-col gap-5 px-3 py-4 sm:px-4 lg:px-6 2xl:px-8">
+        <header className="app-shell-surface rounded-[2rem] px-5 py-5 sm:px-6">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex flex-col">
               <div className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
                 Dashboard modular
               </div>
-              <div className="mt-2 text-2xl font-semibold tracking-tight">
+              <div className="app-display mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
                 Fidel Dashboard
               </div>
-              <p className="mt-2 max-w-2xl text-sm text-[var(--muted)]">
-                Base limpia para trabajar por dominios cortos, con menos ruido y
-                mejor contexto para IA.
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)] sm:text-[15px]">
+                Operacion diaria, licitaciones y modulos vivos en una sola base,
+                con estructura clara para escritorio y movil.
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="hidden rounded-full border border-[var(--line)] bg-white/80 px-4 py-2 text-sm text-[var(--muted)] sm:block">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="rounded-full border border-[var(--line)] bg-white/80 px-4 py-2 text-sm text-[var(--muted)]">
                 Next.js + TypeScript + Supabase
               </div>
               <button
                 onClick={signOut}
-                className="rounded-full bg-[var(--ink)] px-4 py-2 text-sm font-medium text-[var(--surface-strong)] transition hover:opacity-90"
+                className="rounded-full bg-[var(--ink)] px-4 py-2 text-sm font-medium text-[var(--sand)] transition hover:opacity-90"
               >
                 Salir
               </button>
@@ -51,14 +51,38 @@ export function AppShell(props: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[300px_minmax(0,1fr)]">
-          <aside className="h-fit rounded-[2rem] border border-[var(--line)] bg-[var(--panel)] p-4 shadow-[0_20px_60px_rgba(49,46,37,0.08)] backdrop-blur xl:sticky xl:top-6">
-            <div className="mb-4 rounded-[1.5rem] border border-[var(--line)] bg-white/80 p-4">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
+          <div className="app-shell-surface overflow-x-auto rounded-[1.5rem] px-3 py-3 xl:hidden">
+            <nav className="flex min-w-max gap-2">
+              {APP_SECTIONS.map((section) => {
+                const isActive =
+                  pathname === section.href || pathname?.startsWith(`${section.href}/`);
+
+                return (
+                  <Link
+                    key={section.id}
+                    href={section.href}
+                    className={cx(
+                      "rounded-full border px-4 py-2 text-sm whitespace-nowrap transition",
+                      isActive
+                        ? "border-emerald-200 bg-white text-emerald-700 shadow-[0_8px_20px_rgba(29,123,82,0.12)]"
+                        : "border-[var(--line)] bg-white/75 text-[var(--ink)]",
+                    )}
+                  >
+                    {section.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+
+          <aside className="app-shell-surface hidden h-fit rounded-[2rem] p-4 xl:sticky xl:top-6 xl:block">
+            <div className="mb-4 rounded-[1.5rem] border border-[var(--line)] bg-white/85 p-4">
               <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
                 Regla del proyecto
               </div>
               <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                Cada sección vive en su ruta, su metadata y su propio
+                Cada seccion vive en su ruta, su metadata y su propio
                 <code className="ml-1 rounded-md bg-[var(--surface-strong)] px-1.5 py-0.5 text-xs text-[var(--ink)]">
                   CONTEXT.md
                 </code>
@@ -67,14 +91,14 @@ export function AppShell(props: { children: React.ReactNode }) {
             </div>
 
             <nav className="flex flex-col gap-1">
-              {APP_SECTIONS.map((s) => {
+              {APP_SECTIONS.map((section) => {
                 const isActive =
-                  pathname === s.href || pathname?.startsWith(`${s.href}/`);
+                  pathname === section.href || pathname?.startsWith(`${section.href}/`);
 
                 return (
                   <Link
-                    key={s.id}
-                    href={s.href}
+                    key={section.id}
+                    href={section.href}
                     className={cx(
                       "rounded-[1.25rem] border px-4 py-3 text-sm transition",
                       isActive
@@ -82,14 +106,14 @@ export function AppShell(props: { children: React.ReactNode }) {
                         : "border-transparent text-[var(--ink)] hover:border-[var(--line)] hover:bg-white/80",
                     )}
                   >
-                    <div className="font-medium">{s.label}</div>
+                    <div className="font-medium">{section.label}</div>
                     <div
                       className={cx(
                         "text-xs",
                         isActive ? "text-emerald-700/75" : "text-[var(--muted)]",
                       )}
                     >
-                      {s.description}
+                      {section.description}
                     </div>
                   </Link>
                 );
@@ -97,7 +121,7 @@ export function AppShell(props: { children: React.ReactNode }) {
             </nav>
           </aside>
 
-          <main className="rounded-[2rem] border border-[var(--line)] bg-[var(--panel)] p-5 shadow-[0_20px_70px_rgba(49,46,37,0.08)] backdrop-blur sm:p-6">
+          <main className="app-shell-surface rounded-[2rem] p-4 sm:p-5 xl:p-6">
             {props.children}
           </main>
         </div>
