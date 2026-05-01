@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { furnitureCatalogMeta } from "@/modules/muebles/data";
 import type {
   FurnitureMaterial,
@@ -112,6 +112,7 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
   const [projects, setProjects] = useState(props.initialData.projects);
   const [draft, setDraft] = useState<DraftProject>(makeDraft());
   const [materialDraft, setMaterialDraft] = useState<MaterialDraft>(makeMaterialDraft());
+  const [materialModalOpen, setMaterialModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingMaterialId, setEditingMaterialId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -165,6 +166,30 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
   const draftProfit = draftSalePrice - draftCost;
   const draftMargin = draftSalePrice > 0 ? (draftProfit / draftSalePrice) * 100 : 0;
 
+  useEffect(() => {
+    if (!materialModalOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && !savingMaterial) {
+        setMaterialModalOpen(false);
+        setMaterialDraft(makeMaterialDraft());
+        setEditingMaterialId(null);
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [materialModalOpen, savingMaterial]);
+
   function resetDraft() {
     setDraft(makeDraft());
     setEditingId(null);
@@ -173,6 +198,22 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
   function resetMaterialDraft() {
     setMaterialDraft(makeMaterialDraft());
     setEditingMaterialId(null);
+  }
+
+  function openMaterialModal() {
+    resetMaterialDraft();
+    setMaterialModalOpen(true);
+    setMessage(null);
+    setError(null);
+  }
+
+  function closeMaterialModal() {
+    if (savingMaterial) {
+      return;
+    }
+
+    setMaterialModalOpen(false);
+    resetMaterialDraft();
   }
 
   function addMaterial(material: FurnitureMaterial) {
@@ -216,6 +257,7 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
   function startEditingMaterial(material: FurnitureMaterial) {
     setEditingMaterialId(material.id);
     setMaterialDraft(makeMaterialDraft(material));
+    setMaterialModalOpen(true);
     setMessage(null);
     setError(null);
   }
@@ -272,6 +314,7 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
     }));
     setCategory("todas");
     setMessage(editingMaterialId ? "Material actualizado." : "Material agregado al catalogo.");
+    setMaterialModalOpen(false);
     resetMaterialDraft();
   }
 
@@ -644,130 +687,18 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
         </article>
 
         <article className="app-card p-6">
-          <h2 className="text-2xl font-semibold text-[var(--ink)]">Catalogo rescatado</h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">{furnitureCatalogMeta.note}</p>
-
-          <div className="mt-5 rounded-[1.5rem] border border-[var(--line)] bg-[#fff9ef] p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <h3 className="text-base font-semibold text-[var(--ink)]">
-                  {editingMaterialId ? "Editar material" : "Agregar material"}
-                </h3>
-                <p className="mt-1 text-xs text-[var(--muted)]">
-                  Actualiza el precio base o suma insumos nuevos al catalogo.
-                </p>
-              </div>
-              {editingMaterialId ? (
-                <button
-                  type="button"
-                  onClick={resetMaterialDraft}
-                  className="rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
-                >
-                  Nuevo
-                </button>
-              ) : null}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold text-[var(--ink)]">Catalogo rescatado</h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">{furnitureCatalogMeta.note}</p>
             </div>
-
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <label className="grid gap-1.5 text-sm">
-                <span className="font-medium text-[var(--muted)]">Material</span>
-                <input
-                  type="text"
-                  value={materialDraft.name}
-                  onChange={(event) => updateMaterialDraft("name", event.target.value)}
-                  placeholder="Ej: Bisagra cierre suave"
-                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
-                />
-              </label>
-
-              <label className="grid gap-1.5 text-sm">
-                <span className="font-medium text-[var(--muted)]">Categoria</span>
-                <input
-                  type="text"
-                  list="furniture-categories"
-                  value={materialDraft.category}
-                  onChange={(event) => updateMaterialDraft("category", event.target.value)}
-                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
-                />
-                <datalist id="furniture-categories">
-                  {categories.map((item) => (
-                    <option key={item} value={item} />
-                  ))}
-                </datalist>
-              </label>
-
-              <label className="grid gap-1.5 text-sm">
-                <span className="font-medium text-[var(--muted)]">Unidad</span>
-                <input
-                  type="text"
-                  value={materialDraft.unit_label}
-                  onChange={(event) => updateMaterialDraft("unit_label", event.target.value)}
-                  placeholder="unidad, pieza, plancha, metro"
-                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
-                />
-              </label>
-
-              <label className="grid gap-1.5 text-sm">
-                <span className="font-medium text-[var(--muted)]">Precio base</span>
-                <input
-                  type="text"
-                  value={materialDraft.unit_price}
-                  onChange={(event) => updateMaterialDraft("unit_price", event.target.value)}
-                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
-                />
-              </label>
-
-              <label className="grid gap-1.5 text-sm">
-                <span className="font-medium text-[var(--muted)]">Proveedor</span>
-                <input
-                  type="text"
-                  value={materialDraft.supplier}
-                  onChange={(event) => updateMaterialDraft("supplier", event.target.value)}
-                  placeholder="Sodimac, maderera, ferreteria"
-                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
-                />
-              </label>
-
-              <label className="grid gap-1.5 text-sm">
-                <span className="font-medium text-[var(--muted)]">Referencia</span>
-                <input
-                  type="text"
-                  value={materialDraft.reference}
-                  onChange={(event) => updateMaterialDraft("reference", event.target.value)}
-                  placeholder="Medida, marca, formato"
-                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
-                />
-              </label>
-            </div>
-
-            <label className="mt-3 grid gap-1.5 text-sm">
-              <span className="font-medium text-[var(--muted)]">Nota</span>
-              <input
-                type="text"
-                value={materialDraft.note}
-                onChange={(event) => updateMaterialDraft("note", event.target.value)}
-                placeholder="Dato de compra, calidad, rendimiento"
-                className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
-              />
-            </label>
-
-            <div className="mt-4 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={resetMaterialDraft}
-                className="rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-semibold text-[var(--ink)]"
-              >
-                Limpiar
-              </button>
-              <button
-                type="button"
-                onClick={saveMaterial}
-                disabled={savingMaterial}
-                className="rounded-full bg-amber-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-              >
-                {savingMaterial ? "Guardando..." : editingMaterialId ? "Guardar material" : "Agregar material"}
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={openMaterialModal}
+              className="rounded-full bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-amber-900/10 transition hover:bg-amber-700"
+            >
+              Agregar material
+            </button>
           </div>
 
           <div className="mt-5 grid gap-3">
@@ -839,6 +770,165 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
 
       {message ? <section className="app-card p-4 text-center text-emerald-700">{message}</section> : null}
       {error ? <section className="app-card p-4 text-center text-rose-700">{error}</section> : null}
+
+      {materialModalOpen ? (
+        <section
+          aria-labelledby="material-modal-title"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-3 pt-10 backdrop-blur-sm sm:items-center sm:p-6"
+          role="dialog"
+        >
+          <button
+            aria-label="Cerrar modal"
+            className="absolute inset-0 h-full w-full cursor-default"
+            disabled={savingMaterial}
+            onClick={closeMaterialModal}
+            type="button"
+          />
+          <form
+            className="relative z-10 max-h-[90dvh] w-full max-w-2xl overflow-y-auto rounded-t-[2rem] bg-white p-5 shadow-2xl shadow-black/20 sm:rounded-[2rem] sm:p-6"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void saveMaterial();
+            }}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+                  Catalogo de insumos
+                </p>
+                <h2 id="material-modal-title" className="mt-1 text-2xl font-semibold text-[var(--ink)]">
+                  {editingMaterialId ? "Editar material" : "Agregar material"}
+                </h2>
+                <p className="mt-1 text-sm text-[var(--muted)]">
+                  Guarda precio, proveedor y notas para presupuestar mas rapido.
+                </p>
+              </div>
+              <button
+                className="grid size-10 shrink-0 place-items-center rounded-full border border-[var(--line)] text-lg font-semibold text-[var(--ink)] disabled:opacity-50"
+                disabled={savingMaterial}
+                onClick={closeMaterialModal}
+                type="button"
+              >
+                x
+              </button>
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <label className="grid gap-1.5 text-sm">
+                <span className="font-medium text-[var(--muted)]">Material</span>
+                <input
+                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                  onChange={(event) => updateMaterialDraft("name", event.target.value)}
+                  placeholder="Ej: Bisagra cierre suave"
+                  type="text"
+                  value={materialDraft.name}
+                />
+              </label>
+
+              <label className="grid gap-1.5 text-sm">
+                <span className="font-medium text-[var(--muted)]">Categoria</span>
+                <input
+                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                  list="furniture-material-categories"
+                  onChange={(event) => updateMaterialDraft("category", event.target.value)}
+                  type="text"
+                  value={materialDraft.category}
+                />
+                <datalist id="furniture-material-categories">
+                  {categories.map((item) => (
+                    <option key={item} value={item} />
+                  ))}
+                </datalist>
+              </label>
+
+              <label className="grid gap-1.5 text-sm">
+                <span className="font-medium text-[var(--muted)]">Unidad</span>
+                <input
+                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                  onChange={(event) => updateMaterialDraft("unit_label", event.target.value)}
+                  placeholder="unidad, pieza, plancha, metro"
+                  type="text"
+                  value={materialDraft.unit_label}
+                />
+              </label>
+
+              <label className="grid gap-1.5 text-sm">
+                <span className="font-medium text-[var(--muted)]">Precio base</span>
+                <input
+                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                  onChange={(event) => updateMaterialDraft("unit_price", event.target.value)}
+                  placeholder="Ej: 12990"
+                  type="text"
+                  value={materialDraft.unit_price}
+                />
+              </label>
+
+              <label className="grid gap-1.5 text-sm">
+                <span className="font-medium text-[var(--muted)]">Proveedor</span>
+                <input
+                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                  onChange={(event) => updateMaterialDraft("supplier", event.target.value)}
+                  placeholder="Sodimac, maderera, ferreteria"
+                  type="text"
+                  value={materialDraft.supplier}
+                />
+              </label>
+
+              <label className="grid gap-1.5 text-sm">
+                <span className="font-medium text-[var(--muted)]">Referencia</span>
+                <input
+                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                  onChange={(event) => updateMaterialDraft("reference", event.target.value)}
+                  placeholder="Medida, marca, formato"
+                  type="text"
+                  value={materialDraft.reference}
+                />
+              </label>
+            </div>
+
+            <label className="mt-3 grid gap-1.5 text-sm">
+              <span className="font-medium text-[var(--muted)]">URL fuente</span>
+              <input
+                className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                onChange={(event) => updateMaterialDraft("source_url", event.target.value)}
+                placeholder="Link de referencia o compra"
+                type="url"
+                value={materialDraft.source_url}
+              />
+            </label>
+
+            <label className="mt-3 grid gap-1.5 text-sm">
+              <span className="font-medium text-[var(--muted)]">Nota</span>
+              <input
+                className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                onChange={(event) => updateMaterialDraft("note", event.target.value)}
+                placeholder="Dato de compra, calidad, rendimiento"
+                type="text"
+                value={materialDraft.note}
+              />
+            </label>
+
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button
+                className="rounded-full border border-[var(--line)] bg-white px-5 py-2.5 text-sm font-semibold text-[var(--ink)] disabled:opacity-50"
+                disabled={savingMaterial}
+                onClick={closeMaterialModal}
+                type="button"
+              >
+                Cancelar
+              </button>
+              <button
+                className="rounded-full bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+                disabled={savingMaterial}
+                type="submit"
+              >
+                {savingMaterial ? "Guardando..." : editingMaterialId ? "Guardar material" : "Agregar material"}
+              </button>
+            </div>
+          </form>
+        </section>
+      ) : null}
 
       <section className="app-card p-6">
         <div className="flex items-center justify-between gap-3">
