@@ -5,7 +5,6 @@ import {
   routineTemplates,
   routineHtmlWeeks,
   routinePlanAnchor,
-  sessionHistory as legacySessionHistory,
   type ConsistencyPoint,
   type HealthPagePayload,
   type SessionHistoryItem,
@@ -248,22 +247,6 @@ function sortConsistencyPoints(points: ConsistencyPoint[]) {
   );
 }
 
-function mergeSessionHistory(
-  primary: SessionHistoryItem[],
-  fallback: SessionHistoryItem[],
-) {
-  const seen = new Set<string>();
-
-  return [...primary, ...fallback].filter((item) => {
-    if (seen.has(item.id)) {
-      return false;
-    }
-
-    seen.add(item.id);
-    return true;
-  });
-}
-
 function buildConsistencyFromHistory(items: SessionHistoryItem[]) {
   const counts = new Map<string, number>();
 
@@ -339,7 +322,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
     props.initialData.inbodyScans[props.initialData.inbodyScans.length - 1]?.id ?? "",
   );
   const initialSessionHistory = useMemo(
-    () => mergeSessionHistory(props.initialData.sessionHistory, legacySessionHistory),
+    () => props.initialData.sessionHistory,
     [props.initialData.sessionHistory],
   );
   const [sessionHistory, setSessionHistory] = useState(initialSessionHistory);
@@ -597,6 +580,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
         routineWeekId: selectedWeek.id,
         sessionDate: registrationDraft.date,
         sessionType: registrationDraft.type,
+        weekLabel: selectedWeek.label.replace("Semana ", "S"),
         status: registrationDraft.status,
         notes: registrationDraft.notes,
         exercises: registrationDraft.exercises.map((exercise) => ({

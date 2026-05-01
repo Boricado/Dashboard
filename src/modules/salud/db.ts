@@ -72,6 +72,7 @@ type RoutineDayRow = {
 type SessionRow = {
   id: string;
   routine_week_id: string | null;
+  week_label: string | null;
   session_date: string;
   session_type: string;
   status: "completado" | "parcial" | "pendiente";
@@ -88,6 +89,48 @@ type SessionExerciseRow = {
   load_text: string | null;
   completed: boolean;
   notes: string | null;
+};
+
+const INBODY_FILE_METADATA_BY_DATE: Record<
+  string,
+  { fileName: string; fileSize: number }
+> = {
+  "2024-07-23": {
+    fileName: "166525586_20240723112351_InBody.jpg",
+    fileSize: 426008,
+  },
+  "2025-06-28": {
+    fileName: "166525586_20250628103509_InBody.jpg",
+    fileSize: 430588,
+  },
+  "2025-11-23": {
+    fileName: "166525586_20251123132152_InBody.jpg",
+    fileSize: 433819,
+  },
+  "2026-03-10": {
+    fileName: "100326-1_20260310170221_InBody.jpg",
+    fileSize: 471958,
+  },
+  "2026-04-16": {
+    fileName: "166525586_20260416100044_InBody.jpg",
+    fileSize: 478807,
+  },
+};
+
+const LEGACY_MONTHS: Record<string, string> = {
+  ene: "01",
+  feb: "02",
+  mar: "03",
+  abr: "04",
+  may: "05",
+  jun: "06",
+  jul: "07",
+  ago: "08",
+  sep: "09",
+  sept: "09",
+  oct: "10",
+  nov: "11",
+  dic: "12",
 };
 
 function formatDateLabel(value: string) {
@@ -194,6 +237,196 @@ function buildConsistencyFromSessions(items: SessionHistoryItem[]): ConsistencyP
     .map(([label, value]) => ({ label, value }));
 }
 
+function getInbodyFilePath(userId: string, fileName: string) {
+  return `${userId}/inbody/${fileName}`;
+}
+
+function getInbodyFileMetadata(userId: string, scanDate: string) {
+  const metadata = INBODY_FILE_METADATA_BY_DATE[scanDate];
+
+  if (!metadata) {
+    return {
+      file_name: null,
+      file_path: null,
+      file_mime_type: null,
+      file_size: null,
+    };
+  }
+
+  return {
+    file_name: metadata.fileName,
+    file_path: getInbodyFilePath(userId, metadata.fileName),
+    file_mime_type: "image/jpeg",
+    file_size: metadata.fileSize,
+  };
+}
+
+function parseLegacySessionDate(label: string) {
+  const normalized = label
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(".", "")
+    .trim();
+  const match = normalized.match(/^(\d{1,2})\s+([a-z]+)/);
+
+  if (!match) {
+    return "2026-01-01";
+  }
+
+  const day = match[1].padStart(2, "0");
+  const month = LEGACY_MONTHS[match[2]] ?? "01";
+
+  return `2026-${month}-${day}`;
+}
+
+function normalizeLegacyDetail(value: string) {
+  return value.replace(/\u00c2\u00b7/g, "\u00b7").replace(/\s+/g, " ").trim();
+}
+
+function splitLegacyExerciseDetails(item: SessionHistoryItem) {
+  const explicitDetails = item.details.map(normalizeLegacyDetail).filter(Boolean);
+
+  if (explicitDetails.length > 0) {
+    return explicitDetails;
+  }
+
+  const noteDetails = (item.notes ?? "")
+    .split(/\s*(?:\u00b7|\u00c2\u00b7)\s*/g)
+    .map(normalizeLegacyDetail)
+    .filter(Boolean);
+
+  if (noteDetails.length > 0) {
+    return noteDetails;
+  }
+
+  return item.summary ? [normalizeLegacyDetail(item.summary)] : [];
+}
+
+function parseLegacyExerciseDetail(detail: string) {
+  const [rawName, ...rest] = detail.split(":");
+  const metadata = rest.join(":") || detail;
+  const sets = metadata.match(/series\s+([^\u00b7]+)/i)?.[1]?.trim();
+  const reps = metadata.match(/reps\s+([^\u00b7]+)/i)?.[1]?.trim();
+  const load = metadata.match(/carga\s+([^\u00b7]+)/i)?.[1]?.trim();
+
+  return {
+    name: normalizeLegacyDetail(rawName).slice(0, 160) || "Registro importado",
+    sets_text: sets ?? null,
+    reps_text: reps ?? null,
+    load_text: load ?? null,
+    notes: normalizeLegacyDetail(detail),
+  };
+}
+
+async function ensureInbodyFileMetadata(userId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { count, error: countError } = await supabase
+    .from("health_inbody_scans")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .in("scan_date", Object.keys(INBODY_FILE_METADATA_BY_DATE))
+    .is("file_path", null);
+
+  if (countError) {
+    throw new Error(countError.message);
+  }
+
+  if (!count) {
+    return;
+  }
+
+  const results = await Promise.all(
+    Object.entries(INBODY_FILE_METADATA_BY_DATE).map(([scanDate, metadata]) =>
+      supabase
+        .from("health_inbody_scans")
+        .update({
+          file_name: metadata.fileName,
+          file_path: getInbodyFilePath(userId, metadata.fileName),
+          file_mime_type: "image/jpeg",
+          file_size: metadata.fileSize,
+        })
+        .eq("user_id", userId)
+        .eq("scan_date", scanDate),
+    ),
+  );
+  const updateError = results.find((result) => result.error)?.error;
+
+  if (updateError) {
+    throw new Error(updateError.message);
+  }
+}
+
+async function ensureLegacySessionHistory(userId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { count, error: countError } = await supabase
+    .from("health_workout_sessions")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("source", "imported");
+
+  if (countError) {
+    throw new Error(countError.message);
+  }
+
+  if (count) {
+    return;
+  }
+
+  const { data: insertedSessions, error: sessionInsertError } = await supabase
+    .from("health_workout_sessions")
+    .upsert(
+      legacySessionHistory.map((item) => ({
+        user_id: userId,
+        routine_week_id: null,
+        routine_day_id: null,
+        week_label: item.week,
+        external_id: item.id,
+        session_date: parseLegacySessionDate(item.date),
+        session_type: item.session,
+        status: "completado",
+        notes: item.notes || item.summary || null,
+        source: "imported",
+      })),
+      { onConflict: "user_id,source,external_id" },
+    )
+    .select("id, external_id");
+
+  if (sessionInsertError) {
+    throw new Error(sessionInsertError.message);
+  }
+
+  const sessionIdByExternalId = new Map(
+    (insertedSessions ?? []).map((item) => [item.external_id as string, item.id as string]),
+  );
+  const exercisePayload = legacySessionHistory.flatMap((item) => {
+    const sessionId = sessionIdByExternalId.get(item.id);
+
+    if (!sessionId) {
+      return [];
+    }
+
+    return splitLegacyExerciseDetails(item).map((detail, index) => ({
+      session_id: sessionId,
+      sort_order: index,
+      completed: true,
+      ...parseLegacyExerciseDetail(detail),
+    }));
+  });
+
+  if (exercisePayload.length === 0) {
+    return;
+  }
+
+  const { error: exerciseInsertError } = await supabase
+    .from("health_workout_session_exercises")
+    .insert(exercisePayload);
+
+  if (exerciseInsertError) {
+    throw new Error(exerciseInsertError.message);
+  }
+}
+
 async function ensureHealthSeedData() {
   const supabase = await createSupabaseServerClient();
   const {
@@ -254,10 +487,7 @@ async function ensureHealthSeedData() {
       segmental_lean: scan.segmentalLean,
       segmental_fat: scan.segmentalFat,
       impedance: scan.impedance,
-      file_name: scan.fileName ?? null,
-      file_path: scan.filePath ?? null,
-      file_mime_type: scan.fileMimeType ?? null,
-      file_size: scan.fileSize ?? null,
+      ...getInbodyFileMetadata(user.id, scan.date),
     }));
 
     const { error } = await supabase.from("health_inbody_scans").insert(payload);
@@ -311,6 +541,9 @@ async function ensureHealthSeedData() {
       }
     }
   }
+
+  await ensureInbodyFileMetadata(user.id);
+  await ensureLegacySessionHistory(user.id);
 }
 
 export async function getHealthPageData(): Promise<HealthPagePayload> {
@@ -344,7 +577,7 @@ export async function getHealthPageData(): Promise<HealthPagePayload> {
       .order("day_index", { ascending: true }),
     supabase
       .from("health_workout_sessions")
-      .select("id, routine_week_id, session_date, session_type, status, notes, created_at")
+      .select("id, routine_week_id, week_label, session_date, session_type, status, notes, created_at")
       .eq("user_id", user.id)
       .order("session_date", { ascending: false })
       .order("created_at", { ascending: false }),
@@ -419,7 +652,7 @@ export async function getHealthPageData(): Promise<HealthPagePayload> {
     return {
       id: session.id,
       date: formatDateLabel(session.session_date),
-      week: weekMap.get(session.routine_week_id ?? "") ?? "Manual",
+      week: session.week_label ?? weekMap.get(session.routine_week_id ?? "") ?? "Manual",
       session: session.session_type,
       summary:
         session.status === "completado"
@@ -430,10 +663,7 @@ export async function getHealthPageData(): Promise<HealthPagePayload> {
     };
   });
 
-  const sessionHistory =
-    savedSessionHistory.length > 0
-      ? [...savedSessionHistory, ...legacySessionHistory]
-      : legacySessionHistory;
+  const sessionHistory = savedSessionHistory.length > 0 ? savedSessionHistory : legacySessionHistory;
 
   const weeklyConsistency =
     sessionHistory.length > 0
@@ -452,6 +682,7 @@ export async function createHealthWorkoutSession(input: {
   routineWeekId?: string | null;
   sessionDate: string;
   sessionType: string;
+  weekLabel?: string | null;
   status: "completado" | "parcial" | "pendiente";
   notes?: string;
   exercises: Array<{
@@ -476,6 +707,7 @@ export async function createHealthWorkoutSession(input: {
     .insert({
       user_id: user.id,
       routine_week_id: input.routineWeekId ?? null,
+      week_label: input.weekLabel ?? null,
       session_date: input.sessionDate,
       session_type: input.sessionType,
       status: input.status,

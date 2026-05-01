@@ -7,6 +7,7 @@ export async function POST(request: Request) {
       routineWeekId?: string | null;
       sessionDate: string;
       sessionType: string;
+      weekLabel?: string | null;
       status: "completado" | "parcial" | "pendiente";
       notes?: string;
       exercises?: Array<{
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
       routineWeekId: payload.routineWeekId ?? null,
       sessionDate: payload.sessionDate,
       sessionType: payload.sessionType,
+      weekLabel: payload.weekLabel ?? null,
       status: payload.status,
       notes: payload.notes ?? "",
       exercises: Array.isArray(payload.exercises)
