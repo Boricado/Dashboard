@@ -1,7 +1,14 @@
-import type { FurnitureProjectInput } from "@/modules/muebles/types";
+import type {
+  FurnitureMaterialInput,
+  FurnitureProjectInput,
+} from "@/modules/muebles/types";
 
-type ValidationResult =
+type ProjectValidationResult =
   | { ok: true; data: FurnitureProjectInput }
+  | { ok: false; error: string };
+
+type MaterialValidationResult =
+  | { ok: true; data: FurnitureMaterialInput }
   | { ok: false; error: string };
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -40,7 +47,26 @@ function parseQuantity(value: unknown) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-export function validateFurnitureProjectInput(payload: unknown): ValidationResult {
+function parsePercent(value: unknown, fallback: number) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return Math.round(value * 10) / 10;
+  }
+
+  if (typeof value !== "string" || value.trim().length === 0) {
+    return fallback;
+  }
+
+  const parsed = Number(value.replace(",", "."));
+  return Number.isFinite(parsed) ? Math.round(parsed * 10) / 10 : null;
+}
+
+function readOptionalText(value: unknown) {
+  return typeof value === "string" && value.trim().length > 0
+    ? value.trim()
+    : undefined;
+}
+
+export function validateFurnitureProjectInput(payload: unknown): ProjectValidationResult {
   if (!isPlainObject(payload)) {
     return { ok: false, error: "El cuerpo es invalido." };
   }
@@ -56,6 +82,8 @@ export function validateFurnitureProjectInput(payload: unknown): ValidationResul
 
   const laborCost = parseMoney(payload.labor_cost);
   const salePrice = parseMoney(payload.sale_price);
+  const wastePercent = parsePercent(payload.waste_percent, 10);
+  const targetMarginPercent = parsePercent(payload.target_margin_percent, 35);
 
   if (laborCost == null || laborCost < 0) {
     return { ok: false, error: "La mano de obra no es valida." };
@@ -63,6 +91,14 @@ export function validateFurnitureProjectInput(payload: unknown): ValidationResul
 
   if (salePrice == null || salePrice < 0) {
     return { ok: false, error: "El precio de venta no es valido." };
+  }
+
+  if (wastePercent == null || wastePercent < 0 || wastePercent > 100) {
+    return { ok: false, error: "La merma debe estar entre 0% y 100%." };
+  }
+
+  if (targetMarginPercent == null || targetMarginPercent < 0 || targetMarginPercent >= 95) {
+    return { ok: false, error: "El margen objetivo debe estar entre 0% y 95%." };
   }
 
   const rawItems = Array.isArray(payload.items) ? payload.items : [];
@@ -108,17 +144,54 @@ export function validateFurnitureProjectInput(payload: unknown): ValidationResul
     ok: true,
     data: {
       name,
-      description:
-        typeof payload.description === "string" && payload.description.trim().length > 0
-          ? payload.description.trim()
-          : undefined,
+      description: readOptionalText(payload.description),
       labor_cost: laborCost,
       sale_price: salePrice,
-      notes:
-        typeof payload.notes === "string" && payload.notes.trim().length > 0
-          ? payload.notes.trim()
-          : undefined,
+      waste_percent: wastePercent,
+      target_margin_percent: targetMarginPercent,
+      notes: readOptionalText(payload.notes),
       items,
+    },
+  };
+}
+
+export function validateFurnitureMaterialInput(payload: unknown): MaterialValidationResult {
+  if (!isPlainObject(payload)) {
+    return { ok: false, error: "El cuerpo es invalido." };
+  }
+
+  const category = readOptionalText(payload.category);
+  const name = readOptionalText(payload.name);
+  const unitLabel = readOptionalText(payload.unit_label);
+  const unitPrice = parseMoney(payload.unit_price);
+
+  if (!category) {
+    return { ok: false, error: "La categoria del material es obligatoria." };
+  }
+
+  if (!name) {
+    return { ok: false, error: "El nombre del material es obligatorio." };
+  }
+
+  if (!unitLabel) {
+    return { ok: false, error: "La unidad del material es obligatoria." };
+  }
+
+  if (unitPrice == null || unitPrice < 0) {
+    return { ok: false, error: "El precio del material no es valido." };
+  }
+
+  return {
+    ok: true,
+    data: {
+      category,
+      name,
+      unit_label: unitLabel,
+      unit_price: unitPrice,
+      reference: readOptionalText(payload.reference),
+      supplier: readOptionalText(payload.supplier),
+      note: readOptionalText(payload.note),
+      source_url: readOptionalText(payload.source_url),
     },
   };
 }

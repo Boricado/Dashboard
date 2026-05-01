@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { furnitureCatalogMeta, seedFurnitureMaterials } from "@/modules/muebles/data";
 import type {
   FurnitureMaterial,
+  FurnitureMaterialInput,
   FurniturePageData,
   FurnitureProject,
   FurnitureProjectInput,
@@ -18,6 +19,20 @@ type MaterialRow = {
   supplier: string | null;
   note: string | null;
   source_url: string | null;
+};
+
+type ProjectRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  labor_cost: number;
+  sale_price: number;
+  waste_percent: number | null;
+  target_margin_percent: number | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  items: ProjectItemRow[] | null;
 };
 
 type ProjectItemRow = {
@@ -58,6 +73,20 @@ function mapMaterial(row: MaterialRow): FurnitureMaterial {
   };
 }
 
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function makeMaterialKey(input: FurnitureMaterialInput) {
+  const base = slugify(`${input.category}-${input.name}`);
+  return `custom-${base || "material"}-${Date.now()}`;
+}
+
 function buildFallbackData(): FurniturePageData {
   const now = new Date().toISOString();
   const materials: FurnitureMaterial[] = seedFurnitureMaterials.map((item, index) => ({
@@ -82,6 +111,8 @@ function buildFallbackData(): FurniturePageData {
         description: "Proyecto ejemplo para revisar el modulo.",
         labor_cost: 65000,
         sale_price: 220000,
+        waste_percent: 10,
+        target_margin_percent: 35,
         notes: furnitureCatalogMeta.note,
         created_at: now,
         updated_at: now,
@@ -154,7 +185,7 @@ export async function getFurniturePageData(): Promise<FurniturePageData> {
     supabase
       .from("furniture_projects")
       .select(
-        "id, name, description, labor_cost, sale_price, notes, created_at, updated_at, items:furniture_project_materials(id, project_id, material_id, quantity, unit_price_snapshot, notes, material:furniture_materials(id, material_key, category, name, unit_label, unit_price, reference, supplier, note, source_url))",
+        "id, name, description, labor_cost, sale_price, waste_percent, target_margin_percent, notes, created_at, updated_at, items:furniture_project_materials(id, project_id, material_id, quantity, unit_price_snapshot, notes, material:furniture_materials(id, material_key, category, name, unit_label, unit_price, reference, supplier, note, source_url))",
       )
       .eq("user_id", userId)
       .order("created_at", { ascending: false }),
@@ -169,12 +200,14 @@ export async function getFurniturePageData(): Promise<FurniturePageData> {
   }
 
   const materials = (materialsResult.data ?? []).map((row) => mapMaterial(row as MaterialRow));
-  const projects: FurnitureProject[] = (projectsResult.data ?? []).map((project) => ({
+  const projects: FurnitureProject[] = ((projectsResult.data ?? []) as ProjectRow[]).map((project) => ({
     id: project.id,
     name: project.name,
     description: project.description,
     labor_cost: project.labor_cost,
     sale_price: project.sale_price,
+    waste_percent: project.waste_percent ?? 10,
+    target_margin_percent: project.target_margin_percent ?? 35,
     notes: project.notes,
     created_at: project.created_at,
     updated_at: project.updated_at,
@@ -196,6 +229,60 @@ export function getFurnitureFallbackData() {
   return buildFallbackData();
 }
 
+export async function createFurnitureMaterial(input: FurnitureMaterialInput) {
+  const { supabase, userId } = await getFurnitureContext();
+
+  const { data, error } = await supabase
+    .from("furniture_materials")
+    .insert({
+      user_id: userId,
+      material_key: makeMaterialKey(input),
+      category: input.category,
+      name: input.name,
+      unit_label: input.unit_label,
+      unit_price: input.unit_price,
+      reference: input.reference ?? null,
+      supplier: input.supplier ?? null,
+      note: input.note ?? null,
+      source_url: input.source_url ?? null,
+    })
+    .select("id, material_key, category, name, unit_label, unit_price, reference, supplier, note, source_url")
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return mapMaterial(data as MaterialRow);
+}
+
+export async function updateFurnitureMaterial(id: string, input: FurnitureMaterialInput) {
+  const { supabase, userId } = await getFurnitureContext();
+
+  const { data, error } = await supabase
+    .from("furniture_materials")
+    .update({
+      category: input.category,
+      name: input.name,
+      unit_label: input.unit_label,
+      unit_price: input.unit_price,
+      reference: input.reference ?? null,
+      supplier: input.supplier ?? null,
+      note: input.note ?? null,
+      source_url: input.source_url ?? null,
+    })
+    .eq("user_id", userId)
+    .eq("id", id)
+    .select("id, material_key, category, name, unit_label, unit_price, reference, supplier, note, source_url")
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return mapMaterial(data as MaterialRow);
+}
+
 export async function createFurnitureProject(input: FurnitureProjectInput) {
   const { supabase, userId } = await getFurnitureContext();
 
@@ -207,6 +294,8 @@ export async function createFurnitureProject(input: FurnitureProjectInput) {
       description: input.description ?? null,
       labor_cost: input.labor_cost,
       sale_price: input.sale_price,
+      waste_percent: input.waste_percent,
+      target_margin_percent: input.target_margin_percent,
       notes: input.notes ?? null,
     })
     .select("id")
@@ -252,6 +341,8 @@ export async function updateFurnitureProject(id: string, input: FurnitureProject
       description: input.description ?? null,
       labor_cost: input.labor_cost,
       sale_price: input.sale_price,
+      waste_percent: input.waste_percent,
+      target_margin_percent: input.target_margin_percent,
       notes: input.notes ?? null,
     })
     .eq("user_id", userId)

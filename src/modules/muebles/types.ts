@@ -27,10 +27,23 @@ export type FurnitureProject = {
   description: string | null;
   labor_cost: number;
   sale_price: number;
+  waste_percent: number;
+  target_margin_percent: number;
   notes: string | null;
   created_at: string;
   updated_at: string;
   items: FurnitureProjectMaterial[];
+};
+
+export type FurnitureMaterialInput = {
+  category: string;
+  name: string;
+  unit_label: string;
+  unit_price: number;
+  reference?: string;
+  supplier?: string;
+  note?: string;
+  source_url?: string;
 };
 
 export type FurnitureProjectInput = {
@@ -38,6 +51,8 @@ export type FurnitureProjectInput = {
   description?: string;
   labor_cost: number;
   sale_price: number;
+  waste_percent: number;
+  target_margin_percent: number;
   notes?: string;
   items: Array<{
     material_id: string;

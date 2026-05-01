@@ -21,8 +21,21 @@ type DraftProject = {
   description: string;
   labor_cost: string;
   sale_price: string;
+  waste_percent: string;
+  target_margin_percent: string;
   notes: string;
   items: DraftItem[];
+};
+
+type MaterialDraft = {
+  category: string;
+  name: string;
+  unit_label: string;
+  unit_price: string;
+  reference: string;
+  supplier: string;
+  note: string;
+  source_url: string;
 };
 
 function formatClp(value: number) {
@@ -40,6 +53,8 @@ function makeDraft(project?: FurnitureProject): DraftProject {
       description: "",
       labor_cost: "0",
       sale_price: "0",
+      waste_percent: "10",
+      target_margin_percent: "35",
       notes: "",
       items: [],
     };
@@ -50,6 +65,8 @@ function makeDraft(project?: FurnitureProject): DraftProject {
     description: project.description ?? "",
     labor_cost: String(project.labor_cost),
     sale_price: String(project.sale_price),
+    waste_percent: String(project.waste_percent),
+    target_margin_percent: String(project.target_margin_percent),
     notes: project.notes ?? "",
     items: project.items.map((item) => ({
       material_id: item.material_id,
@@ -58,6 +75,28 @@ function makeDraft(project?: FurnitureProject): DraftProject {
       notes: item.notes ?? "",
     })),
   };
+}
+
+function makeMaterialDraft(material?: FurnitureMaterial): MaterialDraft {
+  return {
+    category: material?.category ?? "madera",
+    name: material?.name ?? "",
+    unit_label: material?.unit_label ?? "unidad",
+    unit_price: material ? String(material.unit_price) : "0",
+    reference: material?.reference ?? "",
+    supplier: material?.supplier ?? "",
+    note: material?.note ?? "",
+    source_url: material?.source_url ?? "",
+  };
+}
+
+function parseMoneyInput(value: string) {
+  return Number(value.replace(/[^\d-]/g, "")) || 0;
+}
+
+function parsePercentInput(value: string, fallback: number) {
+  const parsed = Number(value.replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function computeMaterialTotal(items: DraftItem[]) {
@@ -69,13 +108,16 @@ function computeMaterialTotal(items: DraftItem[]) {
 }
 
 export function MueblesClient(props: { initialData: FurniturePageData }) {
-  const [materials] = useState(props.initialData.materials);
+  const [materials, setMaterials] = useState(props.initialData.materials);
   const [projects, setProjects] = useState(props.initialData.projects);
   const [draft, setDraft] = useState<DraftProject>(makeDraft());
+  const [materialDraft, setMaterialDraft] = useState<MaterialDraft>(makeMaterialDraft());
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingMaterialId, setEditingMaterialId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("todas");
   const [saving, setSaving] = useState(false);
+  const [savingMaterial, setSavingMaterial] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -110,15 +152,27 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
   );
 
   const draftMaterialCost = computeMaterialTotal(draft.items);
-  const draftLaborCost = Number(draft.labor_cost.replace(/[^\d-]/g, "")) || 0;
-  const draftSalePrice = Number(draft.sale_price.replace(/[^\d-]/g, "")) || 0;
-  const draftCost = draftMaterialCost + draftLaborCost;
+  const draftLaborCost = parseMoneyInput(draft.labor_cost);
+  const draftSalePrice = parseMoneyInput(draft.sale_price);
+  const draftWastePercent = parsePercentInput(draft.waste_percent, 10);
+  const draftTargetMarginPercent = parsePercentInput(draft.target_margin_percent, 35);
+  const draftWasteCost = Math.round(draftMaterialCost * (draftWastePercent / 100));
+  const draftCost = draftMaterialCost + draftWasteCost + draftLaborCost;
+  const draftSuggestedSalePrice =
+    draftTargetMarginPercent < 95
+      ? Math.ceil(draftCost / Math.max(0.05, 1 - draftTargetMarginPercent / 100))
+      : draftCost;
   const draftProfit = draftSalePrice - draftCost;
   const draftMargin = draftSalePrice > 0 ? (draftProfit / draftSalePrice) * 100 : 0;
 
   function resetDraft() {
     setDraft(makeDraft());
     setEditingId(null);
+  }
+
+  function resetMaterialDraft() {
+    setMaterialDraft(makeMaterialDraft());
+    setEditingMaterialId(null);
   }
 
   function addMaterial(material: FurnitureMaterial) {
@@ -159,6 +213,68 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
     setError(null);
   }
 
+  function startEditingMaterial(material: FurnitureMaterial) {
+    setEditingMaterialId(material.id);
+    setMaterialDraft(makeMaterialDraft(material));
+    setMessage(null);
+    setError(null);
+  }
+
+  function updateMaterialDraft(key: keyof MaterialDraft, value: string) {
+    setMaterialDraft((current) => ({ ...current, [key]: value }));
+  }
+
+  async function saveMaterial() {
+    setSavingMaterial(true);
+    setMessage(null);
+    setError(null);
+
+    const payload = {
+      ...materialDraft,
+      unit_price: parseMoneyInput(materialDraft.unit_price),
+    };
+    const response = await fetch(
+      editingMaterialId
+        ? `/api/muebles/materials/${editingMaterialId}`
+        : "/api/muebles/materials",
+      {
+        method: editingMaterialId ? "PATCH" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+
+    const result = await response.json();
+    setSavingMaterial(false);
+
+    if (!response.ok) {
+      setError(result.error ?? "No se pudo guardar el material.");
+      return;
+    }
+
+    const savedMaterial = result.material as FurnitureMaterial;
+    setMaterials((current) =>
+      editingMaterialId
+        ? current.map((item) => (item.id === savedMaterial.id ? savedMaterial : item))
+        : [...current, savedMaterial].sort((a, b) =>
+            `${a.category}-${a.name}`.localeCompare(`${b.category}-${b.name}`),
+          ),
+    );
+    setDraft((current) => ({
+      ...current,
+      items: current.items.map((item) =>
+        item.material_id === savedMaterial.id
+          ? { ...item, unit_price_snapshot: String(savedMaterial.unit_price) }
+          : item,
+      ),
+    }));
+    setCategory("todas");
+    setMessage(editingMaterialId ? "Material actualizado." : "Material agregado al catalogo.");
+    resetMaterialDraft();
+  }
+
   async function saveProject() {
     setSaving(true);
     setMessage(null);
@@ -169,6 +285,8 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
       description: draft.description || undefined,
       labor_cost: Number(draft.labor_cost.replace(/[^\d-]/g, "")) || 0,
       sale_price: Number(draft.sale_price.replace(/[^\d-]/g, "")) || 0,
+      waste_percent: draftWastePercent,
+      target_margin_percent: draftTargetMarginPercent,
       notes: draft.notes || undefined,
       items: draft.items.map((item) => ({
         material_id: item.material_id,
@@ -310,7 +428,7 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
             </label>
           </div>
 
-          <div className="mt-4 grid gap-4 xl:grid-cols-3">
+          <div className="mt-4 grid gap-4 xl:grid-cols-5">
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-[var(--muted)]">Mano de obra</span>
               <input
@@ -330,6 +448,33 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
                 value={draft.sale_price}
                 onChange={(event) =>
                   setDraft((current) => ({ ...current, sale_price: event.target.value }))
+                }
+                className="h-12 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+              />
+            </label>
+
+            <label className="grid gap-2 text-sm">
+              <span className="font-medium text-[var(--muted)]">Merma %</span>
+              <input
+                type="text"
+                value={draft.waste_percent}
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, waste_percent: event.target.value }))
+                }
+                className="h-12 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+              />
+            </label>
+
+            <label className="grid gap-2 text-sm">
+              <span className="font-medium text-[var(--muted)]">Margen objetivo %</span>
+              <input
+                type="text"
+                value={draft.target_margin_percent}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    target_margin_percent: event.target.value,
+                  }))
                 }
                 className="h-12 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
               />
@@ -356,6 +501,12 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
                 </div>
               </div>
               <div>
+                <div className="text-[var(--muted)]">Merma</div>
+                <div className="mt-1 text-xl font-semibold text-[var(--ink)]">
+                  {formatClp(draftWasteCost)}
+                </div>
+              </div>
+              <div>
                 <div className="text-[var(--muted)]">Costo total</div>
                 <div className="mt-1 text-xl font-semibold text-[var(--ink)]">
                   {formatClp(draftCost)}
@@ -371,6 +522,26 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
                 <div className="text-[var(--muted)]">Margen</div>
                 <div className="mt-1 text-xl font-semibold text-[var(--ink)]">
                   {draftMargin.toFixed(1)}%
+                </div>
+              </div>
+              <div>
+                <div className="text-[var(--muted)]">Venta sugerida</div>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <span className="text-xl font-semibold text-amber-800">
+                    {formatClp(draftSuggestedSalePrice)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setDraft((current) => ({
+                        ...current,
+                        sale_price: String(draftSuggestedSalePrice),
+                      }))
+                    }
+                    className="rounded-full bg-amber-600 px-3 py-1 text-xs font-semibold text-white"
+                  >
+                    Usar
+                  </button>
                 </div>
               </div>
             </div>
@@ -476,6 +647,129 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
           <h2 className="text-2xl font-semibold text-[var(--ink)]">Catalogo rescatado</h2>
           <p className="mt-1 text-sm text-[var(--muted)]">{furnitureCatalogMeta.note}</p>
 
+          <div className="mt-5 rounded-[1.5rem] border border-[var(--line)] bg-[#fff9ef] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h3 className="text-base font-semibold text-[var(--ink)]">
+                  {editingMaterialId ? "Editar material" : "Agregar material"}
+                </h3>
+                <p className="mt-1 text-xs text-[var(--muted)]">
+                  Actualiza el precio base o suma insumos nuevos al catalogo.
+                </p>
+              </div>
+              {editingMaterialId ? (
+                <button
+                  type="button"
+                  onClick={resetMaterialDraft}
+                  className="rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+                >
+                  Nuevo
+                </button>
+              ) : null}
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <label className="grid gap-1.5 text-sm">
+                <span className="font-medium text-[var(--muted)]">Material</span>
+                <input
+                  type="text"
+                  value={materialDraft.name}
+                  onChange={(event) => updateMaterialDraft("name", event.target.value)}
+                  placeholder="Ej: Bisagra cierre suave"
+                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                />
+              </label>
+
+              <label className="grid gap-1.5 text-sm">
+                <span className="font-medium text-[var(--muted)]">Categoria</span>
+                <input
+                  type="text"
+                  list="furniture-categories"
+                  value={materialDraft.category}
+                  onChange={(event) => updateMaterialDraft("category", event.target.value)}
+                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                />
+                <datalist id="furniture-categories">
+                  {categories.map((item) => (
+                    <option key={item} value={item} />
+                  ))}
+                </datalist>
+              </label>
+
+              <label className="grid gap-1.5 text-sm">
+                <span className="font-medium text-[var(--muted)]">Unidad</span>
+                <input
+                  type="text"
+                  value={materialDraft.unit_label}
+                  onChange={(event) => updateMaterialDraft("unit_label", event.target.value)}
+                  placeholder="unidad, pieza, plancha, metro"
+                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                />
+              </label>
+
+              <label className="grid gap-1.5 text-sm">
+                <span className="font-medium text-[var(--muted)]">Precio base</span>
+                <input
+                  type="text"
+                  value={materialDraft.unit_price}
+                  onChange={(event) => updateMaterialDraft("unit_price", event.target.value)}
+                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                />
+              </label>
+
+              <label className="grid gap-1.5 text-sm">
+                <span className="font-medium text-[var(--muted)]">Proveedor</span>
+                <input
+                  type="text"
+                  value={materialDraft.supplier}
+                  onChange={(event) => updateMaterialDraft("supplier", event.target.value)}
+                  placeholder="Sodimac, maderera, ferreteria"
+                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                />
+              </label>
+
+              <label className="grid gap-1.5 text-sm">
+                <span className="font-medium text-[var(--muted)]">Referencia</span>
+                <input
+                  type="text"
+                  value={materialDraft.reference}
+                  onChange={(event) => updateMaterialDraft("reference", event.target.value)}
+                  placeholder="Medida, marca, formato"
+                  className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                />
+              </label>
+            </div>
+
+            <label className="mt-3 grid gap-1.5 text-sm">
+              <span className="font-medium text-[var(--muted)]">Nota</span>
+              <input
+                type="text"
+                value={materialDraft.note}
+                onChange={(event) => updateMaterialDraft("note", event.target.value)}
+                placeholder="Dato de compra, calidad, rendimiento"
+                className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+              />
+            </label>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={resetMaterialDraft}
+                className="rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-semibold text-[var(--ink)]"
+              >
+                Limpiar
+              </button>
+              <button
+                type="button"
+                onClick={saveMaterial}
+                disabled={savingMaterial}
+                className="rounded-full bg-amber-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+              >
+                {savingMaterial ? "Guardando..." : editingMaterialId ? "Guardar material" : "Agregar material"}
+              </button>
+            </div>
+          </div>
+
           <div className="mt-5 grid gap-3">
             <input
               type="text"
@@ -519,8 +813,17 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
                     Agregar
                   </button>
                 </div>
-                <div className="mt-3 text-sm text-[var(--ink)]">
-                  {formatClp(material.unit_price)} / {material.unit_label}
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--ink)]">
+                  <span>
+                    {formatClp(material.unit_price)} / {material.unit_label}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => startEditingMaterial(material)}
+                    className="rounded-full border border-[var(--line)] bg-[#fff9ef] px-3 py-1 text-xs font-semibold text-[var(--ink)]"
+                  >
+                    Editar precio
+                  </button>
                 </div>
                 {material.reference ? (
                   <div className="mt-1 text-sm text-[var(--muted)]">{material.reference}</div>
@@ -556,9 +859,14 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
               (sum, item) => sum + item.quantity * item.unit_price_snapshot,
               0,
             );
-            const totalCost = materialCost + project.labor_cost;
+            const wasteCost = Math.round(materialCost * (project.waste_percent / 100));
+            const totalCost = materialCost + wasteCost + project.labor_cost;
             const profit = project.sale_price - totalCost;
             const margin = project.sale_price > 0 ? (profit / project.sale_price) * 100 : 0;
+            const suggestedSalePrice =
+              project.target_margin_percent < 95
+                ? Math.ceil(totalCost / Math.max(0.05, 1 - project.target_margin_percent / 100))
+                : totalCost;
 
             return (
               <article
@@ -592,13 +900,24 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
                   </div>
                 </div>
 
-                <div className="mt-5 grid gap-3 md:grid-cols-4">
+                <div className="mt-5 grid gap-3 md:grid-cols-5">
                   <div className="rounded-[1.25rem] border border-[var(--line)] bg-[#fff9ef] p-4">
                     <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
                       Materia prima
                     </div>
                     <div className="mt-2 text-xl font-semibold text-[var(--ink)]">
                       {formatClp(materialCost)}
+                    </div>
+                  </div>
+                  <div className="rounded-[1.25rem] border border-[var(--line)] bg-[#fff9ef] p-4">
+                    <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+                      Merma
+                    </div>
+                    <div className="mt-2 text-xl font-semibold text-[var(--ink)]">
+                      {formatClp(wasteCost)}
+                    </div>
+                    <div className="mt-1 text-xs text-[var(--muted)]">
+                      {project.waste_percent.toFixed(1)}%
                     </div>
                   </div>
                   <div className="rounded-[1.25rem] border border-[var(--line)] bg-[#fff9ef] p-4">
@@ -616,6 +935,9 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
                     <div className="mt-2 text-xl font-semibold text-[var(--ink)]">
                       {formatClp(project.sale_price)}
                     </div>
+                    <div className="mt-1 text-xs text-[var(--muted)]">
+                      Sugerido {formatClp(suggestedSalePrice)}
+                    </div>
                   </div>
                   <div className="rounded-[1.25rem] border border-[var(--line)] bg-[#fff9ef] p-4">
                     <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
@@ -624,7 +946,9 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
                     <div className={`mt-2 text-xl font-semibold ${profit >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
                       {formatClp(profit)}
                     </div>
-                    <div className="mt-1 text-xs text-[var(--muted)]">{margin.toFixed(1)}% margen</div>
+                    <div className="mt-1 text-xs text-[var(--muted)]">
+                      {margin.toFixed(1)}% / objetivo {project.target_margin_percent.toFixed(1)}%
+                    </div>
                   </div>
                 </div>
 
