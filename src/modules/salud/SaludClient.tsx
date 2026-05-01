@@ -274,12 +274,24 @@ function incrementConsistencyPoint(points: ConsistencyPoint[], label: string) {
   );
 }
 
-function MiniMetricBar(props: { label: string; value: string; progress: number }) {
+function MiniMetricBar(props: {
+  label: string;
+  value: string;
+  target?: string;
+  progress: number;
+}) {
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-3 text-sm">
         <span className="font-medium text-[var(--muted)]">{props.label}</span>
-        <span className="font-semibold text-[var(--ink)]">{props.value}</span>
+        <span className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1 text-right">
+          <span className="font-semibold text-[var(--ink)]">{props.value}</span>
+          {props.target ? (
+            <span className="rounded-full bg-[#fff0d3] px-2 py-0.5 text-xs font-semibold text-[#9a5a00]">
+              Meta {props.target}
+            </span>
+          ) : null}
+        </span>
       </div>
       <div className="h-2 rounded-full bg-[#e9e8f7]">
         <div
@@ -375,25 +387,30 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
   const consistencyMin = 0;
   const consistencyMax = Math.max(...weeklyConsistency.map((point) => point.value), 1);
   const latestMeasurement = {
-    title: "Composicion InBody",
-    dateLabel: `Ultima medicion: ${latestScan.label}`,
+    title: "Composición InBody",
+    dateLabel: `Última medición: ${latestScan.label}`,
     bodyFat: `${latestScan.bodyFatPercent.toFixed(1)}%`,
   };
+  const targetBodyFatMass = Math.max(0, latestScan.bodyFatMassKg + latestScan.fatControlKg);
+  const targetMuscleMass = latestScan.skeletalMuscleKg + latestScan.muscleControlKg;
   const compositionMetrics = [
+    {
+      label: "Peso",
+      value: `${latestScan.weightKg.toFixed(1)} kg`,
+      target: `${latestScan.targetWeightKg.toFixed(1)} kg`,
+      progress: Math.min(100, Math.round((latestScan.targetWeightKg / latestScan.weightKg) * 100)),
+    },
     {
       label: "Masa muscular",
       value: `${latestScan.skeletalMuscleKg.toFixed(1)} kg`,
+      target: `${targetMuscleMass.toFixed(1)} kg`,
       progress: Math.min(100, Math.round((latestScan.skeletalMuscleKg / 45) * 100)),
     },
     {
       label: "Masa grasa",
       value: `${latestScan.bodyFatMassKg.toFixed(1)} kg`,
+      target: `${targetBodyFatMass.toFixed(1)} kg`,
       progress: Math.min(100, Math.round((latestScan.bodyFatMassKg / 30) * 100)),
-    },
-    {
-      label: "Score InBody",
-      value: `${latestScan.score} pts`,
-      progress: Math.min(100, latestScan.score),
     },
   ];
   const inbodyComparisonRows = useMemo(
@@ -658,14 +675,14 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <h1 className="text-4xl font-semibold tracking-tight text-[var(--ink)]">
-                  Composicion InBody
+                  Composición InBody
                 </h1>
                 <p className="mt-2 text-lg text-[var(--muted)]">
-                  Ultima medicion: {latestMeasurement.dateLabel.replace("Ultima medicion: ", "")}
+                  Última medición: {latestMeasurement.dateLabel.replace("Última medición: ", "")}
                 </p>
               </div>
-              <span className="rounded-full bg-[#d9f5ef] px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">
-                Base inicial
+              <span className="rounded-full bg-[var(--ink)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(31,27,22,0.14)]">
+                Meta InBody
               </span>
             </div>
 
@@ -698,6 +715,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
                     key={metric.label}
                     label={metric.label}
                     value={metric.value}
+                    target={metric.target}
                     progress={metric.progress}
                   />
                 ))}
@@ -794,7 +812,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
                 </p>
               </div>
               <div className="rounded-[1.2rem] border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--muted)]">
-                {latestScan.heightCm} cm · {latestScan.age} anos
+                {latestScan.heightCm} cm · {latestScan.age} años
               </div>
             </div>
 
@@ -906,7 +924,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 text-sm text-[var(--muted)]">
-                  <span>{selectedScan.heightCm} cm · {selectedScan.age} anos</span>
+                  <span>{selectedScan.heightCm} cm · {selectedScan.age} años</span>
                   {selectedScan.filePath ? (
                     <a
                       href={`/api/health/inbody/${selectedScan.id}/file`}

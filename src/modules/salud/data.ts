@@ -622,8 +622,8 @@ export const healthSummaryStats: HealthStat[] = [
 ];
 
 export const latestMeasurement = {
-  title: "Composicion InBody",
-  dateLabel: `Ultima medicion: ${latestScan.label}`,
+  title: "Composición InBody",
+  dateLabel: `Última medición: ${latestScan.label}`,
   bodyFat: `${latestScan.bodyFatPercent.toFixed(1)}%`,
   bodyFatLabel: "Body fat",
 };
