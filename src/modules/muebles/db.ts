@@ -153,19 +153,100 @@ async function ensureFurnitureSeedData() {
   const existingKeys = new Set((materials ?? []).map((item) => item.material_key));
   const missing = seedFurnitureMaterials.filter((item) => !existingKeys.has(item.material_key));
 
-  if (missing.length === 0) {
+  if (missing.length > 0) {
+    const { error: insertError } = await supabase.from("furniture_materials").insert(
+      missing.map((item) => ({
+        user_id: userId,
+        ...item,
+      })),
+    );
+
+    if (insertError) {
+      throw new Error(insertError.message);
+    }
+  }
+
+  await ensureCortaVistaProject(supabase, userId);
+}
+
+async function ensureCortaVistaProject(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  userId: string,
+) {
+  const projectName = "Corta vista con macetero";
+  const { data: existing, error: existingError } = await supabase
+    .from("furniture_projects")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("name", projectName)
+    .maybeSingle();
+
+  if (existingError) {
+    throw new Error(existingError.message);
+  }
+
+  if (existing) {
     return;
   }
 
-  const { error: insertError } = await supabase.from("furniture_materials").insert(
-    missing.map((item) => ({
-      user_id: userId,
-      ...item,
-    })),
-  );
+  const { data: materials, error: materialsError } = await supabase
+    .from("furniture_materials")
+    .select("id, name, unit_price")
+    .eq("user_id", userId)
+    .eq("category", "madera");
 
-  if (insertError) {
-    throw new Error(insertError.message);
+  if (materialsError) {
+    throw new Error(materialsError.message);
+  }
+
+  const pino1x2 = materials?.find((material) => material.name.includes('1"x2"'));
+  const pino1x4 = materials?.find((material) => material.name.includes('1"x4"'));
+
+  if (!pino1x2 || !pino1x4) {
+    return;
+  }
+
+  const materialCost = 24 * Number(pino1x2.unit_price) + 19 * Number(pino1x4.unit_price);
+  const salePrice = Math.ceil(materialCost / 0.65);
+
+  const { data: project, error: projectError } = await supabase
+    .from("furniture_projects")
+    .insert({
+      user_id: userId,
+      name: projectName,
+      description: "Listones de pino seco cepillado segun OpenCutList.",
+      labor_cost: 0,
+      sale_price: salePrice,
+      waste_percent: 0,
+      target_margin_percent: 35,
+      notes: "OpenCutList: 1x2 = 68,30 m y 1x4 = 54,56 m. Cantidades ya incluyen 10% de merma sobre barras de 3,2 m.",
+    })
+    .select("id")
+    .single();
+
+  if (projectError) {
+    throw new Error(projectError.message);
+  }
+
+  const { error: itemsError } = await supabase.from("furniture_project_materials").insert([
+    {
+      project_id: project.id,
+      material_id: pino1x2.id,
+      quantity: 24,
+      unit_price_snapshot: Number(pino1x2.unit_price),
+      notes: "Compra estimada: 24 piezas de 3,2 m.",
+    },
+    {
+      project_id: project.id,
+      material_id: pino1x4.id,
+      quantity: 19,
+      unit_price_snapshot: Number(pino1x4.unit_price),
+      notes: "Compra estimada: 19 piezas de 3,2 m.",
+    },
+  ]);
+
+  if (itemsError) {
+    throw new Error(itemsError.message);
   }
 }
 
