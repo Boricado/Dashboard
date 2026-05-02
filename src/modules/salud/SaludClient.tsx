@@ -385,7 +385,8 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
   const weightMin = Math.min(...weightTrend.map((point) => point.value));
   const weightMax = Math.max(...weightTrend.map((point) => point.value));
   const consistencyMin = 0;
-  const consistencyMax = Math.max(...weeklyConsistency.map((point) => point.value), 1);
+  const visibleConsistency = weeklyConsistency.slice(-8);
+  const consistencyMax = Math.max(...visibleConsistency.map((point) => point.value), 1);
   const latestMeasurement = {
     title: "Composición InBody",
     dateLabel: `Última medición: ${latestScan.label}`,
@@ -754,11 +755,16 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
             </div>
           </article>
 
-          <article className="app-card p-8 shadow-[0_16px_48px_rgba(31,27,22,0.05)]">
-            <h2 className="text-3xl font-semibold text-[var(--ink)]">Consistencia</h2>
+          <article className="app-card p-5 shadow-[0_16px_48px_rgba(31,27,22,0.05)] sm:p-8">
+            <div className="flex flex-wrap items-end justify-between gap-2">
+              <h2 className="text-2xl font-semibold text-[var(--ink)] sm:text-3xl">Consistencia</h2>
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                Ultimas {visibleConsistency.length}
+              </span>
+            </div>
             <p className="hidden">Sesiones por semana</p>
 
-            <div className="relative mt-8 overflow-hidden rounded-[1.5rem] border border-[#e7e4f4] bg-white p-5">
+            <div className="relative mt-6 overflow-hidden rounded-[1.5rem] border border-[#e7e4f4] bg-white p-3 sm:p-5">
               <div className="pointer-events-none absolute inset-x-5 top-5 bottom-11 grid grid-rows-4">
                 {[0, 1, 2, 3].map((line) => (
                   <div
@@ -769,24 +775,24 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
               </div>
 
               <div className="relative grid grid-cols-[24px_minmax(0,1fr)] gap-4">
-                <div className="grid h-[190px] grid-rows-4 text-xs text-[var(--muted)]">
+                <div className="grid h-[174px] grid-rows-4 text-xs text-[var(--muted)]">
                   <span className="self-start">{consistencyMax}</span>
                   <span className="self-center">{Math.round((consistencyMax * 2) / 3)}</span>
                   <span className="self-center">{Math.round(consistencyMax / 3)}</span>
                   <span className="self-end">0</span>
                 </div>
-                <div className="flex h-[176px] gap-3 overflow-x-auto pb-1">
-                  {weeklyConsistency.map((point) => (
-                    <div key={point.label} className="grid min-w-12 flex-1 grid-rows-[1fr_auto_auto] gap-2 overflow-hidden">
-                      <div className="flex items-end">
+                <div className="flex h-[174px] gap-3 overflow-x-auto pb-2">
+                  {visibleConsistency.map((point) => (
+                    <div key={point.label} className="grid min-w-[3.25rem] flex-1 grid-rows-[1fr_auto_auto] gap-1.5">
+                      <div className="flex h-[128px] items-end">
                         <div
-                          className="w-full rounded-t-[1rem] bg-[#147a3d]"
+                          className="w-full min-w-8 rounded-t-[0.9rem] bg-[#147a3d]"
                           style={{
-                            height: `${chartHeight(point.value, consistencyMin, consistencyMax, 132)}px`,
+                            height: `${chartHeight(point.value, consistencyMin, consistencyMax, 128)}px`,
                           }}
                         />
                       </div>
-                      <div className="text-center text-xs text-[var(--muted)]">{point.label}</div>
+                      <div className="truncate text-center text-xs text-[var(--muted)]">{point.label}</div>
                       <div className="text-center text-sm font-semibold text-[var(--ink)]">
                         {point.value}
                       </div>
