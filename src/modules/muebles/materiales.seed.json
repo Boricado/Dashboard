@@ -1,12 +1,12 @@
 {
   "moneda": "CLP",
-  "ultima_actualizacion": "2026-04-17",
-  "nota": "Precios verificados en Sodimac.cl abril 2026. Sodimac vende pino en 3.2m (no 3m). Madereras locales pueden ser 20-30% más baratas.",
+  "ultima_actualizacion": "2026-05-02",
+  "nota": "Precios verificados en Sodimac.cl el 02-05-2026. Sodimac vende pino en 3.2m (no 3m). Madereras locales pueden ser 20-30% mas baratas.",
 
   "pino_estructural": [
-    { "dimension": "1\"x2\" (2.5x5cm)",  "largo_m": 3.2, "precio_sodimac": 1480,  "precio_min": 1480,  "precio_max": 2200  },
+    { "dimension": "1\"x2\" (2.5x5cm)",  "largo_m": 3.2, "precio_sodimac": 1480,  "precio_min": 1480,  "precio_max": 2200, "nombre_sodimac": "Pino Certificado Seco Cepillado 1x2 3,2 m", "url_sodimac": "https://sodimac.falabella.com/sodimac-cl/product/110327420/Pino-Certificado-Seco-Cepillado-1x2-3%2C2-m/110327424", "nota_sodimac": "Precio actual revisado: $1.480 por pieza de 3,2 m. Medida real ficha: 19 x 41 mm."  },
     { "dimension": "1\"x3\" (2.5x7.5cm)","largo_m": 3.2, "precio_sodimac": 2130,  "precio_min": 2130,  "precio_max": 3000  },
-    { "dimension": "1\"x4\" (2.5x10cm)", "largo_m": 3.2, "precio_sodimac": 2580,  "precio_min": 2580,  "precio_max": 3800  },
+    { "dimension": "1\"x4\" (2.5x10cm)", "largo_m": 3.2, "precio_sodimac": 2580,  "precio_min": 2580,  "precio_max": 3800, "nombre_sodimac": "Pino Certificado Seco Cepillado 1x4 3,2 m", "url_sodimac": "https://www.sodimac.cl/sodimac-cl/b/pino-1x4-cepillado", "nota_sodimac": "Precio actual revisado: $2.580 por pieza de 3,2 m."  },
     { "dimension": "1\"x6\" (2.5x15cm)", "largo_m": 3.2, "precio_sodimac": 3890,  "precio_min": 3890,  "precio_max": 5500  },
     { "dimension": "1\"x8\" (2.5x20cm)", "largo_m": 3.2, "precio_sodimac": 6050,  "precio_min": 6050,  "precio_max": 8500  },
     { "dimension": "2\"x2\" (5x5cm)",    "largo_m": 3.2, "precio_sodimac": 2690,  "precio_min": 2690,  "precio_max": 4000  },

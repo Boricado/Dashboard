@@ -247,6 +247,56 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
     }));
   }
 
+
+  function loadCortaVistaDraft() {
+    const pino1x2 = materials.find((material) =>
+      material.category === "madera" &&
+      (material.name.includes('1"x2"') || material.reference?.includes('1"x2"')),
+    );
+    const pino1x4 = materials.find((material) =>
+      material.category === "madera" &&
+      (material.name.includes('1"x4"') || material.reference?.includes('1"x4"')),
+    );
+
+    const items: DraftItem[] = [];
+    if (pino1x2) {
+      items.push({
+        material_id: pino1x2.id,
+        quantity: "24",
+        unit_price_snapshot: String(pino1x2.unit_price),
+        notes: "OpenCutList: 68,30 m totales. Compra estimada con 10% merma: 24 piezas de 3,2 m.",
+      });
+    }
+    if (pino1x4) {
+      items.push({
+        material_id: pino1x4.id,
+        quantity: "19",
+        unit_price_snapshot: String(pino1x4.unit_price),
+        notes: "OpenCutList: 54,56 m totales. Compra estimada con 10% merma: 19 piezas de 3,2 m.",
+      });
+    }
+
+    const materialCost = items.reduce(
+      (sum, item) => sum + Number(item.quantity) * parseMoneyInput(item.unit_price_snapshot),
+      0,
+    );
+    const suggestedSale = Math.ceil(materialCost / 0.65);
+
+    setEditingId(null);
+    setDraft({
+      name: "Corta vista con macetero",
+      description: "Listones de pino seco cepillado segun OpenCutList.",
+      labor_cost: "0",
+      sale_price: String(suggestedSale),
+      waste_percent: "0",
+      target_margin_percent: "35",
+      notes: "Precios Sodimac actuales al 02-05-2026. Cantidades ya incluyen 10% de merma sobre largo total.",
+      items,
+    });
+    setMessage("Corta vista cargado como proyecto nuevo. Revisa y presiona Crear proyecto.");
+    setError(null);
+  }
+
   function startEditing(project: FurnitureProject) {
     setEditingId(project.id);
     setDraft(makeDraft(project));
@@ -471,7 +521,7 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
             </label>
           </div>
 
-          <div className="mt-4 grid gap-4 xl:grid-cols-5">
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-[var(--muted)]">Mano de obra</span>
               <input
@@ -530,7 +580,7 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
                 value={draft.notes}
                 onChange={(event) => setDraft((current) => ({ ...current, notes: event.target.value }))}
                 placeholder="Acabado, plazo, condicion especial"
-                className="h-12 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                className="h-12 min-w-0 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
               />
             </label>
           </div>
@@ -674,6 +724,13 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
               className="rounded-full border border-[var(--line)] px-4 py-2 text-sm font-semibold text-[var(--ink)]"
             >
               Limpiar
+            </button>
+            <button
+              type="button"
+              onClick={loadCortaVistaDraft}
+              className="rounded-full border border-amber-200 bg-[#fff9ef] px-4 py-2 text-sm font-semibold text-amber-800"
+            >
+              Cargar corta vista
             </button>
             <button
               type="button"
