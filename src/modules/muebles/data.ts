@@ -80,6 +80,17 @@ export const seedFurnitureMaterials: SeedMaterial[] = [
     note: item.nota ?? null,
     source_url: null,
   })),
+  ...data.accesorios_globales.map((item) => ({
+    material_key: `accesorio-${slugify(item.tipo)}`,
+    category: "accesorios",
+    name: item.tipo,
+    unit_label: item.unidad,
+    unit_price: choosePrice(item.precio_ref),
+    reference: item.referencia,
+    supplier: "Ferreteria / retail",
+    note: item.nota,
+    source_url: null,
+  })),
 ];
 
 export const furnitureCatalogMeta = {

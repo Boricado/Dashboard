@@ -157,6 +157,86 @@
     { "tipo": "Tinte acuoso Minwax 250ml",  "precio_min": 12000, "precio_max": 20000, "recomendado": false, "nota": "Para oscurecer veta" }
   ],
 
+  "accesorios_globales": [
+    {
+      "tipo": "Tornillos madera surtidos",
+      "unidad": "pack",
+      "precio_ref": 8990,
+      "referencia": "Pack tornillos madera / aglomerado",
+      "nota": "Accesorio global para armado. Ajusta medida y cantidad segun proyecto."
+    },
+    {
+      "tipo": "Tornillo techo hexagonal madera 3\" caja 100u",
+      "unidad": "caja",
+      "precio_ref": 21990,
+      "referencia": "Caja 100 unidades",
+      "nota": "Fijacion estructural para bastidores, soportes y piezas gruesas."
+    },
+    {
+      "tipo": "Broca madera individual",
+      "unidad": "unidad",
+      "precio_ref": 2990,
+      "referencia": "Broca madera uso general",
+      "nota": "Consumible de taller. Usa la medida real que requiera el proyecto."
+    },
+    {
+      "tipo": "Pack brocas madera",
+      "unidad": "pack",
+      "precio_ref": 9990,
+      "referencia": "Set brocas madera surtidas",
+      "nota": "Pack base para perforaciones comunes en pino, MDF y terciado."
+    },
+    {
+      "tipo": "Pack brocas fresadora / router",
+      "unidad": "pack",
+      "precio_ref": 24990,
+      "referencia": "Set fresas router surtidas",
+      "nota": "Para rebajes, cantos, ranuras y detalles con fresadora."
+    },
+    {
+      "tipo": "Brocha 2\"",
+      "unidad": "unidad",
+      "precio_ref": 2490,
+      "referencia": "Brocha uso general",
+      "nota": "Aplicacion de pintura, barniz, cola o sellador."
+    },
+    {
+      "tipo": "Pintura esmalte al agua 1L",
+      "unidad": "unidad",
+      "precio_ref": 12990,
+      "referencia": "Esmalte al agua interior/exterior",
+      "nota": "Acabado pintado. Ajusta color, marca y rendimiento."
+    },
+    {
+      "tipo": "Agorex contacto 1/4 galon",
+      "unidad": "unidad",
+      "precio_ref": 12990,
+      "referencia": "Adhesivo contacto",
+      "nota": "Pegado de laminas, tapacanto manual, cuero, goma u otros revestimientos."
+    },
+    {
+      "tipo": "Tapacanto melamina 22mm",
+      "unidad": "rollo",
+      "precio_ref": 6990,
+      "referencia": "Rollo tapacanto 22mm",
+      "nota": "Para cantos de melamina o tableros de 18mm. Ajusta color y metros."
+    },
+    {
+      "tipo": "Sierra de mano",
+      "unidad": "unidad",
+      "precio_ref": 8990,
+      "referencia": "Serrucho / sierra manual",
+      "nota": "Herramienta global de taller. Puede cargarse una vez si se compra para el proyecto."
+    },
+    {
+      "tipo": "Formon",
+      "unidad": "unidad",
+      "precio_ref": 7990,
+      "referencia": "Formon carpintero",
+      "nota": "Para rebajes, ajustes finos y limpieza de ensambles."
+    }
+  ],
+
   "proveedores_zona": [
     { "nombre": "Maderera Arizala",              "ciudad": "La Serena", "zona": "Zona industrial Av. Francisco de Aguirre" },
     { "nombre": "Maderera El Roble",             "ciudad": "La Serena", "zona": "" },
