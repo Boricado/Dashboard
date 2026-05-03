@@ -167,6 +167,7 @@ async function ensureFurnitureSeedData() {
   }
 
   await ensureCortaVistaProject(supabase, userId);
+  await ensureMesaTrabajoProject(supabase, userId);
 }
 
 async function ensureCortaVistaProject(
@@ -244,6 +245,138 @@ async function ensureCortaVistaProject(
       notes: "Compra estimada: 19 piezas de 3,2 m.",
     },
   ]);
+
+  if (itemsError) {
+    throw new Error(itemsError.message);
+  }
+}
+
+async function ensureMesaTrabajoProject(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  userId: string,
+) {
+  const projectName = "Mesa de trabajo";
+  const { data: materials, error: materialsError } = await supabase
+    .from("furniture_materials")
+    .select("id, category, name, unit_price")
+    .eq("user_id", userId);
+
+  if (materialsError) {
+    throw new Error(materialsError.message);
+  }
+
+  const osb15 = materials?.find(
+    (material) => material.category === "tableros" && material.name.includes("OSB 15mm"),
+  );
+  const terciado18 = materials?.find(
+    (material) =>
+      material.category === "tableros" &&
+      (material.name.includes("Plywood 18mm") || material.name.includes("Terciado")),
+  );
+  const pino1x2 = materials?.find(
+    (material) => material.category === "madera" && material.name.includes('1"x2"'),
+  );
+
+  if (!osb15 || !terciado18 || !pino1x2) {
+    return;
+  }
+
+  const materialCost =
+    Number(osb15.unit_price) + Number(terciado18.unit_price) + 12 * Number(pino1x2.unit_price);
+  const salePrice = Math.ceil(materialCost / 0.65);
+  const projectPayload = {
+    user_id: userId,
+    name: projectName,
+    description: "Mesa de carpinteria segun OpenCutList del modelo dibujado.",
+    labor_cost: 0,
+    sale_price: salePrice,
+    waste_percent: 0,
+    target_margin_percent: 35,
+    notes:
+      "OpenCutList: OSB 15mm x1, terciado estructural 18mm x1, pino 1x2 = 38 cortes / 37,35 m totales / compra estimada 12 piezas de 3,2 m.",
+  };
+  const projectItems = [
+    {
+      material_id: osb15.id,
+      quantity: 1,
+      unit_price_snapshot: Number(osb15.unit_price),
+      notes: "OpenCutList: 1 plancha inferior OSB 15mm 1220x2440.",
+    },
+    {
+      material_id: terciado18.id,
+      quantity: 1,
+      unit_price_snapshot: Number(terciado18.unit_price),
+      notes: "OpenCutList: 1 plancha superior terciado estructural 18mm 1220x2440.",
+    },
+    {
+      material_id: pino1x2.id,
+      quantity: 12,
+      unit_price_snapshot: Number(pino1x2.unit_price),
+      notes: "OpenCutList: 38 cortes, 37,35 m totales. Compra estimada: 12 piezas de 3,2 m.",
+    },
+  ];
+
+  const { data: existing, error: existingError } = await supabase
+    .from("furniture_projects")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("name", projectName)
+    .maybeSingle();
+
+  if (existingError) {
+    throw new Error(existingError.message);
+  }
+
+  if (existing) {
+    const { error: updateError } = await supabase
+      .from("furniture_projects")
+      .update(projectPayload)
+      .eq("user_id", userId)
+      .eq("id", existing.id);
+
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    const { error: deleteItemsError } = await supabase
+      .from("furniture_project_materials")
+      .delete()
+      .eq("project_id", existing.id);
+
+    if (deleteItemsError) {
+      throw new Error(deleteItemsError.message);
+    }
+
+    const { error: insertItemsError } = await supabase.from("furniture_project_materials").insert(
+      projectItems.map((item) => ({
+        project_id: existing.id,
+        ...item,
+      })),
+    );
+
+    if (insertItemsError) {
+      throw new Error(insertItemsError.message);
+    }
+
+    return;
+  }
+
+  const { data: project, error: projectError } = await supabase
+    .from("furniture_projects")
+    .insert(projectPayload)
+    .select("id")
+    .single();
+
+  if (projectError) {
+    throw new Error(projectError.message);
+  }
+
+  const { error: itemsError } = await supabase.from("furniture_project_materials").insert(
+    projectItems.map((item) => ({
+      project_id: project.id,
+      ...item,
+    })),
+  );
 
   if (itemsError) {
     throw new Error(itemsError.message);

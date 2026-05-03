@@ -38,6 +38,11 @@ type MaterialDraft = {
   source_url: string;
 };
 
+type PurchaseRow = {
+  project_id: string;
+  quantity: string;
+};
+
 function formatClp(value: number) {
   return new Intl.NumberFormat("es-CL", {
     style: "currency",
@@ -99,6 +104,11 @@ function parsePercentInput(value: string, fallback: number) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function parseQuantityInput(value: string) {
+  const parsed = Number(value.replace(",", "."));
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
 function computeMaterialTotal(items: DraftItem[]) {
   return items.reduce((sum, item) => {
     const quantity = Number(item.quantity.replace(",", ".")) || 0;
@@ -122,6 +132,11 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [purchaseRows, setPurchaseRows] = useState<PurchaseRow[]>(
+    props.initialData.projects[0]
+      ? [{ project_id: props.initialData.projects[0].id, quantity: "1" }]
+      : [],
+  );
 
   const filteredMaterials = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -165,6 +180,47 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
       : draftCost;
   const draftProfit = draftSalePrice - draftCost;
   const draftMargin = draftSalePrice > 0 ? (draftProfit / draftSalePrice) * 100 : 0;
+  const purchaseSummary = useMemo(() => {
+    const grouped = new Map<
+      string,
+      {
+        material: FurnitureMaterial;
+        quantity: number;
+        subtotal: number;
+        projects: Set<string>;
+      }
+    >();
+
+    for (const row of purchaseRows) {
+      const project = projects.find((item) => item.id === row.project_id);
+      const projectQuantity = parseQuantityInput(row.quantity);
+
+      if (!project || projectQuantity <= 0) {
+        continue;
+      }
+
+      for (const item of project.items) {
+        const current = grouped.get(item.material_id) ?? {
+          material: item.material,
+          quantity: 0,
+          subtotal: 0,
+          projects: new Set<string>(),
+        };
+
+        current.quantity += item.quantity * projectQuantity;
+        current.subtotal += item.quantity * projectQuantity * item.unit_price_snapshot;
+        current.projects.add(project.name);
+        grouped.set(item.material_id, current);
+      }
+    }
+
+    return Array.from(grouped.values()).sort((a, b) =>
+      `${a.material.category}-${a.material.name}`.localeCompare(
+        `${b.material.category}-${b.material.name}`,
+      ),
+    );
+  }, [projects, purchaseRows]);
+  const purchaseTotal = purchaseSummary.reduce((sum, item) => sum + item.subtotal, 0);
 
   useEffect(() => {
     if (!materialModalOpen) {
@@ -247,6 +303,31 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
     }));
   }
 
+  function addPurchaseRow() {
+    const firstProject = projects[0];
+
+    if (!firstProject) {
+      return;
+    }
+
+    setPurchaseRows((current) => [
+      ...current,
+      {
+        project_id: firstProject.id,
+        quantity: "1",
+      },
+    ]);
+  }
+
+  function updatePurchaseRow(index: number, key: keyof PurchaseRow, value: string) {
+    setPurchaseRows((current) =>
+      current.map((row, rowIndex) => (rowIndex === index ? { ...row, [key]: value } : row)),
+    );
+  }
+
+  function removePurchaseRow(index: number) {
+    setPurchaseRows((current) => current.filter((_, rowIndex) => rowIndex !== index));
+  }
 
   function loadCortaVistaDraft() {
     const pino1x2 = materials.find((material) =>
@@ -294,6 +375,68 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
       items,
     });
     setMessage("Corta vista cargado como proyecto nuevo. Revisa y presiona Crear proyecto.");
+    setError(null);
+  }
+
+  function loadMesaTrabajoDraft() {
+    const osb15 = materials.find(
+      (material) => material.category === "tableros" && material.name.includes("OSB 15mm"),
+    );
+    const terciado18 = materials.find(
+      (material) =>
+        material.category === "tableros" &&
+        (material.name.includes("Plywood 18mm") || material.name.includes("Terciado")),
+    );
+    const pino1x2 = materials.find(
+      (material) =>
+        material.category === "madera" &&
+        (material.name.includes('1"x2"') || material.reference?.includes('1"x2"')),
+    );
+
+    const items: DraftItem[] = [];
+    if (osb15) {
+      items.push({
+        material_id: osb15.id,
+        quantity: "1",
+        unit_price_snapshot: String(osb15.unit_price),
+        notes: "OpenCutList: 1 plancha inferior OSB 15mm 1220x2440.",
+      });
+    }
+    if (terciado18) {
+      items.push({
+        material_id: terciado18.id,
+        quantity: "1",
+        unit_price_snapshot: String(terciado18.unit_price),
+        notes: "OpenCutList: 1 plancha superior terciado estructural 18mm 1220x2440.",
+      });
+    }
+    if (pino1x2) {
+      items.push({
+        material_id: pino1x2.id,
+        quantity: "12",
+        unit_price_snapshot: String(pino1x2.unit_price),
+        notes: "OpenCutList: 38 cortes, 37,35 m totales. Compra estimada: 12 piezas de 3,2 m.",
+      });
+    }
+
+    const materialCost = items.reduce(
+      (sum, item) => sum + Number(item.quantity) * parseMoneyInput(item.unit_price_snapshot),
+      0,
+    );
+    const suggestedSale = Math.ceil(materialCost / 0.65);
+
+    setEditingId(null);
+    setDraft({
+      name: "Mesa de trabajo",
+      description: "Mesa de carpinteria segun OpenCutList del modelo dibujado.",
+      labor_cost: "0",
+      sale_price: String(suggestedSale),
+      waste_percent: "0",
+      target_margin_percent: "35",
+      notes: "OpenCutList: OSB 15mm x1, terciado estructural 18mm x1, pino 1x2 con 37,35 m totales.",
+      items,
+    });
+    setMessage("Mesa de trabajo cargada como proyecto nuevo. Revisa y presiona Crear proyecto.");
     setError(null);
   }
 
@@ -734,6 +877,13 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
             </button>
             <button
               type="button"
+              onClick={loadMesaTrabajoDraft}
+              className="rounded-full border border-amber-200 bg-[#fff9ef] px-4 py-2 text-sm font-semibold text-amber-800"
+            >
+              Cargar mesa
+            </button>
+            <button
+              type="button"
               onClick={saveProject}
               disabled={saving}
               className="rounded-full bg-amber-600 px-5 py-2 text-sm font-semibold text-white disabled:opacity-60"
@@ -827,6 +977,116 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
 
       {message ? <section className="app-card p-4 text-center text-emerald-700">{message}</section> : null}
       {error ? <section className="app-card p-4 text-center text-rose-700">{error}</section> : null}
+
+      <section className="app-card p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-semibold text-[var(--ink)]">Resumen de compras</h2>
+            <p className="mt-1 text-sm text-[var(--muted)]">
+              Selecciona proyectos y cantidades para agrupar la compra total de materiales.
+            </p>
+          </div>
+          <div className="rounded-full bg-[#fff9ef] px-4 py-2 text-sm font-semibold text-[var(--ink)]">
+            Total {formatClp(purchaseTotal)}
+          </div>
+        </div>
+
+        <div className="mt-5 space-y-3">
+          {purchaseRows.length === 0 ? (
+            <div className="rounded-[1.25rem] border border-dashed border-[var(--line)] px-4 py-5 text-sm text-[var(--muted)]">
+              Crea un proyecto para armar una lista de compra.
+            </div>
+          ) : (
+            purchaseRows.map((row, index) => (
+              <div
+                key={`${row.project_id}-${index}`}
+                className="grid gap-3 rounded-[1.25rem] border border-[var(--line)] bg-white p-4 md:grid-cols-[1fr_9rem_auto]"
+              >
+                <label className="grid gap-2 text-sm">
+                  <span className="font-medium text-[var(--muted)]">Proyecto</span>
+                  <select
+                    value={row.project_id}
+                    onChange={(event) => updatePurchaseRow(index, "project_id", event.target.value)}
+                    className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                  >
+                    {projects.map((project) => (
+                      <option key={project.id} value={project.id}>
+                        {project.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="grid gap-2 text-sm">
+                  <span className="font-medium text-[var(--muted)]">Cantidad</span>
+                  <input
+                    type="text"
+                    value={row.quantity}
+                    onChange={(event) => updatePurchaseRow(index, "quantity", event.target.value)}
+                    className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                  />
+                </label>
+
+                <div className="flex items-end">
+                  <button
+                    type="button"
+                    onClick={() => removePurchaseRow(index)}
+                    className="h-11 rounded-full border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-700"
+                  >
+                    Quitar
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="mt-4 flex justify-end">
+          <button
+            type="button"
+            onClick={addPurchaseRow}
+            disabled={projects.length === 0}
+            className="rounded-full border border-amber-200 bg-[#fff9ef] px-4 py-2 text-sm font-semibold text-amber-800 disabled:opacity-60"
+          >
+            Agregar proyecto
+          </button>
+        </div>
+
+        {purchaseSummary.length > 0 ? (
+          <div className="mt-5 overflow-hidden rounded-[1.25rem] border border-[var(--line)]">
+            <table className="min-w-full border-collapse bg-white text-sm">
+              <thead className="bg-[#f7f3e9] text-left text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                <tr>
+                  <th className="px-4 py-3">Material</th>
+                  <th className="px-4 py-3">Categoria</th>
+                  <th className="px-4 py-3">Cantidad compra</th>
+                  <th className="px-4 py-3">Subtotal</th>
+                  <th className="px-4 py-3">Proyectos</th>
+                </tr>
+              </thead>
+              <tbody>
+                {purchaseSummary.map((item) => (
+                  <tr key={item.material.id} className="border-t border-[var(--line)]">
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-[var(--ink)]">{item.material.name}</div>
+                      <div className="text-xs text-[var(--muted)]">{item.material.reference}</div>
+                    </td>
+                    <td className="px-4 py-3">{item.material.category}</td>
+                    <td className="px-4 py-3 font-semibold">
+                      {item.quantity.toLocaleString("es-CL", { maximumFractionDigits: 2 })}{" "}
+                      {item.material.unit_label}
+                    </td>
+                    <td className="px-4 py-3 font-semibold">{formatClp(item.subtotal)}</td>
+                    <td className="px-4 py-3 text-[var(--muted)]">
+                      {Array.from(item.projects).join(", ")}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
+      </section>
 
       {materialModalOpen ? (
         <section
