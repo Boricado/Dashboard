@@ -276,13 +276,19 @@ async function ensureMesaTrabajoProject(
   const pino1x2 = materials?.find(
     (material) => material.category === "madera" && material.name.includes('1"x2"'),
   );
+  const pino1x3 = materials?.find(
+    (material) => material.category === "madera" && material.name.includes('1"x3"'),
+  );
 
-  if (!osb15 || !terciado18 || !pino1x2) {
+  if (!osb15 || !terciado18 || !pino1x2 || !pino1x3) {
     return;
   }
 
   const materialCost =
-    Number(osb15.unit_price) + Number(terciado18.unit_price) + 12 * Number(pino1x2.unit_price);
+    Number(osb15.unit_price) +
+    Number(terciado18.unit_price) +
+    2 * Number(pino1x2.unit_price) +
+    11 * Number(pino1x3.unit_price);
   const salePrice = Math.ceil(materialCost / 0.65);
   const projectPayload = {
     user_id: userId,
@@ -293,7 +299,7 @@ async function ensureMesaTrabajoProject(
     waste_percent: 0,
     target_margin_percent: 35,
     notes:
-      "OpenCutList: OSB 15mm x1, terciado estructural 18mm x1, pino 1x2 = 38 cortes / 37,35 m totales / compra estimada 12 piezas de 3,2 m.",
+      "OpenCutList: OSB 15mm x1, terciado estructural 18mm x1, pino 1x2 = 4 cortes / 4,73 m / compra 2 piezas; pino 1x3 = 34 cortes / 32,29 m / compra 11 piezas.",
   };
   const projectItems = [
     {
@@ -310,9 +316,15 @@ async function ensureMesaTrabajoProject(
     },
     {
       material_id: pino1x2.id,
-      quantity: 12,
+      quantity: 2,
       unit_price_snapshot: Number(pino1x2.unit_price),
-      notes: "OpenCutList: 38 cortes, 37,35 m totales. Compra estimada: 12 piezas de 3,2 m.",
+      notes: "OpenCutList: 4 cortes, 4,73 m totales. Compra estimada: 2 piezas de 3,2 m.",
+    },
+    {
+      material_id: pino1x3.id,
+      quantity: 11,
+      unit_price_snapshot: Number(pino1x3.unit_price),
+      notes: "OpenCutList: 34 cortes, 32,29 m totales. Compra estimada: 11 piezas de 3,2 m.",
     },
   ];
 

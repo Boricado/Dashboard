@@ -392,6 +392,11 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
         material.category === "madera" &&
         (material.name.includes('1"x2"') || material.reference?.includes('1"x2"')),
     );
+    const pino1x3 = materials.find(
+      (material) =>
+        material.category === "madera" &&
+        (material.name.includes('1"x3"') || material.reference?.includes('1"x3"')),
+    );
 
     const items: DraftItem[] = [];
     if (osb15) {
@@ -413,9 +418,17 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
     if (pino1x2) {
       items.push({
         material_id: pino1x2.id,
-        quantity: "12",
+        quantity: "2",
         unit_price_snapshot: String(pino1x2.unit_price),
-        notes: "OpenCutList: 38 cortes, 37,35 m totales. Compra estimada: 12 piezas de 3,2 m.",
+        notes: "OpenCutList: 4 cortes, 4,73 m totales. Compra estimada: 2 piezas de 3,2 m.",
+      });
+    }
+    if (pino1x3) {
+      items.push({
+        material_id: pino1x3.id,
+        quantity: "11",
+        unit_price_snapshot: String(pino1x3.unit_price),
+        notes: "OpenCutList: 34 cortes, 32,29 m totales. Compra estimada: 11 piezas de 3,2 m.",
       });
     }
 
@@ -433,7 +446,7 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
       sale_price: String(suggestedSale),
       waste_percent: "0",
       target_margin_percent: "35",
-      notes: "OpenCutList: OSB 15mm x1, terciado estructural 18mm x1, pino 1x2 con 37,35 m totales.",
+      notes: "OpenCutList: OSB 15mm x1, terciado estructural 18mm x1, pino 1x2 = 4,73 m y pino 1x3 = 32,29 m.",
       items,
     });
     setMessage("Mesa de trabajo cargada como proyecto nuevo. Revisa y presiona Crear proyecto.");
