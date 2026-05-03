@@ -298,6 +298,22 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
   const purchaseNet = Math.round(purchaseTotal / 1.19);
   const purchaseVat = purchaseTotal - purchaseNet;
 
+  function getProjectPurchaseCost(row: PurchaseRow) {
+    const project = projects.find((item) => item.id === row.project_id);
+    const projectQuantity = parseQuantityInput(row.quantity);
+
+    if (!project || projectQuantity <= 0) {
+      return 0;
+    }
+
+    const projectMaterials = project.items.reduce(
+      (sum, item) => sum + item.quantity * item.unit_price_snapshot,
+      0,
+    );
+
+    return projectMaterials * projectQuantity;
+  }
+
   useEffect(() => {
     if (!materialModalOpen) {
       return;
@@ -1263,6 +1279,7 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
               <tr>
                 <th className="px-4 py-3">Proyecto</th>
                 <th className="px-4 py-3">Cantidad</th>
+                <th className="px-4 py-3">Compra proyecto</th>
                 <th className="px-4 py-3 text-right">Accion</th>
               </tr>
             </thead>
@@ -1289,6 +1306,9 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
                       onChange={(event) => updatePurchaseRow(index, "quantity", event.target.value)}
                       className="h-11 w-28 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
                     />
+                  </td>
+                  <td className="px-4 py-3 font-semibold text-[var(--ink)]">
+                    {formatClp(getProjectPurchaseCost(row))}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <button
