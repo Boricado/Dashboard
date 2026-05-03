@@ -43,6 +43,13 @@ type PurchaseRow = {
   quantity: string;
 };
 
+type PurchaseExtraRow = {
+  material_id: string;
+  quantity: string;
+};
+
+type PurchaseSortKey = "material" | "category" | "quantity" | "unitPrice" | "subtotal" | "projects";
+
 function formatClp(value: number) {
   return new Intl.NumberFormat("es-CL", {
     style: "currency",
@@ -117,6 +124,15 @@ function computeMaterialTotal(items: DraftItem[]) {
   }, 0);
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 export function MueblesClient(props: { initialData: FurniturePageData }) {
   const [materials, setMaterials] = useState(props.initialData.materials);
   const [projects, setProjects] = useState(props.initialData.projects);
@@ -132,11 +148,16 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [purchaseSort, setPurchaseSort] = useState<{
+    key: PurchaseSortKey;
+    direction: "asc" | "desc";
+  }>({ key: "subtotal", direction: "desc" });
   const [purchaseRows, setPurchaseRows] = useState<PurchaseRow[]>(
     props.initialData.projects[0]
       ? [{ project_id: props.initialData.projects[0].id, quantity: "1" }]
       : [],
   );
+  const [purchaseExtraRows, setPurchaseExtraRows] = useState<PurchaseExtraRow[]>([]);
 
   const filteredMaterials = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -184,13 +205,14 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
       : draftCost;
   const draftProfit = draftSalePrice - draftCost;
   const draftMargin = draftSalePrice > 0 ? (draftProfit / draftSalePrice) * 100 : 0;
-  const purchaseSummary = useMemo(() => {
+  const purchaseSummaryBase = useMemo(() => {
     const grouped = new Map<
       string,
       {
         material: FurnitureMaterial;
         quantity: number;
         subtotal: number;
+        unitPrice: number;
         projects: Set<string>;
       }
     >();
@@ -208,14 +230,39 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
           material: item.material,
           quantity: 0,
           subtotal: 0,
+          unitPrice: item.unit_price_snapshot,
           projects: new Set<string>(),
         };
 
         current.quantity += item.quantity * projectQuantity;
         current.subtotal += item.quantity * projectQuantity * item.unit_price_snapshot;
+        current.unitPrice = item.unit_price_snapshot;
         current.projects.add(project.name);
         grouped.set(item.material_id, current);
       }
+    }
+
+    for (const row of purchaseExtraRows) {
+      const material = materials.find((item) => item.id === row.material_id);
+      const quantity = parseQuantityInput(row.quantity);
+
+      if (!material || quantity <= 0) {
+        continue;
+      }
+
+      const current = grouped.get(row.material_id) ?? {
+        material,
+        quantity: 0,
+        subtotal: 0,
+        unitPrice: material.unit_price,
+        projects: new Set<string>(),
+      };
+
+      current.quantity += quantity;
+      current.subtotal += quantity * material.unit_price;
+      current.unitPrice = material.unit_price;
+      current.projects.add("Adicional");
+      grouped.set(row.material_id, current);
     }
 
     return Array.from(grouped.values()).sort((a, b) =>
@@ -223,8 +270,33 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
         `${b.material.category}-${b.material.name}`,
       ),
     );
-  }, [projects, purchaseRows]);
+  }, [materials, projects, purchaseExtraRows, purchaseRows]);
+  const purchaseSummary = useMemo(() => {
+    const direction = purchaseSort.direction === "asc" ? 1 : -1;
+
+    return [...purchaseSummaryBase].sort((a, b) => {
+      const aProjects = Array.from(a.projects).join(", ");
+      const bProjects = Array.from(b.projects).join(", ");
+      const values: Record<PurchaseSortKey, [string | number, string | number]> = {
+        material: [a.material.name, b.material.name],
+        category: [a.material.category, b.material.category],
+        quantity: [a.quantity, b.quantity],
+        unitPrice: [a.unitPrice, b.unitPrice],
+        subtotal: [a.subtotal, b.subtotal],
+        projects: [aProjects, bProjects],
+      };
+      const [left, right] = values[purchaseSort.key];
+
+      if (typeof left === "number" && typeof right === "number") {
+        return (left - right) * direction;
+      }
+
+      return String(left).localeCompare(String(right), "es-CL") * direction;
+    });
+  }, [purchaseSort, purchaseSummaryBase]);
   const purchaseTotal = purchaseSummary.reduce((sum, item) => sum + item.subtotal, 0);
+  const purchaseNet = Math.round(purchaseTotal / 1.19);
+  const purchaseVat = purchaseTotal - purchaseNet;
 
   useEffect(() => {
     if (!materialModalOpen) {
@@ -331,6 +403,126 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
 
   function removePurchaseRow(index: number) {
     setPurchaseRows((current) => current.filter((_, rowIndex) => rowIndex !== index));
+  }
+
+  function addPurchaseExtraRow(material?: FurnitureMaterial) {
+    const firstMaterial = material ?? materials[0];
+
+    if (!firstMaterial) {
+      return;
+    }
+
+    setPurchaseExtraRows((current) => [
+      ...current,
+      {
+        material_id: firstMaterial.id,
+        quantity: "1",
+      },
+    ]);
+  }
+
+  function updatePurchaseExtraRow(index: number, key: keyof PurchaseExtraRow, value: string) {
+    setPurchaseExtraRows((current) =>
+      current.map((row, rowIndex) => (rowIndex === index ? { ...row, [key]: value } : row)),
+    );
+  }
+
+  function removePurchaseExtraRow(index: number) {
+    setPurchaseExtraRows((current) => current.filter((_, rowIndex) => rowIndex !== index));
+  }
+
+  function updatePurchaseSort(key: PurchaseSortKey) {
+    setPurchaseSort((current) => ({
+      key,
+      direction: current.key === key && current.direction === "desc" ? "asc" : "desc",
+    }));
+  }
+
+  function sortLabel(key: PurchaseSortKey) {
+    if (purchaseSort.key !== key) {
+      return "";
+    }
+
+    return purchaseSort.direction === "desc" ? " ↓" : " ↑";
+  }
+
+  function openPurchasePrintWindow() {
+    const today = new Date().toLocaleDateString("es-CL");
+    const rows = purchaseSummary
+      .map((item) => {
+        const projectsText = Array.from(item.projects).join(", ");
+        const quantity = item.quantity.toLocaleString("es-CL", { maximumFractionDigits: 2 });
+        return `
+          <tr>
+            <td>
+              <strong>${escapeHtml(item.material.name)}</strong>
+              <span>${escapeHtml(item.material.reference ?? "")}</span>
+            </td>
+            <td>${escapeHtml(item.material.category)}</td>
+            <td class="right">${quantity} ${escapeHtml(item.material.unit_label)}</td>
+            <td class="right">${formatClp(item.unitPrice)}</td>
+            <td class="right">${formatClp(item.subtotal)}</td>
+            <td>${escapeHtml(projectsText)}</td>
+          </tr>
+        `;
+      })
+      .join("");
+    const printWindow = window.open("", "presupuesto-muebles", "width=960,height=720");
+
+    if (!printWindow) {
+      setError("No pude abrir la ventana de impresion. Revisa si el navegador bloqueo ventanas emergentes.");
+      return;
+    }
+
+    printWindow.document.write(`
+      <!doctype html>
+      <html>
+        <head>
+          <title>Presupuesto muebles</title>
+          <style>
+            body { color: #1f2a24; font-family: Arial, sans-serif; margin: 32px; }
+            header { border-bottom: 2px solid #d8c4a3; margin-bottom: 24px; padding-bottom: 18px; }
+            h1 { font-size: 28px; margin: 0 0 8px; }
+            p { color: #6f675e; margin: 0; }
+            table { border-collapse: collapse; font-size: 13px; width: 100%; }
+            th { background: #f7f3e9; color: #6f675e; font-size: 11px; letter-spacing: .12em; text-align: left; text-transform: uppercase; }
+            th, td { border-bottom: 1px solid #d8c4a3; padding: 10px; vertical-align: top; }
+            td span { color: #6f675e; display: block; font-size: 11px; margin-top: 3px; }
+            .right { text-align: right; white-space: nowrap; }
+            .totals { margin-left: auto; margin-top: 24px; width: 320px; }
+            .totals div { display: flex; justify-content: space-between; padding: 8px 0; }
+            .totals .final { border-top: 2px solid #1f2a24; font-size: 20px; font-weight: 700; margin-top: 8px; padding-top: 12px; }
+            @media print { body { margin: 20mm; } }
+          </style>
+        </head>
+        <body>
+          <header>
+            <h1>Presupuesto de materiales</h1>
+            <p>Resumen de compras muebles · ${escapeHtml(today)}</p>
+          </header>
+          <table>
+            <thead>
+              <tr>
+                <th>Material</th>
+                <th>Categoria</th>
+                <th class="right">Cantidad</th>
+                <th class="right">Precio unidad</th>
+                <th class="right">Total elemento</th>
+                <th>Origen</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <section class="totals">
+            <div><span>Total neto</span><strong>${formatClp(purchaseNet)}</strong></div>
+            <div><span>IVA 19%</span><strong>${formatClp(purchaseVat)}</strong></div>
+            <div class="final"><span>Total</span><strong>${formatClp(purchaseTotal)}</strong></div>
+          </section>
+          <script>window.onload = () => window.print();</script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   }
 
   function loadCortaVistaDraft() {
@@ -1047,65 +1239,78 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
           <div>
             <h2 className="text-2xl font-semibold text-[var(--ink)]">Resumen de compras</h2>
             <p className="mt-1 text-sm text-[var(--muted)]">
-              Selecciona proyectos y cantidades para agrupar la compra total de materiales.
+              Agrupa proyectos, accesorios y materiales adicionales en una compra imprimible.
             </p>
           </div>
-          <div className="rounded-full bg-[#fff9ef] px-4 py-2 text-sm font-semibold text-[var(--ink)]">
-            Total {formatClp(purchaseTotal)}
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={openPurchasePrintWindow}
+              disabled={purchaseSummary.length === 0}
+              className="rounded-full bg-amber-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+            >
+              Imprimir presupuesto
+            </button>
+            <div className="rounded-full bg-[#fff9ef] px-4 py-2 text-sm font-semibold text-[var(--ink)]">
+              Total {formatClp(purchaseTotal)}
+            </div>
           </div>
         </div>
 
-        <div className="mt-5 space-y-3">
+        <div className="mt-5 overflow-hidden rounded-[1.25rem] border border-[var(--line)]">
+          <table className="min-w-full border-collapse bg-white text-sm">
+            <thead className="bg-[#f7f3e9] text-left text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+              <tr>
+                <th className="px-4 py-3">Proyecto</th>
+                <th className="px-4 py-3">Cantidad</th>
+                <th className="px-4 py-3 text-right">Accion</th>
+              </tr>
+            </thead>
+            <tbody>
+              {purchaseRows.map((row, index) => (
+                <tr key={`${row.project_id}-${index}`} className="border-t border-[var(--line)]">
+                  <td className="px-4 py-3">
+                    <select
+                      value={row.project_id}
+                      onChange={(event) => updatePurchaseRow(index, "project_id", event.target.value)}
+                      className="h-11 w-full rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                    >
+                      {projects.map((project) => (
+                        <option key={project.id} value={project.id}>
+                          {project.name}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="px-4 py-3">
+                    <input
+                      type="text"
+                      value={row.quantity}
+                      onChange={(event) => updatePurchaseRow(index, "quantity", event.target.value)}
+                      className="h-11 w-28 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                    />
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      type="button"
+                      onClick={() => removePurchaseRow(index)}
+                      className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700"
+                    >
+                      Quitar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
           {purchaseRows.length === 0 ? (
-            <div className="rounded-[1.25rem] border border-dashed border-[var(--line)] px-4 py-5 text-sm text-[var(--muted)]">
+            <div className="border-t border-[var(--line)] px-4 py-5 text-sm text-[var(--muted)]">
               Crea un proyecto para armar una lista de compra.
             </div>
-          ) : (
-            purchaseRows.map((row, index) => (
-              <div
-                key={`${row.project_id}-${index}`}
-                className="grid gap-3 rounded-[1.25rem] border border-[var(--line)] bg-white p-4 md:grid-cols-[1fr_9rem_auto]"
-              >
-                <label className="grid gap-2 text-sm">
-                  <span className="font-medium text-[var(--muted)]">Proyecto</span>
-                  <select
-                    value={row.project_id}
-                    onChange={(event) => updatePurchaseRow(index, "project_id", event.target.value)}
-                    className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
-                  >
-                    {projects.map((project) => (
-                      <option key={project.id} value={project.id}>
-                        {project.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="grid gap-2 text-sm">
-                  <span className="font-medium text-[var(--muted)]">Cantidad</span>
-                  <input
-                    type="text"
-                    value={row.quantity}
-                    onChange={(event) => updatePurchaseRow(index, "quantity", event.target.value)}
-                    className="h-11 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
-                  />
-                </label>
-
-                <div className="flex items-end">
-                  <button
-                    type="button"
-                    onClick={() => removePurchaseRow(index)}
-                    className="h-11 rounded-full border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-700"
-                  >
-                    Quitar
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
+          ) : null}
         </div>
 
-        <div className="mt-4 flex justify-end">
+        <div className="mt-4 flex justify-end gap-2">
           <button
             type="button"
             onClick={addPurchaseRow}
@@ -1116,16 +1321,109 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
           </button>
         </div>
 
+        <div className="mt-6 overflow-hidden rounded-[1.25rem] border border-[var(--line)]">
+          <table className="min-w-full border-collapse bg-white text-sm">
+            <thead className="bg-[#f7f3e9] text-left text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+              <tr>
+                <th className="px-4 py-3">Material adicional</th>
+                <th className="px-4 py-3">Cantidad</th>
+                <th className="px-4 py-3 text-right">Accion</th>
+              </tr>
+            </thead>
+            <tbody>
+              {purchaseExtraRows.map((row, index) => (
+                <tr key={`${row.material_id}-${index}`} className="border-t border-[var(--line)]">
+                  <td className="px-4 py-3">
+                    <select
+                      value={row.material_id}
+                      onChange={(event) =>
+                        updatePurchaseExtraRow(index, "material_id", event.target.value)
+                      }
+                      className="h-11 w-full rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                    >
+                      {materials.map((material) => (
+                        <option key={material.id} value={material.id}>
+                          {material.name}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="px-4 py-3">
+                    <input
+                      type="text"
+                      value={row.quantity}
+                      onChange={(event) =>
+                        updatePurchaseExtraRow(index, "quantity", event.target.value)
+                      }
+                      className="h-11 w-28 rounded-[1rem] border border-[var(--line)] bg-white px-4 outline-none focus:border-amber-500"
+                    />
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      type="button"
+                      onClick={() => removePurchaseExtraRow(index)}
+                      className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700"
+                    >
+                      Quitar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {purchaseExtraRows.length === 0 ? (
+            <div className="border-t border-[var(--line)] px-4 py-5 text-sm text-[var(--muted)]">
+              Agrega accesorios, herramientas o materiales extra sin crear otro proyecto.
+            </div>
+          ) : null}
+        </div>
+
+        <div className="mt-4 flex justify-end">
+          <button
+            type="button"
+            onClick={() => addPurchaseExtraRow()}
+            disabled={materials.length === 0}
+            className="rounded-full border border-amber-200 bg-[#fff9ef] px-4 py-2 text-sm font-semibold text-amber-800 disabled:opacity-60"
+          >
+            Agregar material adicional
+          </button>
+        </div>
+
         {purchaseSummary.length > 0 ? (
           <div className="mt-5 overflow-hidden rounded-[1.25rem] border border-[var(--line)]">
             <table className="min-w-full border-collapse bg-white text-sm">
               <thead className="bg-[#f7f3e9] text-left text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
                 <tr>
-                  <th className="px-4 py-3">Material</th>
-                  <th className="px-4 py-3">Categoria</th>
-                  <th className="px-4 py-3">Cantidad compra</th>
-                  <th className="px-4 py-3">Subtotal</th>
-                  <th className="px-4 py-3">Proyectos</th>
+                  <th className="px-4 py-3">
+                    <button type="button" onClick={() => updatePurchaseSort("material")}>
+                      Material{sortLabel("material")}
+                    </button>
+                  </th>
+                  <th className="px-4 py-3">
+                    <button type="button" onClick={() => updatePurchaseSort("category")}>
+                      Categoria{sortLabel("category")}
+                    </button>
+                  </th>
+                  <th className="px-4 py-3">
+                    <button type="button" onClick={() => updatePurchaseSort("quantity")}>
+                      Cantidad compra{sortLabel("quantity")}
+                    </button>
+                  </th>
+                  <th className="px-4 py-3">
+                    <button type="button" onClick={() => updatePurchaseSort("unitPrice")}>
+                      Precio unidad{sortLabel("unitPrice")}
+                    </button>
+                  </th>
+                  <th className="px-4 py-3">
+                    <button type="button" onClick={() => updatePurchaseSort("subtotal")}>
+                      Total elemento{sortLabel("subtotal")}
+                    </button>
+                  </th>
+                  <th className="px-4 py-3">
+                    <button type="button" onClick={() => updatePurchaseSort("projects")}>
+                      Origen{sortLabel("projects")}
+                    </button>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -1140,6 +1438,7 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
                       {item.quantity.toLocaleString("es-CL", { maximumFractionDigits: 2 })}{" "}
                       {item.material.unit_label}
                     </td>
+                    <td className="px-4 py-3 font-semibold">{formatClp(item.unitPrice)}</td>
                     <td className="px-4 py-3 font-semibold">{formatClp(item.subtotal)}</td>
                     <td className="px-4 py-3 text-[var(--muted)]">
                       {Array.from(item.projects).join(", ")}
@@ -1150,6 +1449,21 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
             </table>
           </div>
         ) : null}
+
+        <div className="mt-5 grid gap-3 rounded-[1.25rem] border border-[var(--line)] bg-[#fff9ef] p-4 text-sm sm:ml-auto sm:max-w-md">
+          <div className="flex items-center justify-between">
+            <span className="text-[var(--muted)]">Total neto</span>
+            <strong className="text-[var(--ink)]">{formatClp(purchaseNet)}</strong>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[var(--muted)]">IVA 19%</span>
+            <strong className="text-[var(--ink)]">{formatClp(purchaseVat)}</strong>
+          </div>
+          <div className="flex items-center justify-between border-t border-[var(--line)] pt-3 text-lg">
+            <span className="font-semibold text-[var(--ink)]">Total</span>
+            <strong className="text-amber-800">{formatClp(purchaseTotal)}</strong>
+          </div>
+        </div>
       </section>
 
       {materialModalOpen ? (
