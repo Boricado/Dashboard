@@ -15,7 +15,28 @@ export type ContadorBankSummary = {
   latestTransactionDate: string | null;
 };
 
+export type ContadorTaxDeclaration = {
+  id: string;
+  declarationType: "f29";
+  periodYear: number;
+  periodMonth: number;
+  periodLabel: string;
+  folio: string | null;
+  presentedAt: string | null;
+  movementStatus: "sin_movimientos" | "con_movimientos";
+  netSales: number;
+  vatDebit: number;
+  vatCredit: number;
+  previousCredit: number;
+  totalCredit: number;
+  ivaCreditToCarry: number;
+  amountPaid: number;
+  siiCodes: Record<string, number>;
+  notes: string | null;
+};
+
 export type ContadorPageData = {
   checkpoints: Record<string, boolean>;
   bankSummary: ContadorBankSummary;
+  taxDeclarations: ContadorTaxDeclaration[];
 };

@@ -64,6 +64,8 @@ export function ContadorClient(props: { initialData: ContadorPageData }) {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savingKey, setSavingKey] = useState<string | null>(null);
+  const taxDeclarations = props.initialData.taxDeclarations;
+  const latestTaxDeclaration = taxDeclarations[0];
   const monthlyCalendar = useMemo(
     () =>
       buildMonthlyTaxCalendar().map((item) =>
@@ -216,10 +218,32 @@ export function ContadorClient(props: { initialData: ContadorPageData }) {
               </div>
             </div>
             <p>
-              Tambien rescate de tu modulo viejo la necesidad de no olvidarse de DTE, RCV,
-              patente municipal y la futura F22. Lo deje mas ordenado y con una separacion mas
-              clara entre tareas iniciales, vencimientos mensuales y obligaciones anuales.
+              Tambien rescate la necesidad de no olvidarse de DTE, RCV, patente municipal y
+              la futura F22, separado entre tareas iniciales, vencimientos mensuales y
+              obligaciones anuales.
             </p>
+            <div className="rounded-[1.25rem] border border-emerald-100 bg-emerald-50 px-4 py-4 text-sm">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                IVA a favor registrado
+              </div>
+              <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <div className="text-3xl font-semibold tracking-tight text-emerald-800">
+                    {formatClp(latestTaxDeclaration?.ivaCreditToCarry ?? 0)}
+                  </div>
+                  <div className="mt-1 text-emerald-900/75">
+                    {latestTaxDeclaration
+                      ? `${latestTaxDeclaration.periodLabel} · F29 ${latestTaxDeclaration.movementStatus === "sin_movimientos" ? "sin movimientos" : "con movimientos"}`
+                      : "Aun sin declaraciones registradas"}
+                  </div>
+                </div>
+                {latestTaxDeclaration?.presentedAt ? (
+                  <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-emerald-700">
+                    Presentado {formatHumanDate(latestTaxDeclaration.presentedAt)}
+                  </span>
+                ) : null}
+              </div>
+            </div>
             <div className="flex flex-wrap gap-3 pt-1">
               {contadorOfficialLinks.map((item) => (
                 <Link
@@ -309,6 +333,85 @@ export function ContadorClient(props: { initialData: ContadorPageData }) {
               </ul>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="app-card p-6">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <SectionPill label="IVA" tone="green" />
+            <div>
+              <h2 className="text-2xl font-semibold text-[var(--ink)]">
+                Declaraciones e IVA a favor
+              </h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">
+                Registro de montos, sin guardar los certificados PDF.
+              </p>
+            </div>
+          </div>
+          <span className="rounded-full bg-[#f2f0fb] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
+            {taxDeclarations.length} registros
+          </span>
+        </div>
+
+        <div className="mt-5 grid gap-4 lg:grid-cols-3">
+          {taxDeclarations.length > 0 ? (
+            taxDeclarations.map((item) => (
+              <article
+                key={item.id}
+                className="rounded-[1.5rem] border border-[var(--line)] bg-white p-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                      {item.declarationType.toUpperCase()} · {item.periodLabel}
+                    </div>
+                    <h3 className="mt-2 text-xl font-semibold text-[var(--ink)]">
+                      {formatClp(item.ivaCreditToCarry)}
+                    </h3>
+                    <p className="mt-1 text-sm text-[var(--muted)]">IVA a favor para arrastre</p>
+                  </div>
+                  <SectionPill
+                    label={item.movementStatus === "sin_movimientos" ? "Sin movimientos" : "Con movimientos"}
+                    tone={item.movementStatus === "sin_movimientos" ? "green" : "orange"}
+                  />
+                </div>
+
+                <div className="mt-4 grid gap-2 text-sm">
+                  <div className="flex justify-between gap-3">
+                    <span className="text-[var(--muted)]">Folio</span>
+                    <span className="font-semibold text-[var(--ink)]">{item.folio ?? "-"}</span>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <span className="text-[var(--muted)]">Presentado</span>
+                    <span className="font-semibold text-[var(--ink)]">
+                      {item.presentedAt ? formatHumanDate(item.presentedAt) : "-"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <span className="text-[var(--muted)]">Pago</span>
+                    <span className="font-semibold text-[var(--ink)]">{formatClp(item.amountPaid)}</span>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <span className="text-[var(--muted)]">Cod. 77</span>
+                    <span className="font-semibold text-[var(--ink)]">
+                      {formatClp(item.siiCodes["77"] ?? item.ivaCreditToCarry)}
+                    </span>
+                  </div>
+                </div>
+
+                {item.notes ? (
+                  <p className="mt-4 rounded-[1rem] bg-[#f2f0fb] px-3 py-3 text-sm leading-6 text-[var(--muted)]">
+                    {item.notes}
+                  </p>
+                ) : null}
+              </article>
+            ))
+          ) : (
+            <div className="rounded-[1.5rem] border border-dashed border-[var(--line)] bg-white p-5 text-sm text-[var(--muted)] lg:col-span-3">
+              Aun no hay declaraciones registradas.
+            </div>
+          )}
         </div>
       </section>
 
