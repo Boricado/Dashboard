@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { hasSupabaseEnv } from "@/lib/env";
 import { updateSession } from "@/lib/supabase/middleware";
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   if (!hasSupabaseEnv()) {
     return NextResponse.next({ request });
   }
