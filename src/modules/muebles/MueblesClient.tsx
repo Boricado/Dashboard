@@ -473,7 +473,31 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
   }
 
   function openPurchasePrintWindow() {
-    const today = new Date().toLocaleDateString("es-CL");
+    const printedAt = new Date();
+    const today = printedAt.toLocaleDateString("es-CL");
+    const time = printedAt.toLocaleTimeString("es-CL", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const selectedProjectsRows = purchaseRows
+      .map((row) => {
+        const project = projects.find((item) => item.id === row.project_id);
+        const quantity = parseQuantityInput(row.quantity);
+
+        if (!project || quantity <= 0) {
+          return "";
+        }
+
+        return `
+          <tr>
+            <td>${escapeHtml(project.name)}</td>
+            <td class="right">${quantity.toLocaleString("es-CL", { maximumFractionDigits: 2 })}</td>
+            <td class="right">${formatClp(getProjectPurchaseCost(row))}</td>
+          </tr>
+        `;
+      })
+      .join("");
+    const extrasCount = purchaseExtraRows.filter((row) => parseQuantityInput(row.quantity) > 0).length;
     const rows = purchaseSummary
       .map((item) => {
         const projectsText = Array.from(item.projects).join(", ");
@@ -493,6 +517,8 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
         `;
       })
       .join("");
+    const printDensityClass =
+      purchaseSummary.length > 16 ? "dense ultra-dense" : purchaseSummary.length > 10 ? "dense" : "";
     const printWindow = window.open("", "presupuesto-muebles", "width=960,height=720");
 
     if (!printWindow) {
@@ -506,27 +532,160 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
         <head>
           <title>Presupuesto muebles</title>
           <style>
-            body { color: #1f2a24; font-family: Arial, sans-serif; margin: 32px; }
-            header { border-bottom: 2px solid #d8c4a3; margin-bottom: 24px; padding-bottom: 18px; }
-            h1 { font-size: 28px; margin: 0 0 8px; }
+            @page { margin: 0; size: Letter portrait; }
+            * { box-sizing: border-box; }
+            html, body { margin: 0; padding: 0; }
+            body {
+              background: #ffffff;
+              color: #1f2a24;
+              font-family: Arial, sans-serif;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .page {
+              height: 11in;
+              overflow: hidden;
+              padding: 0.32in 0.36in;
+              width: 8.5in;
+            }
+            .content { transform-origin: top left; }
+            header {
+              align-items: start;
+              border-bottom: 1.5px solid #d8c4a3;
+              display: grid;
+              gap: 12px;
+              grid-template-columns: 1fr 108px 132px;
+              margin-bottom: 9px;
+              padding-bottom: 9px;
+            }
+            h1 { font-size: 20px; line-height: 1.05; margin: 0 0 4px; }
+            h2 {
+              font-size: 10px;
+              letter-spacing: .14em;
+              margin: 0 0 4px;
+              text-transform: uppercase;
+            }
             p { color: #6f675e; margin: 0; }
-            table { border-collapse: collapse; font-size: 13px; width: 100%; }
-            th { background: #f7f3e9; color: #6f675e; font-size: 11px; letter-spacing: .12em; text-align: left; text-transform: uppercase; }
-            th, td { border-bottom: 1px solid #d8c4a3; padding: 10px; vertical-align: top; }
-            td span { color: #6f675e; display: block; font-size: 11px; margin-top: 3px; }
+            .subtitle { font-size: 10px; }
+            .stamp, .total-card {
+              border: 1px solid #d8c4a3;
+              border-radius: 10px;
+              padding: 7px 8px;
+            }
+            .stamp span, .total-card span {
+              color: #6f675e;
+              display: block;
+              font-size: 8px;
+              letter-spacing: .12em;
+              text-transform: uppercase;
+            }
+            .stamp strong, .total-card strong {
+              display: block;
+              font-size: 13px;
+              line-height: 1.15;
+              margin-top: 2px;
+            }
+            .total-card strong { font-size: 17px; }
+            .projects {
+              border: 1px solid #d8c4a3;
+              border-radius: 12px;
+              margin-bottom: 8px;
+              overflow: hidden;
+            }
+            .projects-head {
+              align-items: center;
+              background: #f7f3e9;
+              display: flex;
+              justify-content: space-between;
+              padding: 6px 8px;
+            }
+            .projects-head span {
+              color: #6f675e;
+              font-size: 9px;
+            }
+            table { border-collapse: collapse; font-size: 9.4px; line-height: 1.12; width: 100%; }
+            th {
+              background: #f7f3e9;
+              color: #6f675e;
+              font-size: 7.4px;
+              letter-spacing: .09em;
+              text-align: left;
+              text-transform: uppercase;
+            }
+            th, td { border-bottom: 1px solid #d8c4a3; padding: 5px 6px; vertical-align: top; }
+            td span { color: #6f675e; display: block; font-size: 7.8px; margin-top: 2px; }
+            .materials-table strong { display: block; line-height: 1.08; }
+            .materials-table th:nth-child(1), .materials-table td:nth-child(1) { width: 27%; }
+            .materials-table th:nth-child(2), .materials-table td:nth-child(2) { width: 11%; }
+            .materials-table th:nth-child(3), .materials-table td:nth-child(3) { width: 12%; }
+            .materials-table th:nth-child(4), .materials-table td:nth-child(4) { width: 13%; }
+            .materials-table th:nth-child(5), .materials-table td:nth-child(5) { width: 13%; }
+            .materials-table th:nth-child(6), .materials-table td:nth-child(6) { width: 24%; }
             .right { text-align: right; white-space: nowrap; }
-            .totals { margin-left: auto; margin-top: 24px; width: 320px; }
-            .totals div { display: flex; justify-content: space-between; padding: 8px 0; }
-            .totals .final { border-top: 2px solid #1f2a24; font-size: 20px; font-weight: 700; margin-top: 8px; padding-top: 12px; }
-            @media print { body { margin: 20mm; } }
+            .totals {
+              display: grid;
+              gap: 5px;
+              grid-template-columns: repeat(3, 1fr);
+              margin-left: auto;
+              margin-top: 8px;
+              max-width: 360px;
+            }
+            .totals div {
+              border: 1px solid #d8c4a3;
+              border-radius: 9px;
+              padding: 6px 7px;
+            }
+            .totals span { color: #6f675e; display: block; font-size: 8px; }
+            .totals strong { display: block; font-size: 12px; margin-top: 2px; text-align: right; }
+            .totals .final { border-color: #1f2a24; }
+            .totals .final strong { font-size: 15px; }
+            .dense table { font-size: 8.4px; line-height: 1.05; }
+            .dense th, .dense td { padding: 4px 5px; }
+            .dense td span { font-size: 7px; }
+            .ultra-dense table { font-size: 7.6px; }
+            .ultra-dense th, .ultra-dense td { padding: 3px 4px; }
+            @media screen {
+              body { background: #202020; padding: 18px; }
+              .page { background: white; box-shadow: 0 12px 38px rgba(0,0,0,.28); margin: auto; }
+            }
           </style>
         </head>
         <body>
+          <main class="page ${printDensityClass}">
+            <div class="content">
           <header>
-            <h1>Presupuesto de materiales</h1>
-            <p>Resumen de compras muebles · ${escapeHtml(today)}</p>
+            <div>
+              <h1>Presupuesto de materiales</h1>
+              <p class="subtitle">Resumen de compras muebles - ${purchaseSummary.length} materiales</p>
+            </div>
+            <div class="stamp">
+              <span>Fecha</span>
+              <strong>${escapeHtml(today)}</strong>
+              <span>Hora</span>
+              <strong>${escapeHtml(time)}</strong>
+            </div>
+            <div class="total-card">
+              <span>Total compra</span>
+              <strong>${formatClp(purchaseTotal)}</strong>
+            </div>
           </header>
-          <table>
+          <section class="projects">
+            <div class="projects-head">
+              <h2>Proyectos incluidos</h2>
+              <span>${extrasCount > 0 ? `${extrasCount} material(es) adicional(es)` : "Sin adicionales"}</span>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Proyecto</th>
+                  <th class="right">Cantidad</th>
+                  <th class="right">Compra proyecto</th>
+                </tr>
+              </thead>
+              <tbody>${selectedProjectsRows}</tbody>
+            </table>
+          </section>
+          <table class="materials-table">
             <thead>
               <tr>
                 <th>Material</th>
@@ -534,7 +693,7 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
                 <th class="right">Cantidad</th>
                 <th class="right">Precio unidad</th>
                 <th class="right">Total elemento</th>
-                <th>Origen</th>
+                <th>Proyecto / origen</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -544,7 +703,33 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
             <div><span>IVA 19%</span><strong>${formatClp(purchaseVat)}</strong></div>
             <div class="final"><span>Total</span><strong>${formatClp(purchaseTotal)}</strong></div>
           </section>
-          <script>window.onload = () => window.print();</script>
+            </div>
+          </main>
+          <script>
+            function fitToSinglePage() {
+              const page = document.querySelector(".page");
+              const content = document.querySelector(".content");
+              if (!page || !content) return;
+
+              const scale = Math.min(
+                1,
+                page.clientWidth / content.scrollWidth,
+                page.clientHeight / content.scrollHeight,
+              );
+
+              content.style.transform = "scale(" + scale + ")";
+              content.style.width = (100 / scale) + "%";
+            }
+
+            window.onload = () => {
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  fitToSinglePage();
+                  window.print();
+                });
+              });
+            };
+          </script>
         </body>
       </html>
     `);
