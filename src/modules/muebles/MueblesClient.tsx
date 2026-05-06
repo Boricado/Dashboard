@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { furnitureCatalogMeta } from "@/modules/muebles/data";
 import type {
   FurnitureMaterial,
@@ -158,6 +158,7 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
       : [],
   );
   const [purchaseExtraRows, setPurchaseExtraRows] = useState<PurchaseExtraRow[]>([]);
+  const projectEditorRef = useRef<HTMLElement | null>(null);
 
   const filteredMaterials = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -341,6 +342,15 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
   function resetDraft() {
     setDraft(makeDraft());
     setEditingId(null);
+  }
+
+  function scrollToProjectEditor() {
+    window.requestAnimationFrame(() => {
+      projectEditorRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
   }
 
   function resetMaterialDraft() {
@@ -670,6 +680,7 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
     setDraft(makeDraft(project));
     setMessage(null);
     setError(null);
+    scrollToProjectEditor();
   }
 
   function startEditingMaterial(material: FurnitureMaterial) {
@@ -842,7 +853,7 @@ export function MueblesClient(props: { initialData: FurniturePageData }) {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <article className="app-card p-6">
+        <article ref={projectEditorRef} className="app-card scroll-mt-24 p-6">
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-2xl font-semibold text-[var(--ink)]">
