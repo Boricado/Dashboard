@@ -427,6 +427,165 @@ async function ensureLegacySessionHistory(userId: string) {
   }
 }
 
+async function ensureCurrentTrainingAdjustments(userId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data: week, error: weekError } = await supabase
+    .from("health_routine_weeks")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("week_code", "s14")
+    .maybeSingle();
+
+  if (weekError) {
+    throw new Error(weekError.message);
+  }
+
+  if (!week) {
+    return;
+  }
+
+  const { data: saturday, error: saturdayError } = await supabase
+    .from("health_routine_days")
+    .select("id")
+    .eq("week_id", week.id)
+    .eq("day_index", 5)
+    .maybeSingle();
+
+  if (saturdayError) {
+    throw new Error(saturdayError.message);
+  }
+
+  const sessionExternalId = "garmin-2026-05-09-13k";
+  const { data: session, error: sessionError } = await supabase
+    .from("health_workout_sessions")
+    .upsert(
+      {
+        user_id: userId,
+        routine_week_id: week.id,
+        routine_day_id: saturday?.id ?? null,
+        week_label: "S14",
+        external_id: sessionExternalId,
+        session_date: "2026-05-09",
+        session_type: "Tirada Larga",
+        status: "completado",
+        notes:
+          "13.01 km · 1:27:54 · ritmo 6:45/km · FC media 152 ppm · FC maxima 169 ppm · potencia media 311 W · training effect base aerobica baja. Jueves 07-may ajustado a descanso por fatiga para cuidar la progresion hacia la media maraton.",
+        source: "manual",
+      },
+      { onConflict: "user_id,source,external_id" },
+    )
+    .select("id")
+    .single();
+
+  if (sessionError) {
+    throw new Error(sessionError.message);
+  }
+
+  const { count: exerciseCount, error: exerciseCountError } = await supabase
+    .from("health_workout_session_exercises")
+    .select("id", { count: "exact", head: true })
+    .eq("session_id", session.id);
+
+  if (exerciseCountError) {
+    throw new Error(exerciseCountError.message);
+  }
+
+  if (exerciseCount) {
+    return;
+  }
+
+  const { error: exerciseInsertError } = await supabase
+    .from("health_workout_session_exercises")
+    .insert([
+      {
+        session_id: session.id,
+        sort_order: 0,
+        name: "Tirada larga",
+        sets_text: "13.01 km",
+        reps_text: "1:27:54",
+        load_text: "6:45/km",
+        completed: true,
+        notes: "FC 152/169 ppm · potencia 311/474 W · carga 151",
+      },
+      {
+        session_id: session.id,
+        sort_order: 1,
+        name: "Zonas FC",
+        sets_text: "Z3 1:15:22",
+        reps_text: "Z4 11:13",
+        load_text: "Z2 0:42",
+        completed: true,
+        notes: "85% en Z3 y 12% en Z4; controlar fatiga en los proximos rodajes.",
+      },
+      {
+        session_id: session.id,
+        sort_order: 2,
+        name: "Tecnica de carrera",
+        sets_text: "159 ppm",
+        reps_text: "0.93 m",
+        load_text: "292 ms",
+        completed: true,
+        notes: "Cadencia media · longitud de zancada · contacto con el suelo.",
+      },
+    ]);
+
+  if (exerciseInsertError) {
+    throw new Error(exerciseInsertError.message);
+  }
+}
+
+async function ensureHalfMarathonRecoveryPlan(userId: string) {
+  const supabase = await createSupabaseServerClient();
+  const weekCodes = Array.from({ length: 14 }, (_, index) => `s${index + 15}`);
+  const { data: weeks, error: weeksError } = await supabase
+    .from("health_routine_weeks")
+    .select("id, week_code")
+    .eq("user_id", userId)
+    .in("week_code", weekCodes);
+
+  if (weeksError) {
+    throw new Error(weeksError.message);
+  }
+
+  if (!weeks?.length) {
+    return;
+  }
+
+  const weekCodeById = new Map(weeks.map((item) => [item.id as string, item.week_code as string]));
+  const { data: thursdays, error: thursdayError } = await supabase
+    .from("health_routine_days")
+    .select("id, week_id")
+    .in(
+      "week_id",
+      weeks.map((item) => item.id),
+    )
+    .eq("day_index", 3);
+
+  if (thursdayError) {
+    throw new Error(thursdayError.message);
+  }
+
+  const updates = (thursdays ?? []).map((day) =>
+    supabase
+      .from("health_routine_days")
+      .update({
+        session_name: "Descanso",
+        status: "rest",
+        note: weekCodeById.get(day.week_id as string) === "s28"
+          ? "llegar fresco a carrera"
+          : "recuperacion preventiva",
+      })
+      .eq("id", day.id),
+  );
+
+  const results = await Promise.all(updates);
+  const updateError = results.find((result) => result.error)?.error;
+
+  if (updateError) {
+    throw new Error(updateError.message);
+  }
+}
+
 async function ensureHealthSeedData() {
   const supabase = await createSupabaseServerClient();
   const {
@@ -544,6 +703,8 @@ async function ensureHealthSeedData() {
 
   await ensureInbodyFileMetadata(user.id);
   await ensureLegacySessionHistory(user.id);
+  await ensureCurrentTrainingAdjustments(user.id);
+  await ensureHalfMarathonRecoveryPlan(user.id);
 }
 
 export async function getHealthPageData(): Promise<HealthPagePayload> {
