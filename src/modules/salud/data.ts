@@ -708,11 +708,11 @@ export const workoutRoutines: WorkoutWeek[] = [
     statusLabel: "Carga",
     days: [
       { dayShort: "Lun", dayName: "Lunes", session: "Push B", status: "upcoming" },
-      { dayShort: "Mar", dayName: "Martes", session: "Carrera", status: "upcoming", note: "8 km Z2" },
-      { dayShort: "Mie", dayName: "Miercoles", session: "Pierna", status: "upcoming", note: "carga completa" },
+      { dayShort: "Mar", dayName: "Martes", session: "Carrera", status: "upcoming", note: "8 km Z3" },
+      { dayShort: "Mie", dayName: "Miercoles", session: "Pierna", status: "upcoming", note: "carga completa — F. ext. rodilla PRIORIDAD" },
       { dayShort: "Jue", dayName: "Jueves", session: "Descanso", status: "rest", note: "recuperacion preventiva" },
       { dayShort: "Vie", dayName: "Viernes", session: "Pull A", status: "upcoming" },
-      { dayShort: "Sab", dayName: "Sabado", session: "Tirada Larga", status: "upcoming", note: "14 km" },
+      { dayShort: "Sab", dayName: "Sabado", session: "Tirada Larga", status: "upcoming", note: "13 km Z3" },
       { dayShort: "Dom", dayName: "Domingo", session: "Descanso", status: "rest" },
     ],
   },
@@ -961,7 +961,7 @@ export const routineTemplates: Record<string, WorkoutExercise[]> = {
     { name: "Carrera facil Z2", series: "1 bloque", notes: "6 km · FC 118-138 · ritmo comodo" },
   ],
   "Tirada Larga": [
-    { name: "Tirada larga", series: "1 bloque", notes: "12 km · ritmo 6:30-7:00/km · FC <145" },
+    { name: "Tirada larga", series: "1 bloque", notes: "13 km · Z3 Garmin (138-156 ppm) · ritmo comodo" },
   ],
   "Carrera suave": [
     { name: "Trote suave", series: "1 bloque", notes: "Muy facil, sin fatigar piernas" },
