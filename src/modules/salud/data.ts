@@ -728,7 +728,7 @@ export const workoutRoutines: WorkoutWeek[] = [
       { dayShort: "Jue", dayName: "Jueves", session: "Descanso", status: "rest", note: "recuperacion preventiva" },
       { dayShort: "Vie", dayName: "Viernes", session: "Pull B", status: "upcoming" },
       { dayShort: "Sab", dayName: "Sabado", session: "Tirada Larga", status: "upcoming", note: "14 km Z3" },
-      { dayShort: "Dom", dayName: "Domingo", status: "rest" },
+      { dayShort: "Dom", dayName: "Domingo", session: "Descanso", status: "rest" },
     ],
   },
   {
