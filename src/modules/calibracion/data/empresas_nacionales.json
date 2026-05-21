@@ -1,0 +1,110 @@
+[
+  {
+    "id": 1,
+    "nombre": "SGS Chile S.A.",
+    "rut": "90.171.000-2",
+    "sede": "Av. Los Conquistadores 1730, Providencia, Santiago",
+    "web": "www.sgs.com/es-cl",
+    "acreditacion": "INN-Chile ISO/IEC 17025",
+    "alcances": ["balanzas", "masas", "temperatura", "presión", "dimensiones", "caudal", "fuerza", "eléctricas"],
+    "presencia_coquimbo": "Visitas periódicas a mineras, sin oficina fija",
+    "precios_publicos": false,
+    "segmento": "Gran empresa / Multinacional",
+    "nota": "Contratos marco con grandes mineras"
+  },
+  {
+    "id": 2,
+    "nombre": "Bureau Veritas Chile S.A.",
+    "rut": "78.534.650-K",
+    "sede": "Av. Vitacura 2939 piso 5, Santiago",
+    "web": "www.bureauveritas.cl",
+    "acreditacion": "INN-Chile ISO/IEC 17025",
+    "alcances": ["dimensional", "masas", "temperatura", "presión", "eléctricas", "caudal"],
+    "presencia_coquimbo": "Servicio bajo demanda (desplazamiento)",
+    "precios_publicos": false,
+    "segmento": "Gran empresa / Multinacional",
+    "nota": "Contratos marco con mineras de la región"
+  },
+  {
+    "id": 3,
+    "nombre": "Mancal S.A.",
+    "rut": null,
+    "sede": "Panamericana Norte 18.580, Quilicura, Santiago",
+    "web": "www.mancal.cl",
+    "acreditacion": "INN-Chile ISO/IEC 17025",
+    "alcances": ["masas", "balanzas", "pesaje"],
+    "presencia_coquimbo": "Sin presencia local",
+    "precios_publicos": true,
+    "precios_referencia": {
+      "pesa_M1_pieza": { "min": 8000, "max": 15000 },
+      "balanza_industrial": { "min": 25000, "max": 60000 }
+    },
+    "segmento": "PYME / Especializado",
+    "nota": "Especialista en masas y pesaje clase E1 a M3"
+  },
+  {
+    "id": 4,
+    "nombre": "Indumett Ltda.",
+    "rut": null,
+    "sede": "Los Algarrobos 1381, Pudahuel, Santiago",
+    "web": "www.indumett.cl",
+    "acreditacion": "INN-Chile ISO/IEC 17025",
+    "alcances": ["temperatura", "termopares", "presión", "humedad"],
+    "presencia_coquimbo": "Sin presencia local",
+    "precios_publicos": false,
+    "segmento": "PYME / Especializado",
+    "nota": "Especialista en temperatura e instrumentación de proceso"
+  },
+  {
+    "id": 5,
+    "nombre": "CESMEC S.A.",
+    "rut": "78.885.080-9",
+    "sede": "Av. Diego Portales 2243, San Miguel, Santiago",
+    "web": "www.cesmec.cl",
+    "acreditacion": "INN-Chile, múltiples scopes",
+    "alcances": ["eléctricas", "dimensional", "masas", "temperatura", "ensayos materiales"],
+    "presencia_coquimbo": "Contratos con CODELCO y mineras Norte Chico",
+    "precios_publicos": false,
+    "segmento": "Gran empresa / Nacional",
+    "nota": "Centro de ensayos y calibración, historial en minería"
+  },
+  {
+    "id": 6,
+    "nombre": "TÜV Rheinland Chile",
+    "rut": null,
+    "sede": "Nueva Los Leones 1090, Santiago",
+    "web": "www.tuv.com/chile",
+    "acreditacion": "Internacional (alemana) + INN-Chile",
+    "alcances": ["metrología industrial", "calibración", "certificación equipos"],
+    "presencia_coquimbo": "Sin presencia local",
+    "precios_publicos": false,
+    "segmento": "Gran empresa / Multinacional",
+    "nota": "Principalmente gran minería y energía"
+  },
+  {
+    "id": 7,
+    "nombre": "Ingelap Ltda.",
+    "rut": null,
+    "sede": "Santiago",
+    "web": null,
+    "acreditacion": "INN parcial (en proceso)",
+    "alcances": ["topografía", "estaciones totales", "niveles", "GPS"],
+    "presencia_coquimbo": "Sin presencia local",
+    "precios_publicos": false,
+    "segmento": "PYME / Especializado",
+    "nota": "Uno de los pocos con alcance topográfico específico"
+  },
+  {
+    "id": 8,
+    "nombre": "Leica Geosystems Chile",
+    "rut": null,
+    "sede": "Santiago",
+    "web": "www.leica-geosystems.com",
+    "acreditacion": "Servicio técnico fabricante (no laboratorio acreditado INN para terceros)",
+    "alcances": ["estaciones totales Leica", "GPS Leica", "niveles Leica"],
+    "presencia_coquimbo": "Representantes regionales",
+    "precios_publicos": false,
+    "segmento": "Fabricante / OEM",
+    "nota": "Ajuste y verificación de fábrica, no certificado ISO 17025 para terceros"
+  }
+]

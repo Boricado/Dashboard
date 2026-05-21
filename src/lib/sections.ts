@@ -3,6 +3,7 @@ export type AppSectionId =
   | "tareas"
   | "salud"
   | "proyectos"
+  | "calibracion"
   | "muebles"
   | "banco"
   | "contador";
@@ -124,6 +125,36 @@ export const APP_SECTIONS: AppSection[] = [
       "Estado visible por proyecto.",
       "Proximo paso claro.",
       "Fechas y responsables cuando hagan falta.",
+    ],
+  },
+  {
+    id: "calibracion",
+    label: "Calibracion",
+    href: "/calibracion",
+    description: "Estudio de mercado para laboratorio de calibracion en Coquimbo.",
+    summary:
+      "Viabilidad, inversion, fases, precios de mercado y competencia para evaluar el negocio de calibracion.",
+    status: "base lista",
+    contextFile: "src/modules/calibracion/CONTEXT.md",
+    nextSlice: [
+      "Actualizar fuentes con cotizaciones reales.",
+      "Convertir supuestos en escenarios financieros.",
+      "Vincular leads concretos con tareas o licitaciones.",
+    ],
+    dataModel: [
+      "calibration_market_summary",
+      "calibration_price_references",
+      "calibration_competitors",
+    ],
+    boundaries: [
+      "No mezclar seguimiento comercial diario aqui.",
+      "No tratar precios de referencia como cotizaciones vigentes.",
+      "No duplicar licitaciones ni tareas operativas.",
+    ],
+    checklist: [
+      "Veredicto y supuestos visibles.",
+      "Inversion por fase clara.",
+      "Competencia y demanda comparables.",
     ],
   },
   {

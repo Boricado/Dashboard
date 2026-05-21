@@ -1,0 +1,76 @@
+{
+  "ultima_actualizacion": "2025-08",
+  "moneda": "CLP",
+  "nota": "Precios de referencia mercado chileno. Fuente: conocimiento mercado agosto 2025. Verificar cotizaciones actuales.",
+  "categorias": [
+    {
+      "id": "topografia",
+      "nombre": "Instrumentos Topográficos",
+      "color": "#006e2f",
+      "items": [
+        { "instrumento": "Nivel de burbuja (simple)", "min": 15000, "tipico": 25000, "max": 50000, "nota": "Verificación + certificado" },
+        { "instrumento": "Nivel óptico automático", "min": 30000, "tipico": 55000, "max": 90000, "nota": "Con ajuste incluido" },
+        { "instrumento": "Teodolito óptico", "min": 40000, "tipico": 70000, "max": 120000, "nota": "Calibración angular" },
+        { "instrumento": "Estación total (solo angular)", "min": 60000, "tipico": 100000, "max": 180000, "nota": "Sin EDM" },
+        { "instrumento": "Estación total (completa)", "min": 120000, "tipico": 230000, "max": 450000, "nota": "Angular + EDM con cert. INN" },
+        { "instrumento": "GPS/GNSS 1 frecuencia", "min": 80000, "tipico": 150000, "max": 250000, "nota": "Comparación con base CORS" },
+        { "instrumento": "GPS/GNSS RTK (2 frecuencias)", "min": 150000, "tipico": 325000, "max": 600000, "nota": "Requiere línea base conocida" },
+        { "instrumento": "Mira topográfica (invar)", "min": 20000, "tipico": 42500, "max": 80000, "nota": "" },
+        { "instrumento": "Plomada óptica", "min": 20000, "tipico": 37500, "max": 70000, "nota": "" }
+      ]
+    },
+    {
+      "id": "masas",
+      "nombre": "Balanzas y Pesas (Masas)",
+      "color": "#22c55e",
+      "items": [
+        { "instrumento": "Pesa patrón clase M1 (pieza individual)", "min": 5000, "tipico": 10000, "max": 20000, "nota": "Por pieza" },
+        { "instrumento": "Juego pesas M1 completo (1mg–200g)", "min": 80000, "tipico": 150000, "max": 300000, "nota": "Juego completo" },
+        { "instrumento": "Pesas clase M2/M3 industriales (pieza)", "min": 3000, "tipico": 6500, "max": 15000, "nota": "Menor exigencia" },
+        { "instrumento": "Balanza analítica laboratorio", "min": 30000, "tipico": 62500, "max": 150000, "nota": "Hasta 210g / 0.1mg" },
+        { "instrumento": "Balanza de precisión (hasta 10kg)", "min": 25000, "tipico": 47500, "max": 100000, "nota": "" },
+        { "instrumento": "Balanza industrial (hasta 500kg)", "min": 40000, "tipico": 80000, "max": 180000, "nota": "In situ" },
+        { "instrumento": "Balanza de camión / romana", "min": 150000, "tipico": 275000, "max": 800000, "nota": "Requiere visita en terreno" },
+        { "instrumento": "Báscula médica", "min": 15000, "tipico": 32500, "max": 60000, "nota": "" }
+      ]
+    },
+    {
+      "id": "temperatura",
+      "nombre": "Temperatura y Humedad",
+      "color": "#86efac",
+      "items": [
+        { "instrumento": "Termómetro de vidrio (laboratorio)", "min": 8000, "tipico": 15000, "max": 30000, "nota": "" },
+        { "instrumento": "Termómetro digital de contacto", "min": 10000, "tipico": 20000, "max": 45000, "nota": "" },
+        { "instrumento": "Termómetro infrarrojo", "min": 12000, "tipico": 27500, "max": 60000, "nota": "" },
+        { "instrumento": "Termopar tipo K/J/T (individual)", "min": 8000, "tipico": 16000, "max": 35000, "nota": "" },
+        { "instrumento": "Datalogger temperatura/humedad", "min": 15000, "tipico": 35000, "max": 80000, "nota": "" },
+        { "instrumento": "Higrómetro / psicrómetro", "min": 12000, "tipico": 27500, "max": 60000, "nota": "" },
+        { "instrumento": "Horno calibración (verificación)", "min": 80000, "tipico": 160000, "max": 350000, "nota": "" }
+      ]
+    },
+    {
+      "id": "presion",
+      "nombre": "Presión",
+      "color": "#c5ab03",
+      "items": [
+        { "instrumento": "Manómetro Bourdon (industrial)", "min": 15000, "tipico": 35000, "max": 80000, "nota": "" },
+        { "instrumento": "Manómetro de precisión", "min": 25000, "tipico": 57500, "max": 120000, "nota": "" },
+        { "instrumento": "Transductor de presión", "min": 20000, "tipico": 47500, "max": 100000, "nota": "" },
+        { "instrumento": "Vacuómetro", "min": 15000, "tipico": 35000, "max": 80000, "nota": "" },
+        { "instrumento": "Sensor de presión diferencial", "min": 25000, "tipico": 57500, "max": 120000, "nota": "" }
+      ]
+    },
+    {
+      "id": "dimensional",
+      "nombre": "Dimensional (Longitud)",
+      "color": "#6366f1",
+      "items": [
+        { "instrumento": "Cinta métrica / flexómetro (hasta 5m)", "min": 8000, "tipico": 16000, "max": 35000, "nota": "" },
+        { "instrumento": "Cinta métrica (5–50m)", "min": 12000, "tipico": 27500, "max": 60000, "nota": "" },
+        { "instrumento": "Calibrador vernier / pie de metro", "min": 8000, "tipico": 16000, "max": 35000, "nota": "" },
+        { "instrumento": "Micrómetro", "min": 10000, "tipico": 20000, "max": 45000, "nota": "" },
+        { "instrumento": "Regla de acero graduada", "min": 8000, "tipico": 16000, "max": 35000, "nota": "" }
+      ]
+    }
+  ]
+}

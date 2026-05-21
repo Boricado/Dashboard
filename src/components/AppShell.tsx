@@ -52,6 +52,15 @@ function SectionIcon(props: { id: AppSectionId; className?: string }) {
           <path d="M4 6v12" />
         </svg>
       );
+    case "calibracion":
+      return (
+        <svg {...common}>
+          <path d="M9 3h6" />
+          <path d="M10 3v5l-4 8a3 3 0 0 0 2.7 5h6.6A3 3 0 0 0 18 16l-4-8V3" />
+          <path d="M8 14h8" />
+          <path d="M9 18h6" />
+        </svg>
+      );
     case "muebles":
       return (
         <svg {...common}>
