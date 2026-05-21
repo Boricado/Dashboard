@@ -1,5 +1,6 @@
 import empresasData from "@/modules/calibracion/data/empresas_nacionales.json";
 import implementacionData from "@/modules/calibracion/data/implementacion.json";
+import normativaData from "@/modules/calibracion/data/normativa_mercado.json";
 import preciosData from "@/modules/calibracion/data/precios_mercado.json";
 import resumenData from "@/modules/calibracion/data/resumen_ejecutivo.json";
 
@@ -57,6 +58,7 @@ function SectionCard(props: {
 
 export function CalibracionClient() {
   const totalTipico = implementacionData.inversion_total.tipica;
+  const fuentes = [...resumenData.fuentes, ...normativaData.fuentes];
 
   return (
     <div className="flex flex-col gap-5">
@@ -66,13 +68,15 @@ export function CalibracionClient() {
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <StatusPill tone="green">Proyecto 4</StatusPill>
               <StatusPill>Estudio base {resumenData.fecha_estudio}</StatusPill>
+              <StatusPill tone="blue">Empresa creada</StatusPill>
             </div>
             <h1 className="text-3xl font-semibold text-[var(--ink)] sm:text-4xl">
-              Laboratorio de Calibracion
+              Laboratorio de Calibracion por Etapas
             </h1>
             <p className="mt-3 text-base leading-relaxed text-[var(--muted)]">
-              Analisis de viabilidad para un servicio de calibracion de instrumentos
-              topograficos, balanzas, temperatura y dimensional en la Region de Coquimbo.
+              Etapa 1 enfocada exclusivamente en instrumentos topograficos. Etapa 2
+              para balanzas, masas patron, temperatura, presion y otras magnitudes
+              cuando la operacion topografica ya este validada.
             </p>
           </div>
           <div className="min-w-[220px] rounded-xl border border-emerald-200 bg-emerald-50 p-4">
@@ -88,12 +92,12 @@ export function CalibracionClient() {
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
           {
-            label: "Competencia local acreditada",
-            value: String(resumenData.oportunidad.competencia_local_acreditada),
-            detail: resumenData.oportunidad.ventaja,
+            label: "Alcance inicial",
+            value: "Topografia",
+            detail: resumenData.estrategia.etapa_1,
           },
           {
-            label: "Inversion inicial tipica",
+            label: "Inversion Etapa 1 tipica",
             value: formatMillions(totalTipico),
             detail: implementacionData.nota,
           },
@@ -103,7 +107,7 @@ export function CalibracionClient() {
             detail: "meses estimados para ISO/IEC 17025",
           },
           {
-            label: "Ingreso potencial ano 3-4",
+            label: "Ingreso potencial etapa 2",
             value: rangeMillions(
               resumenData.proyeccion_ingresos.at(-1)?.ingreso_mensual_min ?? 0,
               resumenData.proyeccion_ingresos.at(-1)?.ingreso_mensual_max ?? 0,
@@ -120,6 +124,51 @@ export function CalibracionClient() {
           </article>
         ))}
       </section>
+
+      <SectionCard
+        title="Estrategia en dos etapas"
+        description={resumenData.estado_empresa}
+      >
+        <div className="grid gap-3 lg:grid-cols-2">
+          {implementacionData.etapas_estrategicas.map((etapa) => (
+            <article key={etapa.id} className="rounded-xl border border-[var(--line)] bg-white/70 p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 className="font-semibold text-[var(--ink)]">{etapa.nombre}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-[var(--muted)]">
+                    {etapa.objetivo}
+                  </p>
+                </div>
+                <StatusPill tone={etapa.id === "etapa-1" ? "green" : "blue"}>
+                  {etapa.plazo_meses} meses
+                </StatusPill>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {etapa.alcance.map((item) => (
+                  <span
+                    key={item}
+                    className="rounded-md border border-[var(--line)] bg-white px-2 py-1 text-[11px] text-[var(--muted)]"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
+                <p>
+                  <span className="text-[var(--muted)]">Inversion tipica: </span>
+                  <span className="font-semibold text-[var(--accent-strong)]">
+                    {formatMillions(etapa.inversion_tipica)}
+                  </span>
+                </p>
+                <p>
+                  <span className="text-[var(--muted)]">Resultado: </span>
+                  <span className="font-semibold text-[var(--ink)]">{etapa.resultado}</span>
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </SectionCard>
 
       <div className="grid gap-5 lg:grid-cols-2">
         <SectionCard title="Fortalezas">
@@ -147,7 +196,7 @@ export function CalibracionClient() {
 
       <SectionCard
         title="Plan de implementacion escalonada"
-        description="Entrada al mercado en fases para validar demanda antes de comprometer inversion mayor."
+        description="Primero topografia; despues masas, balanzas y magnitudes industriales."
       >
         <div className="space-y-3">
           {implementacionData.fases.map((fase) => (
@@ -198,10 +247,46 @@ export function CalibracionClient() {
         </div>
       </SectionCard>
 
+      <SectionCard
+        title="Exigencias chilenas por etapa"
+        description={normativaData.principio_operativo}
+      >
+        <div className="grid gap-3 lg:grid-cols-2">
+          {normativaData.etapas.map((etapa) => (
+            <article key={etapa.id} className="rounded-xl border border-[var(--line)] bg-white/70 p-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="font-semibold text-[var(--ink)]">{etapa.nombre}</h3>
+                <StatusPill tone={etapa.id === "etapa-1" ? "green" : "blue"}>
+                  {etapa.resoluciones_clave.length} normas
+                </StatusPill>
+              </div>
+              <ul className="mt-3 space-y-2">
+                {etapa.exigencias.map((item) => (
+                  <li key={item} className="flex gap-2 text-sm leading-relaxed text-[var(--ink)]">
+                    <span className="mt-2 size-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {etapa.resoluciones_clave.map((item) => (
+                  <span
+                    key={item}
+                    className="rounded-md bg-[var(--accent-soft)] px-2 py-1 text-[11px] font-medium text-[var(--accent-strong)]"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </SectionCard>
+
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.75fr)]">
         <SectionCard
           title="Desglose de inversion"
-          description="Total laboratorio basico: masas, temperatura y dimensional."
+          description="Etapa 1: laboratorio topografico/geodimensional con ruta a acreditacion."
         >
           <div className="space-y-4">
             {implementacionData.inversion_total.desglose.map((item) => {
@@ -254,6 +339,26 @@ export function CalibracionClient() {
       </div>
 
       <SectionCard
+        title="Resoluciones y normas clave"
+        description="Base normativa usada para ordenar el proyecto y separar topografia de la expansion metrologica general."
+      >
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {normativaData.resoluciones_y_normas.map((item) => (
+            <article key={item.nombre} className="rounded-xl border border-[var(--line)] bg-white/70 p-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusPill tone={item.aplica.includes("Etapa 1") ? "green" : "blue"}>
+                  {item.aplica}
+                </StatusPill>
+              </div>
+              <h3 className="mt-3 font-semibold text-[var(--ink)]">{item.nombre}</h3>
+              <p className="mt-1 text-xs font-semibold uppercase text-[var(--muted)]">{item.tipo}</p>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">{item.uso}</p>
+            </article>
+          ))}
+        </div>
+      </SectionCard>
+
+      <SectionCard
         title="Proyeccion de ingresos por fase"
         description="Estimacion conservadora con precio promedio por servicio."
       >
@@ -267,6 +372,30 @@ export function CalibracionClient() {
               <div className="mt-3 flex justify-between gap-3 border-t border-[var(--line)] pt-3 text-xs text-[var(--muted)]">
                 <span>{item.servicios_mes} servicios/mes</span>
                 <span>{formatClp(item.precio_promedio)} prom.</span>
+              </div>
+            </article>
+          ))}
+        </div>
+      </SectionCard>
+
+      <SectionCard
+        title="Estudio de mercado por fases"
+        description="Secuencia comercial para validar demanda, entrar con topografia y expandir despues a calibracion industrial."
+      >
+        <div className="grid gap-3 lg:grid-cols-5">
+          {normativaData.estudio_mercado_fases.map((fase) => (
+            <article key={fase.fase} className="rounded-xl border border-[var(--line)] bg-white/70 p-4">
+              <h3 className="font-semibold text-[var(--ink)]">{fase.fase}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">{fase.objetivo}</p>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {fase.acciones.map((accion) => (
+                  <span
+                    key={accion}
+                    className="rounded-md border border-[var(--line)] bg-white px-2 py-1 text-[11px] text-[var(--muted)]"
+                  >
+                    {accion}
+                  </span>
+                ))}
               </div>
             </article>
           ))}
@@ -321,6 +450,19 @@ export function CalibracionClient() {
                   </tbody>
                 </table>
               </div>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Alertas comerciales">
+        <div className="grid gap-2 md:grid-cols-2">
+          {normativaData.alertas_comerciales.map((alerta) => (
+            <div
+              key={alerta}
+              className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm leading-relaxed text-amber-900"
+            >
+              {alerta}
             </div>
           ))}
         </div>
@@ -401,9 +543,9 @@ export function CalibracionClient() {
 
       <SectionCard title="Fuentes para verificar">
         <div className="flex flex-wrap gap-2">
-          {resumenData.fuentes.map((fuente) => (
+          {fuentes.map((fuente) => (
             <span
-              key={fuente.nombre}
+              key={`${fuente.nombre}-${fuente.url}`}
               className="rounded-md border border-[var(--line)] bg-white px-3 py-2 text-xs text-[var(--muted)]"
             >
               <span className="font-semibold text-[var(--ink)]">{fuente.nombre}</span>: {fuente.url}

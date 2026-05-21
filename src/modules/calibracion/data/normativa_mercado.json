@@ -1,0 +1,173 @@
+{
+  "ultima_revision": "2026-05-21",
+  "principio_operativo": "La empresa ya puede operar comercialmente, pero el valor regulatorio del certificado depende del alcance técnico, trazabilidad y acreditación. La ruta correcta es vender primero servicios topográficos trazables y declarar acreditación INN sólo cuando el alcance esté concedido.",
+  "etapas": [
+    {
+      "id": "etapa-1",
+      "nombre": "Etapa 1 — Topografía exclusiva",
+      "exigencias": [
+        "Definir alcance geodimensional por instrumento: nivel, teodolito, estación total, distanciómetro/EDM y GNSS/RTK.",
+        "Usar métodos ISO 17123 aplicables: parte 2 para niveles, parte 3 para teodolitos, parte 5 para estaciones totales y parte 8 para GNSS RTK.",
+        "Vincular GNSS y puntos de control a la Red Geodésica Nacional SIRGAS-Chile cuando el servicio requiera coordenadas o línea base oficial.",
+        "Registrar condiciones de medición, trazabilidad, patrón usado, incertidumbre, criterio de aceptación y vigencia recomendada.",
+        "Para licitaciones, preparar certificados 'al día' y controlar vigencia; algunas bases exigen entrega en la primera quincena o vigencia durante todo el contrato.",
+        "Mientras no exista acreditación, usar el texto 'calibración/verificación no acreditada' y no usar marca INN, LC ni declaraciones de acreditación."
+      ],
+      "resoluciones_clave": ["NCh-ISO/IEC 17025:2017", "NCh2451:2014", "ISO 17123-2", "ISO 17123-3", "ISO 17123-5", "ISO 17123-8", "Decreto 215/2009 RNM"],
+      "entregables": [
+        "Certificado o informe topográfico con trazabilidad y declaración de no acreditación si corresponde",
+        "Hoja de vida del instrumento y sticker de estado",
+        "Registro de verificación antes/después de ajuste",
+        "Informe de incertidumbre y cumplimiento contra tolerancia del cliente/fabricante"
+      ]
+    },
+    {
+      "id": "etapa-2",
+      "nombre": "Etapa 2 — Balanzas, masas patrón y magnitudes generales",
+      "exigencias": [
+        "Ampliar alcance INN por magnitud: masa/pesaje, temperatura, humedad, presión y dimensional general.",
+        "Mantener patrones calibrados con trazabilidad a la Red Nacional de Metrología o laboratorios reconocidos.",
+        "Para agroindustria regulada por Ley 20.656, inscribirse en el Registro SAG como laboratorio de calibración por alcance específico.",
+        "En trigo, maíz y avena regulados, los instrumentos/equipos de pesaje o medición deben tener certificados con vigencia máxima de un año, salvo excepción de garantía vigente.",
+        "Aplicar OIML R76 para instrumentos de pesaje no automáticos y OIML R111 para pesas, cuando corresponda al método y al cliente.",
+        "Definir seguridad operacional para calibración in situ de básculas, transporte de masas y trabajos en plantas."
+      ],
+      "resoluciones_clave": ["Ley 20.656", "Decreto 19/2013 Agricultura", "Decreto 63/2013 Trigo", "Decreto 20/2013 Maíz", "Decreto 15/2021 Avena", "NCh-ISO/IEC 17025:2017", "OIML R76", "OIML R111"],
+      "entregables": [
+        "Certificado de calibración de balanza/báscula o masa patrón",
+        "Registro SAG vigente cuando aplique",
+        "Programa anual de recalibración de clientes",
+        "Plan de trazabilidad y mantenimiento de patrones"
+      ]
+    }
+  ],
+  "resoluciones_y_normas": [
+    {
+      "nombre": "NCh-ISO/IEC 17025:2017",
+      "tipo": "Norma de acreditación",
+      "aplica": "Etapas 1 y 2",
+      "uso": "Base para demostrar competencia técnica del laboratorio ante INN."
+    },
+    {
+      "nombre": "NCh2451:2014",
+      "tipo": "Certificados",
+      "aplica": "Etapas 1 y 2",
+      "uso": "Guía chilena para elaborar certificados de calibración."
+    },
+    {
+      "nombre": "INN-R401 y DA-D07",
+      "tipo": "Reglamentos INN",
+      "aplica": "Etapas 1 y 2",
+      "uso": "Reglas y criterios generales para acreditación de laboratorios de ensayo y calibración."
+    },
+    {
+      "nombre": "Decreto 215/2009 Economía",
+      "tipo": "Resolución metrológica chilena",
+      "aplica": "Etapas 1 y 2",
+      "uso": "Reconoce al INN como coordinador y supervisor de laboratorios de la Red Nacional de Metrología."
+    },
+    {
+      "nombre": "ISO 17123-2/3/5/8",
+      "tipo": "Métodos topográficos",
+      "aplica": "Etapa 1",
+      "uso": "Procedimientos de campo para evaluar niveles, teodolitos, estaciones totales y GNSS RTK."
+    },
+    {
+      "nombre": "RGN SIRGAS-Chile / IGM",
+      "tipo": "Referencia geodésica",
+      "aplica": "Etapa 1",
+      "uso": "Marco oficial de referencia para coordenadas, puntos de control y trazabilidad geodésica."
+    },
+    {
+      "nombre": "Ley 20.656 y Decreto 19/2013",
+      "tipo": "Registro SAG",
+      "aplica": "Etapa 2",
+      "uso": "Registro de laboratorios de ensayo, ensayo arbitrador y calibración para transacciones comerciales agropecuarias."
+    },
+    {
+      "nombre": "Decretos 63/2013, 20/2013 y 15/2021",
+      "tipo": "Reglamentos por producto",
+      "aplica": "Etapa 2",
+      "uso": "Exigen calibración anual en instrumentos/equipos usados para trigo, maíz y avena regulados."
+    }
+  ],
+  "estudio_mercado_fases": [
+    {
+      "fase": "1. Segmentación",
+      "objetivo": "Separar compradores topográficos de compradores industriales para no diluir el mensaje comercial.",
+      "acciones": ["Catastro de constructoras y topógrafos", "Catastro de proveedores de arriendo", "Revisión de Mercado Público por certificados topográficos", "Priorización por urgencia y distancia a Santiago"]
+    },
+    {
+      "fase": "2. Validación de dolor",
+      "objetivo": "Confirmar cuánto pagan, cuánto esperan y qué tipo de certificado aceptan antes de la acreditación.",
+      "acciones": ["Entrevistar 30 clientes", "Solicitar 5 cotizaciones reales a competidores", "Probar oferta con retiro/entrega regional", "Medir rechazo por no acreditación"]
+    },
+    {
+      "fase": "3. Oferta mínima vendible",
+      "objetivo": "Vender servicios topográficos que no dependan inicialmente de grandes patrones de masa.",
+      "acciones": ["Pack estación total + nivel", "Servicio express para arriendos", "Convenio mensual con constructoras", "Certificado trazable no acreditado con disclaimer claro"]
+    },
+    {
+      "fase": "4. Acreditación y licitaciones",
+      "objetivo": "Convertir la operación validada en alcance acreditado y subir ticket promedio.",
+      "acciones": ["Postulación INN por alcance geodimensional", "Checklist para bases MOP/SERVIU/municipios", "Registro documental de vigencias", "Estrategia de renovación semestral/anual"]
+    },
+    {
+      "fase": "5. Expansión industrial",
+      "objetivo": "Agregar Etapa 2 sólo cuando topografía sostenga flujo y cartera.",
+      "acciones": ["Masas y balanzas primero", "Registro SAG si hay agroindustria", "Temperatura/presión por contratos recurrentes", "Rutas programadas por provincia"]
+    }
+  ],
+  "alertas_comerciales": [
+    "No prometer acreditación INN antes de obtenerla y aparecer en el directorio vigente.",
+    "Distinguir ajuste, verificación, calibración no acreditada y calibración acreditada.",
+    "En topografía, muchos clientes piden 'certificado de calibración al día' aunque la base no siempre especifique INN; revisar cada licitación.",
+    "En pesaje agroindustrial regulado, la vigencia máxima anual del certificado genera demanda recurrente, pero requiere registro y alcance correcto."
+  ],
+  "fuentes": [
+    {
+      "nombre": "INN — Acreditación",
+      "url": "https://www.inn.cl/Acreditacion"
+    },
+    {
+      "nombre": "INN — Directorio de acreditados",
+      "url": "https://www.inn.cl/encuentra-los-organismos-acreditados"
+    },
+    {
+      "nombre": "LeyChile — Decreto 215/2009",
+      "url": "https://www.leychile.cl/navegar?idNorma=1010961"
+    },
+    {
+      "nombre": "ChileAtiende — Registro Ley 20.656",
+      "url": "https://www.chileatiende.gob.cl/fichas/59953-registro-de-laboratorios-de-ensayo-ensayo-arbitrador-y-calibracion-ley-n-20-656"
+    },
+    {
+      "nombre": "LeyChile — Decreto 63/2013 trigo",
+      "url": "https://www.leychile.cl/navegar?idNorma=1068876"
+    },
+    {
+      "nombre": "Mercado Público — Licitación 1051425-15-LP25",
+      "url": "https://www.mercadopublico.cl/Procurement/Modules/RFB/DetailsAcquisition.aspx?idlicitacion=1051425-15-LP25"
+    },
+    {
+      "nombre": "Mercado Público — Licitación 48-84-LE24",
+      "url": "https://www.mercadopublico.cl/Procurement/Modules/RFB/DetailsAcquisition.aspx?idlicitacion=48-84-LE24"
+    },
+    {
+      "nombre": "ISO — 17123-5 estaciones totales",
+      "url": "https://www.iso.org/standard/71689.html"
+    },
+    {
+      "nombre": "ISO — 17123-8 GNSS RTK",
+      "url": "https://www.iso.org/standard/62961.html"
+    },
+    {
+      "nombre": "IGM — Geodesia y SIRGAS-Chile",
+      "url": "https://www.igm.cl/?menu=4&page=geodesia"
+    },
+    {
+      "nombre": "DAVISLAB — servicios de calibración",
+      "url": "https://www.davislab.cl/es/servicios/servicios-de-calibracion-8"
+    }
+  ]
+}

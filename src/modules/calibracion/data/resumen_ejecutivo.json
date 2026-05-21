@@ -1,53 +1,129 @@
 {
   "proyecto": "Laboratorio de Calibración — Región de Coquimbo",
-  "fecha_estudio": "2025-08",
-  "veredicto": "VIABLE con condiciones",
-  "score_viabilidad": 78,
-
+  "fecha_estudio": "2026-05-21",
+  "estado_empresa": "Empresa constituida; falta habilitación técnica, comercial y acreditación por alcance.",
+  "veredicto": "VIABLE por etapas",
+  "score_viabilidad": 82,
+  "estrategia": {
+    "etapa_1": "Entrar con calibración y verificación de instrumentos topográficos como línea exclusiva: niveles, teodolitos, estaciones totales, accesorios y GNSS/RTK.",
+    "etapa_2": "Expandir después a pesaje, masas patrón, temperatura, humedad, presión y dimensional general, cuando exista flujo comercial y sistema ISO/IEC 17025 maduro.",
+    "criterio": "Antes de la acreditación INN se deben emitir informes o certificados no acreditados con trazabilidad documentada, sin usar la marca INN ni prometer certificado acreditado."
+  },
   "oportunidad": {
     "competencia_local_acreditada": 0,
-    "nota": "No existe ningún laboratorio acreditado ISO 17025 con sede en la Región de Coquimbo (INN/DAE, corte 2024-2025).",
-    "ventaja": "Primer entrante — mercado desatendido"
+    "nota": "No se detecta una sede regional acreditada INN para geodimensional/topografía en Coquimbo. Debe verificarse cada venta contra el directorio INN vigente por alcance.",
+    "ventaja": "Primer operador regional especializado en topografía con ruta a acreditación"
   },
-
   "sectores_demandantes": [
-    { "sector": "Minería", "localidad": "Andacollo, Salamanca, Los Vilos", "demanda": "alta", "instrumentos": ["balanzas industriales", "manómetros", "termómetros"] },
-    { "sector": "Construcción / Obras viales", "localidad": "La Serena, Ovalle, Coquimbo", "demanda": "alta", "instrumentos": ["estaciones totales", "GPS/GNSS", "niveles"] },
-    { "sector": "Agroindustria", "localidad": "Valle del Elqui, Limarí, Choapa", "demanda": "media", "instrumentos": ["balanzas precisión", "termómetros", "higrómetros"] },
-    { "sector": "Salud", "localidad": "La Serena, Coquimbo", "demanda": "media", "instrumentos": ["termómetros clínicos", "básculas médicas", "manómetros PA"] },
-    { "sector": "Pesca / Acuicultura", "localidad": "Coquimbo, Tongoy, Los Vilos", "demanda": "media", "instrumentos": ["balanzas", "termómetros"] },
-    { "sector": "Obras públicas (MOP/SERVIU)", "localidad": "La Serena (sede regional)", "demanda": "alta", "instrumentos": ["topografía completa", "densímetros"] }
+    {
+      "sector": "Topografía para construcción",
+      "localidad": "La Serena, Coquimbo, Ovalle",
+      "demanda": "alta",
+      "instrumentos": ["estaciones totales", "niveles ópticos", "teodolitos", "prismas", "trípodes"]
+    },
+    {
+      "sector": "Obras públicas y consultorías",
+      "localidad": "MOP, SERVIU, municipios y consultoras regionales",
+      "demanda": "alta",
+      "instrumentos": ["estación total", "GNSS RTK", "nivel topográfico", "RPAS asociado a control"]
+    },
+    {
+      "sector": "Minería y contratistas",
+      "localidad": "Andacollo, Salamanca, Los Vilos, Illapel",
+      "demanda": "alta",
+      "instrumentos": ["estaciones totales", "GNSS", "niveles", "accesorios de replanteo"]
+    },
+    {
+      "sector": "Arriendo y venta de equipos",
+      "localidad": "Tiendas técnicas y proveedores de maquinaria",
+      "demanda": "media",
+      "instrumentos": ["kits de arriendo", "niveles", "estaciones totales", "miras", "bases nivelantes"]
+    },
+    {
+      "sector": "Agroindustria y recepción de granos",
+      "localidad": "Elqui, Limarí y Choapa",
+      "demanda": "media",
+      "instrumentos": ["balanzas", "básculas", "masas patrón", "humedad"]
+    },
+    {
+      "sector": "Salud, alimentos y laboratorios",
+      "localidad": "La Serena y Coquimbo",
+      "demanda": "media",
+      "instrumentos": ["balanzas de precisión", "termómetros", "higrómetros", "manómetros"]
+    }
   ],
-
   "fortalezas": [
-    "Sin competencia local acreditada — ventaja de primer entrante",
-    "Diversidad de sectores demandantes (minería, agroindustria, construcción, salud)",
-    "Mercado público: licitaciones MOP, SERVIU, hospitales, municipios requieren cert. ISO 17025",
-    "Crecimiento minero regional: Los Pelambres, Dominga, Cruz Grande",
-    "500 km de Santiago hace costoso usar laboratorios capitalinos",
-    "Verificación obligatoria balanzas comerciales = ingresos tempranos sin acreditación"
+    "La etapa 1 concentra inversión y aprendizaje en un nicho claro: topografía, donde Mercado Público exige certificados de calibración en bases de obras y servicios.",
+    "Coquimbo tiene demanda recurrente por construcción, vialidad, minería, consultorías y arriendo de equipos, sin necesidad de partir con todas las magnitudes metrológicas.",
+    "La distancia a Santiago permite competir por tiempo de respuesta, retiro/entrega regional y visitas en terreno.",
+    "La acreditación geodimensional es diferenciadora: el mercado chileno ya tiene pocos actores visibles con alcance topográfico acreditado.",
+    "La etapa 2 aprovecha infraestructura, sistema de gestión, personal y clientes ya captados para agregar masas, balanzas y magnitudes industriales."
   ],
-
   "riesgos": [
-    "18–24 meses para obtener acreditación INN sin poder emitir certs. acreditados",
-    "Capital inicial $25–45 millones sin retorno inmediato garantizado",
-    "Escasez de metrólogos calificados en regiones",
-    "Mercado PYME con baja disposición a pagar vs. gran minería",
-    "Calibración anual de patrones: costo recurrente $500.000–$2.000.000/año"
+    "Sin acreditación INN, el servicio inicial sirve como verificación/calibración no acreditada; no debe venderse como equivalente a certificado acreditado.",
+    "La acreditación ISO/IEC 17025 puede tomar 12 a 24 meses por alcance, incluyendo documentación, validación de métodos, auditorías y acciones correctivas.",
+    "Topografía requiere método robusto de campo: puntos estables, líneas base, control ambiental, trazabilidad y cálculo de incertidumbre.",
+    "El mercado puede pedir acreditación desde el primer contrato público; por eso la etapa 1 debe segmentar clientes que acepten verificación trazable mientras avanza INN.",
+    "En etapa 2, balanzas y masas elevan la inversión por patrones, transporte de pesas, seguridad operacional y calibración periódica de patrones."
   ],
-
   "proyeccion_ingresos": [
-    { "fase": "Arranque (sin acreditación)", "servicios_mes": 30, "precio_promedio": 30000, "ingreso_mensual_min": 600000, "ingreso_mensual_max": 1200000 },
-    { "fase": "Fase 1 (implementando)", "servicios_mes": 60, "precio_promedio": 40000, "ingreso_mensual_min": 1600000, "ingreso_mensual_max": 3200000 },
-    { "fase": "Fase 2 (acreditado)", "servicios_mes": 115, "precio_promedio": 55000, "ingreso_mensual_min": 4400000, "ingreso_mensual_max": 8250000 },
-    { "fase": "Consolidado (año 3–4)", "servicios_mes": 225, "precio_promedio": 65000, "ingreso_mensual_min": 9750000, "ingreso_mensual_max": 19500000 }
+    {
+      "fase": "Etapa 1A validación topográfica",
+      "servicios_mes": 8,
+      "precio_promedio": 140000,
+      "ingreso_mensual_min": 800000,
+      "ingreso_mensual_max": 1800000
+    },
+    {
+      "fase": "Etapa 1B topografía operativa",
+      "servicios_mes": 18,
+      "precio_promedio": 180000,
+      "ingreso_mensual_min": 2200000,
+      "ingreso_mensual_max": 4500000
+    },
+    {
+      "fase": "Etapa 1C acreditada",
+      "servicios_mes": 35,
+      "precio_promedio": 230000,
+      "ingreso_mensual_min": 5500000,
+      "ingreso_mensual_max": 10500000
+    },
+    {
+      "fase": "Etapa 2 multiservicio",
+      "servicios_mes": 130,
+      "precio_promedio": 85000,
+      "ingreso_mensual_min": 9500000,
+      "ingreso_mensual_max": 22000000
+    }
   ],
-
   "fuentes": [
-    { "nombre": "Directorio laboratorios acreditados INN", "url": "www.inn.cl/acreditacion/directorio" },
-    { "nombre": "Licitaciones calibración Coquimbo", "url": "www.mercadopublico.cl" },
-    { "nombre": "Tarifas acreditación INN", "url": "www.inn.cl/servicios/tarifas" },
-    { "nombre": "Empresas SII (giro laboratorio metrológico)", "url": "www.sii.cl" },
-    { "nombre": "OIML — recomendaciones internacionales", "url": "www.oiml.org" }
+    {
+      "nombre": "INN — Laboratorios de Calibración",
+      "url": "https://www.inn.cl/laboratorios-de-calibracion2"
+    },
+    {
+      "nombre": "INN — Directorio de organismos acreditados",
+      "url": "https://acreditacion.innonline.cl/"
+    },
+    {
+      "nombre": "LeyChile — Decreto 215/2009 RNM",
+      "url": "https://www.leychile.cl/navegar?idNorma=1010961"
+    },
+    {
+      "nombre": "ChileAtiende/SAG — Registro Ley 20.656",
+      "url": "https://www.chileatiende.gob.cl/fichas/59953-registro-de-laboratorios-de-ensayo-ensayo-arbitrador-y-calibracion-ley-n-20-656"
+    },
+    {
+      "nombre": "Mercado Público — exigencias de certificados topográficos",
+      "url": "https://www.mercadopublico.cl/"
+    },
+    {
+      "nombre": "ISO 17123 — pruebas de instrumentos geodésicos",
+      "url": "https://www.iso.org/standard/71689.html"
+    },
+    {
+      "nombre": "IGM — Red Geodésica Nacional SIRGAS-Chile",
+      "url": "https://www.igm.cl/?menu=4&page=geodesia"
+    }
   ]
 }
