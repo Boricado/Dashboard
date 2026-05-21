@@ -5,7 +5,7 @@
   "categorias": [
     {
       "id": "topografia",
-      "nombre": "Etapa 1 — Instrumentos Topográficos",
+      "nombre": "Fase 1 — Instrumentos Topográficos",
       "color": "#006e2f",
       "items": [
         { "instrumento": "Nivel óptico automático", "min": 45000, "tipico": 85000, "max": 140000, "nota": "verificación + ajuste + informe" },
@@ -23,7 +23,7 @@
     },
     {
       "id": "masas",
-      "nombre": "Etapa 2 — Balanzas y Pesas (Masa)",
+      "nombre": "Fase 2 — Balanzas y Pesas (Masa)",
       "color": "#22c55e",
       "items": [
         { "instrumento": "Pesa patrón clase M1 (pieza individual)", "min": 8000, "tipico": 15000, "max": 30000, "nota": "por pieza" },
@@ -39,7 +39,7 @@
     },
     {
       "id": "temperatura",
-      "nombre": "Etapa 2 — Temperatura y Humedad",
+      "nombre": "Fase 3 — Temperatura y Humedad",
       "color": "#0ea5e9",
       "items": [
         { "instrumento": "Termómetro de vidrio", "min": 15000, "tipico": 28000, "max": 55000, "nota": "" },
@@ -53,7 +53,7 @@
     },
     {
       "id": "presion",
-      "nombre": "Etapa 2 — Presión",
+      "nombre": "Fase 3 — Presión",
       "color": "#c5ab03",
       "items": [
         { "instrumento": "Manómetro Bourdon industrial", "min": 35000, "tipico": 70000, "max": 140000, "nota": "" },
@@ -65,7 +65,7 @@
     },
     {
       "id": "dimensional",
-      "nombre": "Etapa 2 — Dimensional General",
+      "nombre": "Fase 3 — Dimensional General",
       "color": "#6366f1",
       "items": [
         { "instrumento": "Cinta métrica / flexómetro hasta 5 m", "min": 15000, "tipico": 30000, "max": 60000, "nota": "" },

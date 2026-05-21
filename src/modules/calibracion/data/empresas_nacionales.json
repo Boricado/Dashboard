@@ -10,7 +10,7 @@
     "presencia_coquimbo": "Sin sede regional detectada; atiende desde Santiago",
     "precios_publicos": false,
     "segmento": "Especialista acreditado",
-    "nota": "Competidor crítico de Etapa 1 por alcance geodimensional acreditado."
+    "nota": "Competidor crítico de Fase 1 por alcance geodimensional acreditado."
   },
   {
     "id": 2,
@@ -49,7 +49,7 @@
     "presencia_coquimbo": "Sin sede regional detectada",
     "precios_publicos": false,
     "segmento": "Laboratorio acreditado",
-    "nota": "Competidor de Etapa 2 y posible referencia para pesaje industrial."
+    "nota": "Competidor de Fase 2 y posible referencia para pesaje industrial."
   },
   {
     "id": 5,
@@ -101,7 +101,7 @@
     "presencia_coquimbo": "Sin sede regional detectada",
     "precios_publicos": false,
     "segmento": "Universidad / técnico",
-    "nota": "Competidor técnico de Etapa 2 para clientes exigentes."
+    "nota": "Competidor técnico para Fase 3 en magnitudes mecánicas."
   },
   {
     "id": 9,
@@ -114,7 +114,7 @@
     "presencia_coquimbo": "Sin sede regional detectada",
     "precios_publicos": true,
     "segmento": "PYME especializada",
-    "nota": "Referencia para Etapa 2: masas patrón y balanzas."
+    "nota": "Referencia para Fase 2: masas patrón y balanzas."
   },
   {
     "id": 10,

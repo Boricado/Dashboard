@@ -1,18 +1,20 @@
 {
   "proyecto": "Laboratorio de Calibración — Región de Coquimbo",
   "fecha_estudio": "2026-05-21",
-  "estado_empresa": "Empresa constituida; falta habilitación técnica, comercial y acreditación por alcance.",
-  "veredicto": "VIABLE por etapas",
+  "estado_empresa": "Empresa constituida; el avance debe ordenarse por alcances técnicos, certificados y acreditaciones.",
+  "veredicto": "VIABLE por fases",
   "score_viabilidad": 82,
   "estrategia": {
-    "etapa_1": "Entrar con calibración y verificación de instrumentos topográficos como línea exclusiva: niveles, teodolitos, estaciones totales, accesorios y GNSS/RTK.",
-    "etapa_2": "Expandir después a pesaje, masas patrón, temperatura, humedad, presión y dimensional general, cuando exista flujo comercial y sistema ISO/IEC 17025 maduro.",
-    "criterio": "Antes de la acreditación INN se deben emitir informes o certificados no acreditados con trazabilidad documentada, sin usar la marca INN ni prometer certificado acreditado."
+    "fase_0": "Certificados, registros y acreditaciones: preparar ISO/IEC 17025, formatos de certificado, matriz de alcances, postulación INN y registro SAG cuando aplique.",
+    "fase_1": "Calibración de instrumentos topográficos: niveles, teodolitos, estaciones totales, GNSS/RTK y accesorios.",
+    "fase_2": "Balanzas, básculas y masas patrón: servicio recurrente anual y ampliación de alcance INN a masa/pesaje.",
+    "fase_3": "Todo lo demás: temperatura, humedad, presión, dimensional general, volumen y eléctrica básica según demanda real.",
+    "criterio": "Antes de acreditarse, emitir sólo informes o certificados no acreditados con trazabilidad documentada y texto claro; usar referencia INN únicamente cuando el alcance esté concedido."
   },
   "oportunidad": {
     "competencia_local_acreditada": 0,
     "nota": "No se detecta una sede regional acreditada INN para geodimensional/topografía en Coquimbo. Debe verificarse cada venta contra el directorio INN vigente por alcance.",
-    "ventaja": "Primer operador regional especializado en topografía con ruta a acreditación"
+    "ventaja": "Primer operador regional especializado que avanza por fases"
   },
   "sectores_demandantes": [
     {
@@ -53,47 +55,47 @@
     }
   ],
   "fortalezas": [
-    "La etapa 1 concentra inversión y aprendizaje en un nicho claro: topografía, donde Mercado Público exige certificados de calibración en bases de obras y servicios.",
-    "Coquimbo tiene demanda recurrente por construcción, vialidad, minería, consultorías y arriendo de equipos, sin necesidad de partir con todas las magnitudes metrológicas.",
+    "La nueva secuencia evita abrir demasiados frentes: Fase 1 topografía, Fase 2 balanzas y Fase 3 resto de magnitudes.",
+    "Fase 0 permite avanzar en certificados y acreditaciones sin confundir permisos con ventas.",
+    "Coquimbo tiene demanda recurrente por construcción, vialidad, minería, consultorías y arriendo de equipos.",
     "La distancia a Santiago permite competir por tiempo de respuesta, retiro/entrega regional y visitas en terreno.",
-    "La acreditación geodimensional es diferenciadora: el mercado chileno ya tiene pocos actores visibles con alcance topográfico acreditado.",
-    "La etapa 2 aprovecha infraestructura, sistema de gestión, personal y clientes ya captados para agregar masas, balanzas y magnitudes industriales."
+    "Balanzas y masas patrón quedan como segunda fase porque requieren más patrones, logística y control de trazabilidad."
   ],
   "riesgos": [
-    "Sin acreditación INN, el servicio inicial sirve como verificación/calibración no acreditada; no debe venderse como equivalente a certificado acreditado.",
+    "Sin acreditación INN, el servicio inicial sirve como verificación/calibración no acreditada; no debe venderse como certificado acreditado.",
     "La acreditación ISO/IEC 17025 puede tomar 12 a 24 meses por alcance, incluyendo documentación, validación de métodos, auditorías y acciones correctivas.",
     "Topografía requiere método robusto de campo: puntos estables, líneas base, control ambiental, trazabilidad y cálculo de incertidumbre.",
-    "El mercado puede pedir acreditación desde el primer contrato público; por eso la etapa 1 debe segmentar clientes que acepten verificación trazable mientras avanza INN.",
-    "En etapa 2, balanzas y masas elevan la inversión por patrones, transporte de pesas, seguridad operacional y calibración periódica de patrones."
+    "Balanzas y masas elevan inversión por patrones, transporte de pesas, seguridad operacional y calibración periódica.",
+    "Fase 3 debe activarse por demanda pagada; abrir temperatura, presión y dimensional sin clientes puede inmovilizar capital."
   ],
   "proyeccion_ingresos": [
     {
-      "fase": "Etapa 1A validación topográfica",
-      "servicios_mes": 8,
-      "precio_promedio": 140000,
-      "ingreso_mensual_min": 800000,
-      "ingreso_mensual_max": 1800000
+      "fase": "Fase 0 acreditaciones",
+      "servicios_mes": 0,
+      "precio_promedio": 0,
+      "ingreso_mensual_min": 0,
+      "ingreso_mensual_max": 0
     },
     {
-      "fase": "Etapa 1B topografía operativa",
-      "servicios_mes": 18,
-      "precio_promedio": 180000,
-      "ingreso_mensual_min": 2200000,
-      "ingreso_mensual_max": 4500000
-    },
-    {
-      "fase": "Etapa 1C acreditada",
-      "servicios_mes": 35,
-      "precio_promedio": 230000,
-      "ingreso_mensual_min": 5500000,
+      "fase": "Fase 1 topografía",
+      "servicios_mes": 25,
+      "precio_promedio": 210000,
+      "ingreso_mensual_min": 1800000,
       "ingreso_mensual_max": 10500000
     },
     {
-      "fase": "Etapa 2 multiservicio",
-      "servicios_mes": 130,
-      "precio_promedio": 85000,
-      "ingreso_mensual_min": 9500000,
-      "ingreso_mensual_max": 22000000
+      "fase": "Fase 2 balanzas",
+      "servicios_mes": 90,
+      "precio_promedio": 95000,
+      "ingreso_mensual_min": 4500000,
+      "ingreso_mensual_max": 16000000
+    },
+    {
+      "fase": "Fase 3 todo lo demás",
+      "servicios_mes": 180,
+      "precio_promedio": 90000,
+      "ingreso_mensual_min": 9000000,
+      "ingreso_mensual_max": 26000000
     }
   ],
   "fuentes": [
