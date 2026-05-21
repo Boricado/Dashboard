@@ -1,0 +1,104 @@
+{
+  "moneda": "CLP",
+  "nota": "Estimaciones para laboratorio básico 3 alcances: masas + temperatura + dimensional. Sede La Serena.",
+
+  "fases": [
+    {
+      "id": 0,
+      "nombre": "Fase 0 — Validación y arranque",
+      "duracion_meses": "0–6",
+      "descripcion": "Autorización como verificador SEREMI Economía. Calibración no acreditada para cartera inicial.",
+      "estado": "inicio",
+      "inversion_min": 3000000,
+      "inversion_max": 5000000,
+      "acciones": [
+        "Obtener autorización verificador instrumentos SEREMI Economía",
+        "Emitir certificados de verificación internos (válidos para muchos clientes)",
+        "Construir cartera de clientes inicial",
+        "Validar demanda real antes de inversión mayor"
+      ],
+      "ingresos_estimados_mes": { "min": 600000, "max": 1200000 }
+    },
+    {
+      "id": 1,
+      "nombre": "Fase 1 — Laboratorio e ISO 17025",
+      "duracion_meses": "6–18",
+      "descripcion": "Montar laboratorio. Implementar sistema gestión calidad. Iniciar proceso acreditación INN.",
+      "estado": "implementacion",
+      "inversion_min": 15000000,
+      "inversion_max": 25000000,
+      "acciones": [
+        "Arrendar y acondicionar local (80–150m²) con sala climatizada",
+        "Adquirir patrones masas + temperatura",
+        "Contratar consultor ISO 17025",
+        "Elaborar procedimientos, documentación SGC",
+        "Solicitar acreditación INN/DAE"
+      ],
+      "ingresos_estimados_mes": { "min": 1600000, "max": 3200000 }
+    },
+    {
+      "id": 2,
+      "nombre": "Fase 2 — Acreditación y expansión",
+      "duracion_meses": "18–30",
+      "descripcion": "Obtener acreditación INN. Agregar presión + dimensional. Contratar municipios, hospitales, MOP.",
+      "estado": "consolidacion",
+      "inversion_min": 5000000,
+      "inversion_max": 12000000,
+      "acciones": [
+        "Recibir acreditación INN-DAE ISO/IEC 17025",
+        "Agregar alcance presión y dimensional completo",
+        "Acceder a licitaciones públicas (mercadopublico.cl)",
+        "Contratos marco MOP, SERVIU, hospitales regionales",
+        "Evaluar alcance topografía según demanda"
+      ],
+      "ingresos_estimados_mes": { "min": 4400000, "max": 8250000 }
+    }
+  ],
+
+  "inversion_total": {
+    "minima": 24950000,
+    "tipica": 41800000,
+    "alta": 69800000,
+    "desglose": [
+      { "concepto": "Patrones masas", "min": 3500000, "tipico": 5500000, "alto": 8300000 },
+      { "concepto": "Patrones temperatura", "min": 5300000, "tipico": 8000000, "alto": 12000000 },
+      { "concepto": "Patrones dimensional", "min": 1650000, "tipico": 2800000, "alto": 4200000 },
+      { "concepto": "Infraestructura", "min": 4500000, "tipico": 8000000, "alto": 13300000 },
+      { "concepto": "Software LIMS", "min": 500000, "tipico": 1500000, "alto": 4000000 },
+      { "concepto": "Acreditación + consultoría", "min": 5500000, "tipico": 8000000, "alto": 13000000 },
+      { "concepto": "Capital de trabajo (6 meses)", "min": 4000000, "tipico": 8000000, "alto": 15000000 }
+    ]
+  },
+
+  "acreditacion_inn": {
+    "norma": "ISO/IEC 17025:2017",
+    "organismo": "INN-Chile / DAE",
+    "web": "www.inn.cl/acreditacion",
+    "costos": [
+      { "concepto": "Pre-evaluación (opcional)", "min": 300000, "max": 600000 },
+      { "concepto": "Solicitud inicial", "min": 450000, "max": 800000 },
+      { "concepto": "Evaluación en terreno", "min": 800000, "max": 1500000 },
+      { "concepto": "Mantenimiento anual", "min": 300000, "max": 600000 },
+      { "concepto": "Reevaluación cada 4 años", "min": 600000, "max": 1200000 },
+      { "concepto": "Consultoría implementación SGC", "min": 2000000, "max": 5000000 },
+      { "concepto": "Documentación y procedimientos", "min": 1000000, "max": 3000000 },
+      { "concepto": "Capacitación personal", "min": 500000, "max": 1500000 }
+    ],
+    "tiempo_total_meses": { "min": 12, "max": 24, "recomendado": 18 }
+  },
+
+  "infraestructura": {
+    "arriendo_local_mes": { "min": 300000, "max": 600000, "zona": "La Serena / Coquimbo industrial" },
+    "acondicionamiento": { "min": 2000000, "max": 6000000, "nota": "Sala climatizada + aislación" },
+    "antihumedad": { "min": 500000, "max": 1500000 },
+    "mobiliario": { "min": 800000, "max": 2000000 },
+    "electrica_ups": { "min": 900000, "max": 2500000 },
+    "registro_ambiental": { "min": 300000, "max": 800000 }
+  },
+
+  "condiciones_ambientales": {
+    "masas": { "temperatura_c": "20 ± 1", "humedad_pct": "40–60" },
+    "dimensional": { "temperatura_c": "20 ± 2", "humedad_pct": "45–65" },
+    "temperatura_instrumentos": { "temperatura_c": "variable", "humedad_pct": "controlada" }
+  }
+}

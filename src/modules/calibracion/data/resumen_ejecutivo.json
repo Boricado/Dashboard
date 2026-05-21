@@ -1,0 +1,53 @@
+{
+  "proyecto": "Laboratorio de Calibración — Región de Coquimbo",
+  "fecha_estudio": "2025-08",
+  "veredicto": "VIABLE con condiciones",
+  "score_viabilidad": 78,
+
+  "oportunidad": {
+    "competencia_local_acreditada": 0,
+    "nota": "No existe ningún laboratorio acreditado ISO 17025 con sede en la Región de Coquimbo (INN/DAE, corte 2024-2025).",
+    "ventaja": "Primer entrante — mercado desatendido"
+  },
+
+  "sectores_demandantes": [
+    { "sector": "Minería", "localidad": "Andacollo, Salamanca, Los Vilos", "demanda": "alta", "instrumentos": ["balanzas industriales", "manómetros", "termómetros"] },
+    { "sector": "Construcción / Obras viales", "localidad": "La Serena, Ovalle, Coquimbo", "demanda": "alta", "instrumentos": ["estaciones totales", "GPS/GNSS", "niveles"] },
+    { "sector": "Agroindustria", "localidad": "Valle del Elqui, Limarí, Choapa", "demanda": "media", "instrumentos": ["balanzas precisión", "termómetros", "higrómetros"] },
+    { "sector": "Salud", "localidad": "La Serena, Coquimbo", "demanda": "media", "instrumentos": ["termómetros clínicos", "básculas médicas", "manómetros PA"] },
+    { "sector": "Pesca / Acuicultura", "localidad": "Coquimbo, Tongoy, Los Vilos", "demanda": "media", "instrumentos": ["balanzas", "termómetros"] },
+    { "sector": "Obras públicas (MOP/SERVIU)", "localidad": "La Serena (sede regional)", "demanda": "alta", "instrumentos": ["topografía completa", "densímetros"] }
+  ],
+
+  "fortalezas": [
+    "Sin competencia local acreditada — ventaja de primer entrante",
+    "Diversidad de sectores demandantes (minería, agroindustria, construcción, salud)",
+    "Mercado público: licitaciones MOP, SERVIU, hospitales, municipios requieren cert. ISO 17025",
+    "Crecimiento minero regional: Los Pelambres, Dominga, Cruz Grande",
+    "500 km de Santiago hace costoso usar laboratorios capitalinos",
+    "Verificación obligatoria balanzas comerciales = ingresos tempranos sin acreditación"
+  ],
+
+  "riesgos": [
+    "18–24 meses para obtener acreditación INN sin poder emitir certs. acreditados",
+    "Capital inicial $25–45 millones sin retorno inmediato garantizado",
+    "Escasez de metrólogos calificados en regiones",
+    "Mercado PYME con baja disposición a pagar vs. gran minería",
+    "Calibración anual de patrones: costo recurrente $500.000–$2.000.000/año"
+  ],
+
+  "proyeccion_ingresos": [
+    { "fase": "Arranque (sin acreditación)", "servicios_mes": 30, "precio_promedio": 30000, "ingreso_mensual_min": 600000, "ingreso_mensual_max": 1200000 },
+    { "fase": "Fase 1 (implementando)", "servicios_mes": 60, "precio_promedio": 40000, "ingreso_mensual_min": 1600000, "ingreso_mensual_max": 3200000 },
+    { "fase": "Fase 2 (acreditado)", "servicios_mes": 115, "precio_promedio": 55000, "ingreso_mensual_min": 4400000, "ingreso_mensual_max": 8250000 },
+    { "fase": "Consolidado (año 3–4)", "servicios_mes": 225, "precio_promedio": 65000, "ingreso_mensual_min": 9750000, "ingreso_mensual_max": 19500000 }
+  ],
+
+  "fuentes": [
+    { "nombre": "Directorio laboratorios acreditados INN", "url": "www.inn.cl/acreditacion/directorio" },
+    { "nombre": "Licitaciones calibración Coquimbo", "url": "www.mercadopublico.cl" },
+    { "nombre": "Tarifas acreditación INN", "url": "www.inn.cl/servicios/tarifas" },
+    { "nombre": "Empresas SII (giro laboratorio metrológico)", "url": "www.sii.cl" },
+    { "nombre": "OIML — recomendaciones internacionales", "url": "www.oiml.org" }
+  ]
+}
