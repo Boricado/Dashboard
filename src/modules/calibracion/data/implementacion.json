@@ -1,104 +1,223 @@
 {
   "moneda": "CLP",
-  "nota": "Estimaciones para laboratorio básico 3 alcances: masas + temperatura + dimensional. Sede La Serena.",
-
+  "nota": "El desglose principal mantiene la inversión de arranque para Fase 1: calibración de instrumentos topográficos. Las fases 2 y 3 se financian como ampliaciones sucesivas.",
+  "etapas_estrategicas": [
+    {
+      "id": "fase-1",
+      "nombre": "Fase 1 — Instrumentos topográficos",
+      "plazo_meses": "0–18",
+      "objetivo": "Abrir el laboratorio con una oferta clara: calibración/verificación de equipos topográficos usados en obras, arriendos, consultorías y minería.",
+      "alcance": ["niveles ópticos", "niveles láser", "teodolitos", "estaciones totales", "GNSS/RTK", "miras", "prismas", "bases nivelantes"],
+      "resultado": "Ingreso temprano por nicho, procedimientos técnicos estabilizados y primera postulación INN.",
+      "inversion_min": 18000000,
+      "inversion_tipica": 42000000,
+      "inversion_max": 76000000
+    },
+    {
+      "id": "fase-2",
+      "nombre": "Fase 2 — Balanzas y masas patrón",
+      "plazo_meses": "18–36",
+      "objetivo": "Agregar servicios de pesaje donde existe recurrencia anual: balanzas de laboratorio, balanzas industriales, básculas y masas patrón.",
+      "alcance": ["balanzas analíticas", "balanzas de precisión", "balanzas industriales", "básculas", "romanas", "masas patrón"],
+      "resultado": "Cartera recurrente por recalibración anual y entrada a agroindustria, salud, minería y laboratorios.",
+      "inversion_min": 35000000,
+      "inversion_tipica": 82000000,
+      "inversion_max": 160000000
+    },
+    {
+      "id": "fase-3",
+      "nombre": "Fase 3 — Todo lo demás",
+      "plazo_meses": "36–60",
+      "objetivo": "Completar el laboratorio multiservicio con temperatura, humedad, presión, dimensional general, volumen y magnitudes eléctricas según demanda real.",
+      "alcance": ["temperatura", "humedad", "presión", "dimensional general", "volumen", "eléctrica básica", "mapeos térmicos"],
+      "resultado": "Oferta integral para contratos de mantenimiento metrológico y licitaciones amplias.",
+      "inversion_min": 30000000,
+      "inversion_tipica": 72000000,
+      "inversion_max": 145000000
+    }
+  ],
   "fases": [
     {
       "id": 0,
-      "nombre": "Fase 0 — Validación y arranque",
-      "duracion_meses": "0–6",
-      "descripcion": "Autorización como verificador SEREMI Economía. Calibración no acreditada para cartera inicial.",
-      "estado": "inicio",
-      "inversion_min": 3000000,
-      "inversion_max": 5000000,
+      "nombre": "Fase 0 — Certificados, registros y acreditaciones",
+      "duracion_meses": "0–60",
+      "descripcion": "Ruta transversal para ordenar la parte legal/técnica antes de vender como laboratorio acreditado. Define qué certificado se puede emitir en cada fase.",
+      "estado": "transversal",
+      "inversion_min": 3500000,
+      "inversion_max": 12000000,
       "acciones": [
-        "Obtener autorización verificador instrumentos SEREMI Economía",
-        "Emitir certificados de verificación internos (válidos para muchos clientes)",
-        "Construir cartera de clientes inicial",
-        "Validar demanda real antes de inversión mayor"
+        "Crear matriz de alcance: topografía, balanzas y otras magnitudes separadas por fase",
+        "Comprar o acceder a NCh-ISO/IEC 17025:2017, NCh2451:2014, INN-R401, INN-R409, INN-R410, DA-D04 y DA-D07",
+        "Definir formato de certificado no acreditado y texto legal para no usar marca INN antes de aprobación",
+        "Planificar postulación INN por alcance: primero geodimensional, luego masa/pesaje, luego magnitudes restantes",
+        "Preparar registro SAG sólo si la Fase 2 atenderá trigo, maíz o avena bajo Ley 20.656"
       ],
-      "ingresos_estimados_mes": { "min": 600000, "max": 1200000 }
+      "ingresos_estimados_mes": { "min": 0, "max": 0 }
     },
     {
       "id": 1,
-      "nombre": "Fase 1 — Laboratorio e ISO 17025",
-      "duracion_meses": "6–18",
-      "descripcion": "Montar laboratorio. Implementar sistema gestión calidad. Iniciar proceso acreditación INN.",
-      "estado": "implementacion",
-      "inversion_min": 15000000,
-      "inversion_max": 25000000,
+      "nombre": "Fase 1 — Calibración de instrumentos topográficos",
+      "duracion_meses": "0–18",
+      "descripcion": "Primera línea comercial. Servicios para estación total, nivel, teodolito, GNSS/RTK y accesorios con trazabilidad y ruta a acreditación geodimensional.",
+      "estado": "inicio",
+      "inversion_min": 18000000,
+      "inversion_max": 76000000,
       "acciones": [
-        "Arrendar y acondicionar local (80–150m²) con sala climatizada",
-        "Adquirir patrones masas + temperatura",
-        "Contratar consultor ISO 17025",
-        "Elaborar procedimientos, documentación SGC",
-        "Solicitar acreditación INN/DAE"
+        "Implementar campo de pruebas, puntos estables y línea base vinculable a RGN/SIRGAS-Chile",
+        "Comprar patrones y accesorios: miras, prismas, bases, termohigrómetro, barómetro, distanciómetro de referencia y software",
+        "Usar ISO 17123-2, 17123-3, 17123-5 y 17123-8 como base metodológica",
+        "Vender a constructoras, topógrafos, arriendos, MOP/SERVIU, municipios y contratistas mineros",
+        "Postular al INN en alcance geodimensional cuando existan métodos validados, registros e incertidumbre"
       ],
-      "ingresos_estimados_mes": { "min": 1600000, "max": 3200000 }
+      "ingresos_estimados_mes": { "min": 1800000, "max": 10500000 }
     },
     {
       "id": 2,
-      "nombre": "Fase 2 — Acreditación y expansión",
-      "duracion_meses": "18–30",
-      "descripcion": "Obtener acreditación INN. Agregar presión + dimensional. Contratar municipios, hospitales, MOP.",
-      "estado": "consolidacion",
-      "inversion_min": 5000000,
-      "inversion_max": 12000000,
+      "nombre": "Fase 2 — Balanzas, básculas y masas patrón",
+      "duracion_meses": "18–36",
+      "descripcion": "Segunda línea. Agrega calibración de balanzas y masas patrón para clientes con renovación anual y mayor volumen de servicios.",
+      "estado": "expansion",
+      "inversion_min": 35000000,
+      "inversion_max": 160000000,
       "acciones": [
-        "Recibir acreditación INN-DAE ISO/IEC 17025",
-        "Agregar alcance presión y dimensional completo",
-        "Acceder a licitaciones públicas (mercadopublico.cl)",
-        "Contratos marco MOP, SERVIU, hospitales regionales",
-        "Evaluar alcance topografía según demanda"
+        "Comprar masas patrón clase F1/M1/M2 según capacidad objetivo y transporte seguro",
+        "Implementar procedimientos para balanzas analíticas, precisión, industriales, plataformas y romanas",
+        "Aplicar OIML R76 para instrumentos de pesaje y OIML R111 para pesas cuando corresponda",
+        "Solicitar ampliación INN en masa/pesaje y mantener trazabilidad de patrones",
+        "Inscribirse en Registro SAG Ley 20.656 si se atenderá agroindustria regulada"
       ],
-      "ingresos_estimados_mes": { "min": 4400000, "max": 8250000 }
+      "ingresos_estimados_mes": { "min": 4500000, "max": 16000000 }
+    },
+    {
+      "id": 3,
+      "nombre": "Fase 3 — Todo lo demás de calibración",
+      "duracion_meses": "36–60",
+      "descripcion": "Tercera línea. Agrega las demás magnitudes según demanda comprobada, no antes: temperatura, humedad, presión, dimensional, volumen y eléctrica básica.",
+      "estado": "consolidacion",
+      "inversion_min": 30000000,
+      "inversion_max": 145000000,
+      "acciones": [
+        "Priorizar magnitudes por demanda pagada: temperatura/humedad, presión, dimensional general, volumen y eléctrica",
+        "Comprar patrones por bloque y no todos a la vez",
+        "Ampliar alcance INN sólo cuando el volumen justifique evaluadores, patrones y mantenimiento",
+        "Ofrecer contratos anuales de mantenimiento metrológico con calendario de vencimientos",
+        "Integrar LIMS, certificados digitales, trazabilidad documental y recordatorios automáticos"
+      ],
+      "ingresos_estimados_mes": { "min": 9000000, "max": 26000000 }
     }
   ],
-
   "inversion_total": {
-    "minima": 24950000,
-    "tipica": 41800000,
-    "alta": 69800000,
+    "minima": 18000000,
+    "tipica": 42000000,
+    "alta": 76000000,
     "desglose": [
-      { "concepto": "Patrones masas", "min": 3500000, "tipico": 5500000, "alto": 8300000 },
-      { "concepto": "Patrones temperatura", "min": 5300000, "tipico": 8000000, "alto": 12000000 },
-      { "concepto": "Patrones dimensional", "min": 1650000, "tipico": 2800000, "alto": 4200000 },
-      { "concepto": "Infraestructura", "min": 4500000, "tipico": 8000000, "alto": 13300000 },
-      { "concepto": "Software LIMS", "min": 500000, "tipico": 1500000, "alto": 4000000 },
-      { "concepto": "Acreditación + consultoría", "min": 5500000, "tipico": 8000000, "alto": 13000000 },
-      { "concepto": "Capital de trabajo (6 meses)", "min": 4000000, "tipico": 8000000, "alto": 15000000 }
+      { "concepto": "Campo de prueba topográfico y puntos de control", "min": 3500000, "tipico": 7500000, "alto": 14000000 },
+      { "concepto": "Patrones y accesorios geodimensionales", "min": 4500000, "tipico": 9500000, "alto": 18000000 },
+      { "concepto": "Instrumentación ambiental y trazabilidad", "min": 1800000, "tipico": 4200000, "alto": 8000000 },
+      { "concepto": "Software, plantillas, LIMS básico y respaldos", "min": 800000, "tipico": 2500000, "alto": 6500000 },
+      { "concepto": "Sistema ISO/IEC 17025 y consultoría", "min": 4500000, "tipico": 9000000, "alto": 16000000 },
+      { "concepto": "Postulación, auditorías y acciones correctivas INN", "min": 2200000, "tipico": 4800000, "alto": 8500000 },
+      { "concepto": "Capital de trabajo comercial (6 meses)", "min": 1700000, "tipico": 4500000, "alto": 5500000 }
     ]
   },
-
+  "inversion_fase_2": {
+    "minima": 35000000,
+    "tipica": 82000000,
+    "alta": 160000000,
+    "desglose": [
+      { "concepto": "Masas patrón y accesorios", "min": 15000000, "tipico": 35000000, "alto": 80000000 },
+      { "concepto": "Equipos y logística para balanzas in situ", "min": 8000000, "tipico": 18000000, "alto": 35000000 },
+      { "concepto": "Acondicionamiento de sala y seguridad", "min": 4000000, "tipico": 10000000, "alto": 18000000 },
+      { "concepto": "Ampliación INN masa/pesaje y SAG", "min": 4500000, "tipico": 9000000, "alto": 16000000 },
+      { "concepto": "Capital de trabajo y transporte", "min": 3500000, "tipico": 10000000, "alto": 11000000 }
+    ]
+  },
+  "inversion_fase_3": {
+    "minima": 30000000,
+    "tipica": 72000000,
+    "alta": 145000000,
+    "desglose": [
+      { "concepto": "Temperatura y humedad", "min": 9000000, "tipico": 20000000, "alto": 42000000 },
+      { "concepto": "Presión", "min": 7000000, "tipico": 16000000, "alto": 32000000 },
+      { "concepto": "Dimensional general y volumen", "min": 7000000, "tipico": 17000000, "alto": 31000000 },
+      { "concepto": "Eléctrica básica y software", "min": 3000000, "tipico": 9000000, "alto": 18000000 },
+      { "concepto": "Ampliaciones INN por magnitud", "min": 4000000, "tipico": 10000000, "alto": 22000000 }
+    ]
+  },
   "acreditacion_inn": {
-    "norma": "ISO/IEC 17025:2017",
-    "organismo": "INN-Chile / DAE",
-    "web": "www.inn.cl/acreditacion",
+    "norma": "NCh-ISO/IEC 17025:2017",
+    "organismo": "INN-Chile / Sistema Nacional de Acreditación",
+    "web": "https://www.inn.cl/acreditacion",
     "costos": [
-      { "concepto": "Pre-evaluación (opcional)", "min": 300000, "max": 600000 },
-      { "concepto": "Solicitud inicial", "min": 450000, "max": 800000 },
-      { "concepto": "Evaluación en terreno", "min": 800000, "max": 1500000 },
-      { "concepto": "Mantenimiento anual", "min": 300000, "max": 600000 },
-      { "concepto": "Reevaluación cada 4 años", "min": 600000, "max": 1200000 },
-      { "concepto": "Consultoría implementación SGC", "min": 2000000, "max": 5000000 },
-      { "concepto": "Documentación y procedimientos", "min": 1000000, "max": 3000000 },
-      { "concepto": "Capacitación personal", "min": 500000, "max": 1500000 }
+      { "concepto": "Compra de normas y documentos técnicos", "min": 400000, "max": 1000000 },
+      { "concepto": "Diagnóstico de brecha ISO/IEC 17025", "min": 600000, "max": 1800000 },
+      { "concepto": "Consultoría e implementación SGC", "min": 2500000, "max": 6500000 },
+      { "concepto": "Validación de métodos, CMC e incertidumbre", "min": 1800000, "max": 5500000 },
+      { "concepto": "Auditoría interna y revisión por la dirección", "min": 600000, "max": 1800000 },
+      { "concepto": "Postulación/evaluación INN y evaluadores", "min": 1500000, "max": 4500000 },
+      { "concepto": "Acciones correctivas y eventual reevaluación", "min": 800000, "max": 2800000 },
+      { "concepto": "Mantenimiento anual del sistema", "min": 900000, "max": 2500000 }
     ],
-    "tiempo_total_meses": { "min": 12, "max": 24, "recomendado": 18 }
+    "tiempo_total_meses": { "min": 12, "max": 24, "recomendado": 18 },
+    "desglose_proceso": [
+      {
+        "orden": 1,
+        "etapa": "Definir alcance",
+        "detalle": "Separar por magnitud, instrumento, rango, método y CMC. No postular todo junto: primero geodimensional, después masa/pesaje y luego otras magnitudes.",
+        "entregable": "Matriz de alcance INN y plan de fases"
+      },
+      {
+        "orden": 2,
+        "etapa": "Documentos obligatorios",
+        "detalle": "Base mínima: NCh-ISO/IEC 17025:2017, NCh2451:2014, INN-R401, INN-R404, INN-R408, INN-R409, INN-R410, DA-D01, DA-D04, DA-D06, DA-D07 y formatos FD-D06.",
+        "entregable": "Carpeta normativa y control de documentos"
+      },
+      {
+        "orden": 3,
+        "etapa": "Sistema de gestión",
+        "detalle": "Imparcialidad, confidencialidad, estructura, control documental, revisión de contratos, compras, reclamos, trabajos no conformes, acciones correctivas, auditoría interna y revisión por la dirección.",
+        "entregable": "Manual/procedimientos SGC ISO 17025"
+      },
+      {
+        "orden": 4,
+        "etapa": "Competencia técnica",
+        "detalle": "Personal autorizado, condiciones ambientales, equipos controlados, trazabilidad metrológica, validación/verificación de métodos, incertidumbre, reglas de decisión y registros técnicos.",
+        "entregable": "Procedimientos técnicos y presupuestos de incertidumbre"
+      },
+      {
+        "orden": 5,
+        "etapa": "Postulación SDAC",
+        "detalle": "Ingreso de solicitud al módulo SDAC/MISP del INN, envío de antecedentes, pago de aranceles, coordinación de evaluación documental y evaluación en terreno.",
+        "entregable": "Solicitud INN ingresada por alcance"
+      },
+      {
+        "orden": 6,
+        "etapa": "Evaluación y cierre",
+        "detalle": "Atender hallazgos, cerrar no conformidades, recibir decisión de acreditación y aparecer en el directorio. Sólo desde ese punto se usa símbolo o referencia de acreditado según INN-R409.",
+        "entregable": "Certificado/alcance INN vigente"
+      }
+    ],
+    "requisitos_clave": [
+      "Alcance claramente definido por instrumento, rango, método y CMC",
+      "Trazabilidad metrológica documentada a patrones nacionales o internacionales",
+      "Procedimientos de calibración/verificación validados",
+      "Estimación de incertidumbre y reglas de decisión declaradas",
+      "Competencia técnica del personal y registros controlados",
+      "Participación en ensayos de aptitud o comparaciones cuando existan",
+      "Uso del símbolo de acreditación sólo conforme a INN-R409"
+    ]
   },
-
   "infraestructura": {
-    "arriendo_local_mes": { "min": 300000, "max": 600000, "zona": "La Serena / Coquimbo industrial" },
-    "acondicionamiento": { "min": 2000000, "max": 6000000, "nota": "Sala climatizada + aislación" },
-    "antihumedad": { "min": 500000, "max": 1500000 },
-    "mobiliario": { "min": 800000, "max": 2000000 },
-    "electrica_ups": { "min": 900000, "max": 2500000 },
-    "registro_ambiental": { "min": 300000, "max": 800000 }
+    "arriendo_local_mes": { "min": 350000, "max": 900000, "zona": "La Serena / Coquimbo con acceso a clientes y espacio de pruebas" },
+    "campo_pruebas": { "min": 2500000, "max": 10000000, "nota": "Puntos estables, línea base, control de distancias y resguardo documental" },
+    "sala_controlada": { "min": 1500000, "max": 5500000, "nota": "Necesaria desde Fase 2 y útil para resguardo de patrones topográficos" },
+    "seguridad_y_transporte": { "min": 1200000, "max": 5000000 },
+    "registro_ambiental": { "min": 500000, "max": 1500000 }
   },
-
   "condiciones_ambientales": {
-    "masas": { "temperatura_c": "20 ± 1", "humedad_pct": "40–60" },
+    "topografia": { "temperatura_c": "registrada en terreno", "humedad_pct": "registrada", "nota": "Aplicar correcciones y registrar condiciones durante pruebas ISO 17123" },
+    "masas": { "temperatura_c": "20 ± 2", "humedad_pct": "40–60" },
     "dimensional": { "temperatura_c": "20 ± 2", "humedad_pct": "45–65" },
-    "temperatura_instrumentos": { "temperatura_c": "variable", "humedad_pct": "controlada" }
+    "temperatura_instrumentos": { "temperatura_c": "según punto de calibración", "humedad_pct": "controlada" }
   }
 }
