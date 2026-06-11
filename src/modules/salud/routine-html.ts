@@ -286,17 +286,18 @@ function go(id) {
 
 function getDayDate(dayIndex: number, weekNum: string): string {
   // Base dates for S19 (9-jun)
+  // Base = Lunes de cada semana (day_index 0)
   const baseDates: Record<string, string> = {
-    "19": "9/6",
-    "20": "16/6",
-    "21": "23/6",
-    "22": "30/6",
-    "23": "7/7",
-    "24": "14/7",
-    "25": "21/7",
-    "26": "28/7",
-    "27": "4/8",
-    "28": "11/8",
+    "19": "8/6",
+    "20": "15/6",
+    "21": "22/6",
+    "22": "29/6",
+    "23": "6/7",
+    "24": "13/7",
+    "25": "20/7",
+    "26": "27/7",
+    "27": "3/8",
+    "28": "10/8",
   };
   const baseDateStr = baseDates[weekNum] || "9/6";
   const [dayStr, monthStr] = baseDateStr.split("/");
@@ -324,7 +325,7 @@ function getWeekTirada(week: WeekData, allDays: DayData[]): string {
     const m = tirada.note.match(/(\d[\d–-]*)\s*km/i);
     if (m) return m[1] + " km";
   }
-  // Fallback by week
+  // Fallback by week (actualizado con plan real S19-S28)
   const distMap: Record<string, string> = {
     s11: "12 km", s12: "8 km", s13: "12 km", s14: "13 km",
     s15: "14 km", s16: "10 km", s17: "15 km", s18: "10 km",
