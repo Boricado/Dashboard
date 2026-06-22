@@ -82,7 +82,7 @@ function sessionAbbrev(session: string): string {
 }
 
 /** Intenta parsear un note como JSON; si falla, devuelve el string original */
-function parseNote(raw: string | null): { text: string; meta?: { focus?: string; alertText?: string; cardio?: { distance?: string; zone?: string; pace?: string } } } | null {
+function parseNote(raw: string | null): { text: string; meta?: { focus?: string; alertText?: string; alertType?: string; cardio?: { distance?: string; zone?: string; pace?: string; zoneNote?: string } } } | null {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw);
@@ -546,7 +546,7 @@ function renderCardioPanel(day: DayData, weekCode: string, dbData?: DayDbData): 
   let distance = dbCardio?.distance || (isTirada ? "16 km" : "9 km");
   let zone = dbCardio?.zone || "Z2";
   let pace = dbCardio?.pace || "~7:00-7:30/km";
-  let detailNote = dbCardio?.zoneNote || parsedNote?.text || "";
+  let detailNote = (dbCardio as DayDbMeta["cardio"])?.zoneNote || parsedNote?.text || "";
 
   // Alert: DB meta first
   let alertHtml = "";
