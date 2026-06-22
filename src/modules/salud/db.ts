@@ -770,6 +770,18 @@ export async function getHealthPageData(): Promise<HealthPagePayload> {
   const sessions = (sessionResult.data ?? []) as SessionRow[];
   const exercises = (exerciseResult.data ?? []) as SessionExerciseRow[];
 
+  function isJsonString(value: string | null): boolean {
+    if (!value) return false;
+    const trimmed = value.trim();
+    if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) return false;
+    try {
+      JSON.parse(trimmed);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   const workoutRoutines: WorkoutWeek[] = weeks.map((week) => ({
     id: week.id,
     label: week.label,
@@ -782,7 +794,7 @@ export async function getHealthPageData(): Promise<HealthPagePayload> {
         dayName: day.day_name,
         session: day.session_name,
         status: day.status,
-        note: day.note ?? undefined,
+        note: isJsonString(day.note) ? undefined : (day.note ?? undefined),
       })),
   }));
 

@@ -35,6 +35,13 @@ const STATUS_STYLE: Record<WorkoutDay["status"], string> = {
   rest: "bg-zinc-100 text-zinc-700",
 };
 
+const STATUS_LABEL: Record<WorkoutDay["status"], string> = {
+  completed: "Completado",
+  today: "Hoy",
+  upcoming: "Proximo",
+  rest: "Descanso",
+};
+
 type RegistrationExercise = {
   name: string;
   sets: string;
@@ -1105,9 +1112,12 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
                       <div className="min-w-0 flex-1">
                         <div className="text-2xl font-semibold text-[var(--ink)]">{day.session}</div>
                         <div className="mt-1 text-sm text-[var(--muted)]">{day.dayName}</div>
+                        {isSelected && day.note ? (
+                          <div className="mt-1 text-xs text-[var(--muted)]/70">{day.note}</div>
+                        ) : null}
                       </div>
                       <div className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${STATUS_STYLE[day.status]}`}>
-                        {day.note ?? day.status}
+                        {STATUS_LABEL[day.status]}
                       </div>
                     </button>
                   );
