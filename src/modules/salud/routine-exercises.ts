@@ -79,19 +79,19 @@ export const pushAExercises: ExercisePlan[] = [
   {
     letter: "A", name: "Press de banca plano", muscle: "Pectoral mayor · Deltoides anterior · Tríceps",
     sets: "4", reps: "8–12",
-    weightByWeek: w("57.5 kg"),
+    weightByWeek: w("57.5 kg", ["s22", "57.5 kg"], ["s24", "60 kg"], ["s25", "57.5 kg"], ["s26", "57.5 kg"]),
     rest: "3 min",
   },
   {
     letter: "B", name: "Press inclinado mancuerna (DB)", muscle: "Pectoral superior · Deltoides anterior",
     sets: "3", reps: "10–12",
-    weightByWeek: w("25 kg"),
+    weightByWeek: w("25 kg", ["s22", "25 kg"], ["s24", "25 kg"], ["s25", "25 kg"], ["s26", "25 kg"]),
     rest: "2:30 min",
   },
   {
     letter: "C", name: "Military press (barra o DB)", muscle: "Deltoides frontal/medio · Tríceps · Trapecio",
     sets: "4", reps: "8–10",
-    weightByWeek: w("35 kg", ["s22", "35 kg"], ["s23", "35 kg"], ["s24", "37.5 kg"]),
+    weightByWeek: w("35 kg", ["s22", "35 kg"], ["s24", "37.5 kg"], ["s25", "35 kg"], ["s26", "35 kg"]),
     rest: "3 min",
   },
   {
@@ -103,7 +103,7 @@ export const pushAExercises: ExercisePlan[] = [
   {
     letter: "E", name: "Aperturas con mancuerna", muscle: "Pectoral mayor — estiramiento completo",
     sets: "3", reps: "12–15",
-    weightByWeek: w("17.5 kg", ["s23", "17.5 kg"], ["s24", "20 kg"]),
+    weightByWeek: w("17.5 kg", ["s22", "17.5 kg"], ["s24", "20 kg"], ["s25", "17.5 kg"], ["s26", "17.5 kg"]),
     rest: "1:30 min",
   },
   {
@@ -114,13 +114,17 @@ export const pushAExercises: ExercisePlan[] = [
     letter: "G", name: "Russian twists con mancuerna", muscle: "Oblicuos · Transverso del abdomen",
     sets: "3", reps: "12–15 c/u", weightByWeek: w("10 kg"), rest: "1 min",
   },
+  {
+    letter: "H", name: "L-sit", muscle: "Core · Flexores de cadera · Tríceps — estabilización completa",
+    sets: "3", reps: "10–15 s", weightByWeek: w("BW"), rest: "1 min",
+  },
 ];
 
 export const pushBExercises: ExercisePlan[] = [
   {
     letter: "A", name: "Press inclinado barra (30–45°)", muscle: "Pectoral superior · Deltoides anterior",
     sets: "4", reps: "8–12",
-    weightByWeek: w("47.5 kg", ["s20", "47.5 kg"], ["s21", "47.5 kg"], ["s23", "50 kg"]),
+    weightByWeek: w("47.5 kg", ["s21", "47.5 kg"], ["s23", "50 kg"], ["s25", "47.5 kg"], ["s27", "47.5 kg"]),
     badgeMap: { base: "ok" }, rest: "3 min",
   },
   {
@@ -132,7 +136,7 @@ export const pushBExercises: ExercisePlan[] = [
   {
     letter: "C", name: "Press hombro sentado DB", muscle: "Deltoides frontal/medio · Tríceps",
     sets: "3", reps: "10–12",
-    weightByWeek: w("17.5 kg", ["s20", "17.5 kg"], ["s23", "20 kg"]),
+    weightByWeek: w("17.5 kg", ["s21", "17.5 kg"], ["s23", "20 kg"], ["s25", "17.5 kg"], ["s27", "17.5 kg"]),
     rest: "2 min",
   },
   {
@@ -165,19 +169,19 @@ export const piernaExercises: ExercisePlan[] = [
   {
     letter: "A", name: "Goblet squat con mancuerna", muscle: "Cuádriceps · Glúteos — máx 90° de flexión de rodilla",
     sets: "4", reps: "10–12",
-    weightByWeek: w("25 kg", ["s20", "25 kg"], ["s21", "25 kg"]),
+    weightByWeek: w("25 kg", ["s22", "25 kg"], ["s25", "25 kg"], ["s26", "25 kg"]),
     rest: "2:30 min",
   },
   {
     letter: "B", name: "Romanian Deadlift con mancuernas", muscle: "Isquiotibiales · Glúteos · Erectors",
     sets: "4", reps: "10–12",
-    weightByWeek: w("25 kg", ["s20", "25 kg"], ["s21", "25 kg"]),
+    weightByWeek: w("25 kg", ["s22", "25 kg"], ["s25", "25 kg"], ["s26", "25 kg"]),
     rest: "2:30 min",
   },
   {
     letter: "C", name: "Hip thrust con barra", muscle: "Glúteo mayor — motor principal de la carrera",
     sets: "4", reps: "12–15",
-    weightByWeek: w("55 lb/lado + barra 20 kg", ["s20", "55 lb/lado"], ["s21", "55 lb/lado"]),
+    weightByWeek: w("55 lb/lado + barra 20 kg", ["s22", "55 lb/lado"], ["s25", "55 lb/lado"], ["s26", "55 lb/lado"]),
     rest: "2:30 min",
   },
   {
@@ -217,13 +221,13 @@ export const pullAExercises: ExercisePlan[] = [
   {
     letter: "B", name: "T-bar row", muscle: "Dorsal · Romboides · Trapecio medio",
     sets: "4", reps: "8–10",
-    weightByWeek: w("45 kg / 100 Lb", ["s20", "45 kg"], ["s23", "47.5 kg"]),
+    weightByWeek: w("45 kg / 100 Lb", ["s21", "45 kg"], ["s23", "47.5 kg"], ["s25", "45 kg"], ["s27", "45 kg"]),
     rest: "2:30 min",
   },
   {
     letter: "C", name: "Remo unilateral con mancuerna", muscle: "Dorsal · Control unilateral · Romboides",
     sets: "3", reps: "10–12",
-    weightByWeek: w("35 kg", ["s20", "35 kg"]),
+    weightByWeek: w("35 kg", ["s21", "35 kg"], ["s23", "36 kg"], ["s25", "35 kg"], ["s27", "35 kg"]),
     rest: "2 min",
   },
   {
@@ -254,18 +258,17 @@ export const pullAExercises: ExercisePlan[] = [
   },
 ];
 
-// --- PULL B ---
 export const pullBExercises: ExercisePlan[] = [
   {
     letter: "A", name: "Jalón al pecho polea agarre ancho", muscle: "Dorsal ancho · Teres mayor — agarre más ancho que hombros",
     sets: "4", reps: "10–12",
-    weightByWeek: w("45 kg"),
+    weightByWeek: w("45 kg", ["s22", "45 kg"], ["s24", "47.5 kg"], ["s25", "45 kg"], ["s26", "45 kg"]),
     rest: "2:30 min",
   },
   {
     letter: "B", name: "Remo con barra agarre prono", muscle: "Dorsal · Romboides · Trapecio — espalda neutra siempre",
     sets: "4", reps: "8–10",
-    weightByWeek: w("45 kg"),
+    weightByWeek: w("45 kg", ["s22", "45 kg"], ["s24", "47.5 kg"], ["s25", "45 kg"], ["s26", "45 kg"]),
     rest: "2:30 min",
   },
   {
@@ -283,7 +286,7 @@ export const pullBExercises: ExercisePlan[] = [
   {
     letter: "E", name: "Curl inclinado con mancuerna", muscle: "Bíceps — inclinado estira el músculo completo",
     sets: "3", reps: "12 c/u",
-    weightByWeek: w("12.5 kg"),
+    weightByWeek: w("12.5 kg", ["s24", "14 kg"], ["s25", "12.5 kg"], ["s26", "12.5 kg"]),
     rest: "1:30 min",
   },
   {
