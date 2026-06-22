@@ -635,7 +635,11 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
       details,
     };
 
-    setSessionHistory((current) => [newEntry, ...current]);
+    setSessionHistory((current) => {
+      const dedupKey = `${newEntry.week}|${newEntry.session}|${newEntry.date}`;
+      const filtered = current.filter((entry) => `${entry.week}|${entry.session}|${entry.date}` !== dedupKey);
+      return [newEntry, ...filtered];
+    });
     setWeeklyConsistency((current) => incrementConsistencyPoint(current, newEntry.week));
     setWorkoutRoutines((current) =>
       current.map((week) => {
@@ -1386,7 +1390,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
               </p>
             </div>
             <a
-              href={`/rutina_semana${selectedHtmlWeek}.html`}
+              href={`/rutina_semana${selectedHtmlWeek}`}
               target="_blank"
               rel="noreferrer"
               className="rounded-full border border-[var(--line)] bg-white px-4 py-2.5 text-sm font-semibold text-[var(--ink)]"
@@ -1415,7 +1419,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
           <div className="mt-5 overflow-hidden rounded-[1.75rem] border border-[var(--line)] bg-white">
             <iframe
               key={selectedHtmlWeek}
-              src={`/rutina_semana${selectedHtmlWeek}.html`}
+              src={`/rutina_semana${selectedHtmlWeek}`}
               title={`Rutina semana ${selectedHtmlWeek}`}
               className="h-[640px] w-full md:h-[820px]"
             />
