@@ -102,7 +102,7 @@ function sessionTypeAbbrev(session: string): string {
   if (s.includes("push")) return "Pecho · Hombros · Tríceps";
   if (s.includes("pull")) return "Dorsal · Romboides · Bíceps";
   if (s.includes("pierna")) return "Cuádriceps · Glúteos · Isquios";
-  if (s.includes("carrera") || s.includes("tirada")) return "Z2 · Aeróbico base";
+  if (s.includes("carrera") || s.includes("tirada")) return "Z3 · Aeróbico";
   return "Recuperación activa";
 }
 
@@ -555,7 +555,7 @@ function renderCardioPanel(day: DayData, weekCode: string, dbData?: DayDbData): 
   if (alertText) {
     alertHtml = `<div class="alert ${escapeHtml(alertType)}"><span>🏃</span><span class="alert-text"><strong>${escapeHtml(alertText)}</strong></span></div>`;
   }
-  if (detailNote.includes("<145")) zone = "Z2 · FC <145";
+  if (detailNote.includes("<145")) zone = "Z3 · FC <155";
   if (detailNote.includes("8:00")) pace = "~7:30-8:00/km";
 
   return `

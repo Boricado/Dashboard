@@ -727,6 +727,51 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
           </div>
         ) : null}
 
+        <section className="app-card p-8">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="text-3xl font-semibold text-[var(--ink)]">Rutinas HTML</h2>
+              <p className="hidden">
+                Rescatado desde tu dashboard anterior para seguir viendo la version que ya te gustaba.
+              </p>
+            </div>
+            <a
+              href={`/rutina_semana/${selectedHtmlWeek}`}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-full border border-[var(--line)] bg-white px-4 py-2.5 text-sm font-semibold text-[var(--ink)]"
+            >
+              Abrir en pestana
+            </a>
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-2">
+            {routineHtmlWeeks.map((week) => (
+              <button
+                key={week}
+                type="button"
+                onClick={() => setSelectedHtmlWeek(week)}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  selectedHtmlWeek === week
+                    ? "bg-emerald-700 text-white"
+                    : "border border-[var(--line)] bg-[#f2f0fb] text-[var(--ink)]"
+                }`}
+              >
+                S{week}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-5 overflow-hidden rounded-[1.75rem] border border-[var(--line)] bg-white">
+            <iframe
+              key={selectedHtmlWeek}
+              src={`/rutina_semana/${selectedHtmlWeek}`}
+              title={`Rutina semana ${selectedHtmlWeek}`}
+              className="h-[640px] w-full md:h-[820px]"
+            />
+          </div>
+        </section>
+
         <section className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.9fr)]">
           <article className="app-card p-8 shadow-[0_16px_48px_rgba(31,27,22,0.05)]">
             <div className="flex flex-wrap items-start justify-between gap-4">
@@ -1424,51 +1469,6 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
               ))}
             </div>
           </aside>
-        </section>
-
-        <section className="app-card p-8">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h2 className="text-3xl font-semibold text-[var(--ink)]">Rutinas HTML</h2>
-              <p className="hidden">
-                Rescatado desde tu dashboard anterior para seguir viendo la version que ya te gustaba.
-              </p>
-            </div>
-            <a
-              href={`/rutina_semana/${selectedHtmlWeek}`}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-full border border-[var(--line)] bg-white px-4 py-2.5 text-sm font-semibold text-[var(--ink)]"
-            >
-              Abrir en pestana
-            </a>
-          </div>
-
-          <div className="mt-6 flex flex-wrap gap-2">
-            {routineHtmlWeeks.map((week) => (
-              <button
-                key={week}
-                type="button"
-                onClick={() => setSelectedHtmlWeek(week)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  selectedHtmlWeek === week
-                    ? "bg-emerald-700 text-white"
-                    : "border border-[var(--line)] bg-[#f2f0fb] text-[var(--ink)]"
-                }`}
-              >
-                S{week}
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-5 overflow-hidden rounded-[1.75rem] border border-[var(--line)] bg-white">
-            <iframe
-              key={selectedHtmlWeek}
-              src={`/rutina_semana/${selectedHtmlWeek}`}
-              title={`Rutina semana ${selectedHtmlWeek}`}
-              className="h-[640px] w-full md:h-[820px]"
-            />
-          </div>
         </section>
 
         <section className="app-card p-8">
