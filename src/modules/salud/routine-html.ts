@@ -544,7 +544,7 @@ function renderCardioPanel(day: DayData, weekCode: string, dbData?: DayDbData): 
 
   // Determine distance, zone, pace from DB or parse from note
   let distance = dbCardio?.distance || (isTirada ? "16 km" : "9 km");
-  let zone = dbCardio?.zone || "Z2";
+  let zone = dbCardio?.zone || "Z3";
   let pace = dbCardio?.pace || "~7:00-7:30/km";
   let detailNote = (dbCardio as DayDbMeta["cardio"])?.zoneNote || parsedNote?.text || "";
 
@@ -560,7 +560,7 @@ function renderCardioPanel(day: DayData, weekCode: string, dbData?: DayDbData): 
 
   return `
   <div class="alert ${isTirada ? "orange" : "green"}"><span>${isTirada ? "🏃" : "✅"}</span>
-    <span class="alert-text"><strong>${isTirada ? "Tirada larga" : "Carrera aeróbica"}.</strong> ${detailNote || (isTirada ? "Mantén ritmo conversacional toda la sesión." : "Zona 2 toda la carrera. Si subes a Z3, baja el ritmo.")}</span>
+    <span class="alert-text"><strong>${isTirada ? "Tirada larga" : "Carrera aeróbica"}.</strong> ${detailNote || (isTirada ? "Mantén ritmo conversacional toda la sesión." : "Zona 3 aeróbica — controlar que no suba a Z4.")}</span>
   </div>
   <div class="section-title">Calentamiento · 8 min</div>
   <div class="warmup-grid">
@@ -568,7 +568,7 @@ function renderCardioPanel(day: DayData, weekCode: string, dbData?: DayDbData): 
   </div>
   <div class="cardio-block">
     <div class="cb-item"><div class="cb-label">Distancia</div><div class="cb-value">${distance}</div><div class="cb-note">Objetivo de la sesión</div></div>
-    <div class="cb-item"><div class="cb-label">Zona FC</div><div class="cb-value green">${zone}</div><div class="cb-note">No sobrepasar 140 ppm (Z2 puro)</div></div>
+    <div class="cb-item"><div class="cb-label">Zona FC</div><div class="cb-value green">${zone}</div><div class="cb-note">Z3 aeróbica — no subir a Z4 (umbral)</div></div>
     <div class="cb-item"><div class="cb-label">Pace</div><div class="cb-value gold">${pace}</div><div class="cb-note">Conversacional — puedes hablar</div></div>
     <div class="cb-item"><div class="cb-label">Hidratación</div><div class="cb-value" style="color:var(--blue);">500 ml</div><div class="cb-note">Antes de salir + sorbos cada 20 min</div></div>
   </div>`;
