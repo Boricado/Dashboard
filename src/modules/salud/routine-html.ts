@@ -242,7 +242,7 @@ export function generateWeekHtml(
     <div class="hs"><div class="hs-label">Semana</div><div class="hs-value o">${weekNum}</div></div>
     <div class="hs"><div class="hs-label">Para la carrera</div><div class="hs-value gold">${Math.max(0, 16 - parseInt(weekNum))} sem</div></div>
     <div class="hs"><div class="hs-label">Tirada</div><div class="hs-value g">${getTiradaDistance(days)}</div></div>
-    <div class="hs"><div class="hs-label">Objetivo</div><div class="hs-value b">sub-2h</div></div>
+    <div class="hs"><div class="hs-label">Objetivo real</div><div class="hs-value b">~2:20-2:25</div></div>
   </div>
 </div>
 
@@ -262,7 +262,7 @@ ${days.map((day, i) => renderDayPanel(day, i === 0, week.week_code, dbDataByDay[
   <div class="section-title">Plan general · hacia La Serena 16/8</div>
   <table class="plan-table">
     <thead><tr>
-      <th>Semana</th><th>Bloque</th><th>Tirada</th><th>Objetivo</th><th>Estado</th>
+      <th>Semana</th><th>Bloque</th><th>Tirada</th><th>Ritmo</th><th>Estado</th>
     </tr></thead>
     <tbody>
 ${allWeeks.map(w => renderPlanRow(w, week.week_code)).join("")}
@@ -356,7 +356,7 @@ function renderPlanRow(week: WeekData, currentWeekCode: string): string {
       <td class="${numClass}">${weekNum}</td>
       <td style="font-size:12px; color:var(--gold); font-weight:600;">${blockDisplay}</td>
       <td style="font-family:var(--mono); font-size:13px; font-weight:700; color:var(--gold);">${getWeekTirada(week, [])}</td>
-      <td style="font-size:12px; color:var(--text2);">Media Maratón La Serena. Sub-2h (5:41/km).</td>
+      <td style="font-size:12px; color:var(--text2);">Terminar entero ~6:30-6:45/km.</td>
       <td>${statusHtml}</td>
     </tr>`;
   }
