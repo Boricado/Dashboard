@@ -269,6 +269,29 @@ function buildConsistencyFromHistory(items: SessionHistoryItem[]) {
   );
 }
 
+function deduplicateSessionHistory(items: SessionHistoryItem[]): SessionHistoryItem[] {
+  const groups = new Map<string, SessionHistoryItem>();
+
+  for (const item of items) {
+    const key = `${item.week}|${item.session}|${item.date}`;
+    const existing = groups.get(key);
+
+    if (!existing) {
+      groups.set(key, item);
+      continue;
+    }
+
+    const existingScore = (existing.details?.length ?? 0) + (existing.notes ? 2 : 0);
+    const currentScore = (item.details?.length ?? 0) + (item.notes ? 2 : 0);
+
+    if (currentScore > existingScore) {
+      groups.set(key, item);
+    }
+  }
+
+  return [...groups.values()];
+}
+
 function incrementConsistencyPoint(points: ConsistencyPoint[], label: string) {
   const counts = new Map(points.map((point) => [point.label, point.value]));
   counts.set(label, (counts.get(label) ?? 0) + 1);
@@ -341,7 +364,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
     props.initialData.inbodyScans[props.initialData.inbodyScans.length - 1]?.id ?? "",
   );
   const initialSessionHistory = useMemo(
-    () => props.initialData.sessionHistory,
+    () => deduplicateSessionHistory(props.initialData.sessionHistory),
     [props.initialData.sessionHistory],
   );
   const [sessionHistory, setSessionHistory] = useState(initialSessionHistory);
@@ -636,9 +659,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
     };
 
     setSessionHistory((current) => {
-      const dedupKey = `${newEntry.week}|${newEntry.session}|${newEntry.date}`;
-      const filtered = current.filter((entry) => `${entry.week}|${entry.session}|${entry.date}` !== dedupKey);
-      return [newEntry, ...filtered];
+      return deduplicateSessionHistory([newEntry, ...current]);
     });
     setWeeklyConsistency((current) => incrementConsistencyPoint(current, newEntry.week));
     setWorkoutRoutines((current) =>
