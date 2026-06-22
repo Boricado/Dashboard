@@ -81,6 +81,22 @@ function sessionAbbrev(session: string): string {
   return session;
 }
 
+/** Intenta parsear un note como JSON; si falla, devuelve el string original */
+function parseNote(raw: string | null): { text: string; meta?: { focus?: string; alertText?: string; cardio?: { distance?: string; zone?: string; pace?: string } } } | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object") {
+      const meta = parsed.meta || null;
+      const text = meta?.focus || "";
+      return { text, meta };
+    }
+    return { text: raw };
+  } catch {
+    return { text: raw };
+  }
+}
+
 function sessionTypeAbbrev(session: string): string {
   const s = session.toLowerCase();
   if (s.includes("push")) return "Pecho · Hombros · Tríceps";
@@ -309,22 +325,26 @@ function getDayDate(dayIndex: number, weekNum: string): string {
   return `${targetDate.getDate()}/${targetDate.getMonth() + 1}`;
 }
 
+function extractDistance(note: string | null): string | null {
+  if (!note) return null;
+  // Try JSON first
+  const parsed = parseNote(note);
+  if (parsed?.meta?.cardio?.distance) return parsed.meta.cardio.distance;
+  // Fallback: regex
+  const m = note.match(/(\d[\d–-]*)\s*km/i);
+  return m ? m[1] + " km" : null;
+}
+
 function getTiradaDistance(days: DayData[]): string {
   const tirada = days.find(d => d.session_name.toLowerCase().includes("tirada"));
-  if (tirada?.note) {
-    const m = tirada.note.match(/(\d[\d–-]*)\s*km/i);
-    if (m) return m[1] + " km";
-  }
-  return "—";
+  return extractDistance(tirada?.note ?? null) || "—";
 }
 
 function getWeekTirada(week: WeekData, allDays: DayData[]): string {
   const weekDays = allDays.filter(d => d.week_id === week.id);
   const tirada = weekDays.find(d => d.session_name.toLowerCase().includes("tirada"));
-  if (tirada?.note) {
-    const m = tirada.note.match(/(\d[\d–-]*)\s*km/i);
-    if (m) return m[1] + " km";
-  }
+  const dist = extractDistance(tirada?.note ?? null);
+  if (dist) return dist;
   // Fallback by week (actualizado con plan real S19-S28)
   const distMap: Record<string, string> = {
     s11: "12 km", s12: "8 km", s13: "12 km", s14: "13 km",
@@ -402,7 +422,8 @@ function renderDayPanel(day: DayData, isActive: boolean, weekCode: string, dbDat
   let content = "";
 
   if (isRest) {
-    const restNote = dbData?.meta?.alertText || day.note || "Recuperación activa — caminar, estiramientos suaves, yoga si toca.";
+    const parsed = parseNote(day.note);
+    const restNote = dbData?.meta?.alertText || parsed?.meta?.alertText || parsed?.text || "Recuperación activa — caminar, estiramientos suaves, yoga si toca.";
     content = `
   <div class="alert green"><span>✅</span><span class="alert-text"><strong>Descanso programado.</strong> ${escapeHtml(restNote)}</span></div>`;
   } else if (isCardio) {
@@ -511,9 +532,10 @@ function renderExerciseRowFromDb(ex: DbExercise): string {
 function renderCardioPanel(day: DayData, weekCode: string, dbData?: DayDbData): string {
   const isTirada = day.session_name.toLowerCase().includes("tirada");
   const dbMeta = dbData?.meta;
+  const parsedNote = parseNote(day.note);
 
-  // Use DB cardio data if available
-  const dbCardio = dbMeta?.cardio;
+  // Use DB cardio data if available, else parse from JSON note, else fallback
+  const dbCardio = dbMeta?.cardio || parsedNote?.meta?.cardio || null;
 
   // Use DB warmups if available, fall back to hardcoded
   const warmupItems = dbMeta?.warmups && dbMeta.warmups.length > 0
@@ -521,18 +543,17 @@ function renderCardioPanel(day: DayData, weekCode: string, dbData?: DayDbData): 
     : warmups.cardio;
 
   // Determine distance, zone, pace from DB or parse from note
-  let distance = dbCardio?.distance || (isTirada ? "10 km" : "8 km");
+  let distance = dbCardio?.distance || (isTirada ? "16 km" : "9 km");
   let zone = dbCardio?.zone || "Z2";
   let pace = dbCardio?.pace || "~7:00-7:30/km";
-  let detailNote = dbCardio?.zoneNote || day.note || "";
+  let detailNote = dbCardio?.zoneNote || parsedNote?.text || "";
 
   // Alert: DB meta first
   let alertHtml = "";
-  if (dbMeta?.alertType && dbMeta?.alertText) {
-    const alertType = dbMeta.alertType;
-    alertHtml = `<div class="alert ${escapeHtml(alertType)}"><span>🏃</span><span class="alert-text"><strong>${escapeHtml(dbMeta.alertText)}</strong></span></div>`;
-  } else if (dbMeta?.alertText) {
-    alertHtml = `<div class="alert blue"><span>🏃</span><span class="alert-text"><strong>${escapeHtml(dbMeta.alertText)}</strong></span></div>`;
+  const alertText = dbMeta?.alertText || parsedNote?.meta?.alertText || "";
+  const alertType = dbMeta?.alertType || "blue";
+  if (alertText) {
+    alertHtml = `<div class="alert ${escapeHtml(alertType)}"><span>🏃</span><span class="alert-text"><strong>${escapeHtml(alertText)}</strong></span></div>`;
   }
   if (detailNote.includes("<145")) zone = "Z2 · FC <145";
   if (detailNote.includes("8:00")) pace = "~7:30-8:00/km";
