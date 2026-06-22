@@ -1,4 +1,4 @@
-// Ruta dinámica: /rutina_semana<numero>.html
+// Ruta dinámica: /rutina_semana/<numero>
 // Genera HTML de la rutina semanal desde tablas dedicadas:
 //   health_routine_day_exercises + health_routine_day_meta
 // Fallback a la columna note (JSON) si las tablas están vacías
@@ -11,7 +11,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<any> },
 ) {
-  const { numero } = await params;
+  let { numero } = await params;
+  // Strip .html extension if present (so /rutina_semana/21.html also works)
+  numero = numero.replace(/\.html$/i, "");
   const weekCode = numero.startsWith("s") ? numero : `s${numero}`;
 
   try {
