@@ -970,6 +970,7 @@ export const routineTemplates: Record<string, WorkoutExercise[]> = {
     { name: "Aperturas con mancuernas", series: "3 x 12-15", load: "17.5 kg c/u" },
     { name: "Plancha", series: "3 x 30-45 s", notes: "Core — abdomen profundo" },
     { name: "Russian twists con mancuerna", series: "3 x 12-15 c/u", load: "10 kg" },
+    { name: "L-sit", series: "3 x 10-15 s", notes: "En paralelas o suelo — piernas extendidas" },
   ],
   "Push B": [
     { name: "Press inclinado con barra", series: "4 x 8-12", load: "47.5 kg" },
@@ -979,6 +980,7 @@ export const routineTemplates: Record<string, WorkoutExercise[]> = {
     { name: "Skullcrusher EZ + press cerrado", series: "3 x 10+10", load: "25 lb c/lado" },
     { name: "Plancha", series: "3 x 30-45 s", notes: "Core — abdomen profundo" },
     { name: "Russian twists con mancuerna", series: "3 x 12-15 c/u", load: "10 kg" },
+    { name: "L-sit", series: "3 x 10-15 s", notes: "En paralelas o suelo — piernas extendidas" },
   ],
   "Pull A": [
     { name: "Dominadas sin banda", series: "4 x 7+", notes: "Reps limpias, rango completo" },

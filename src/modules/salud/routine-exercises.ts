@@ -116,7 +116,6 @@ export const pushAExercises: ExercisePlan[] = [
   },
 ];
 
-// --- PUSH B ---
 export const pushBExercises: ExercisePlan[] = [
   {
     letter: "A", name: "Press inclinado barra (30–45°)", muscle: "Pectoral superior · Deltoides anterior",
@@ -156,9 +155,12 @@ export const pushBExercises: ExercisePlan[] = [
     letter: "G", name: "Russian twists con mancuerna", muscle: "Oblicuos · Transverso del abdomen",
     sets: "3", reps: "12–15 c/u", weightByWeek: w("10 kg"), rest: "1 min",
   },
+  {
+    letter: "H", name: "L-sit", muscle: "Core · Flexores de cadera · Tríceps — estabilización completa",
+    sets: "3", reps: "10–15 s", weightByWeek: w("BW"), rest: "1 min",
+  },
 ];
 
-// --- PIERNA ---
 export const piernaExercises: ExercisePlan[] = [
   {
     letter: "A", name: "Goblet squat con mancuerna", muscle: "Cuádriceps · Glúteos — máx 90° de flexión de rodilla",
