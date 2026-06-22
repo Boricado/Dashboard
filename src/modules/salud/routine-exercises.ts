@@ -79,31 +79,31 @@ export const pushAExercises: ExercisePlan[] = [
   {
     letter: "A", name: "Press de banca plano", muscle: "Pectoral mayor · Deltoides anterior · Tríceps",
     sets: "4", reps: "8–12",
-    weightByWeek: w("57.5 kg", ["s22", "57.5 kg"], ["s24", "60 kg"], ["s25", "57.5 kg"], ["s26", "57.5 kg"]),
+    weightByWeek: w("57.5 kg / 127 lb", ["s22", "57.5 kg / 127 lb"], ["s24", "60 kg / 132 lb"], ["s25", "57.5 kg / 127 lb"], ["s26", "57.5 kg / 127 lb"]),
     rest: "3 min",
   },
   {
     letter: "B", name: "Press inclinado mancuerna (DB)", muscle: "Pectoral superior · Deltoides anterior",
     sets: "3", reps: "10–12",
-    weightByWeek: w("25 kg", ["s22", "25 kg"], ["s24", "25 kg"], ["s25", "25 kg"], ["s26", "25 kg"]),
+    weightByWeek: w("25 kg / 55 lb", ["s22", "25 kg / 55 lb"], ["s24", "25 kg / 55 lb"], ["s25", "25 kg / 55 lb"], ["s26", "25 kg / 55 lb"]),
     rest: "2:30 min",
   },
   {
     letter: "C", name: "Military press (barra o DB)", muscle: "Deltoides frontal/medio · Tríceps · Trapecio",
     sets: "4", reps: "8–10",
-    weightByWeek: w("35 kg", ["s22", "35 kg"], ["s24", "37.5 kg"], ["s25", "35 kg"], ["s26", "35 kg"]),
+    weightByWeek: w("35 kg / 77 lb", ["s22", "35 kg / 77 lb"], ["s24", "37.5 kg / 83 lb"], ["s25", "35 kg / 77 lb"], ["s26", "35 kg / 77 lb"]),
     rest: "3 min",
   },
   {
     letter: "D", name: "Elevaciones laterales de pie", muscle: "Deltoides medio — aislamiento",
     sets: "4", reps: "12–15",
-    weightByWeek: w("10 kg"),
+    weightByWeek: w("10 kg / 22 lb"),
     rest: "1:30 min",
   },
   {
     letter: "E", name: "Aperturas con mancuerna", muscle: "Pectoral mayor — estiramiento completo",
     sets: "3", reps: "12–15",
-    weightByWeek: w("17.5 kg", ["s22", "17.5 kg"], ["s24", "20 kg"], ["s25", "17.5 kg"], ["s26", "17.5 kg"]),
+    weightByWeek: w("17.5 kg / 38 lb", ["s22", "17.5 kg / 38 lb"], ["s24", "20 kg / 44 lb"], ["s25", "17.5 kg / 38 lb"], ["s26", "17.5 kg / 38 lb"]),
     rest: "1:30 min",
   },
   {
@@ -124,7 +124,7 @@ export const pushBExercises: ExercisePlan[] = [
   {
     letter: "A", name: "Press inclinado barra (30–45°)", muscle: "Pectoral superior · Deltoides anterior",
     sets: "4", reps: "8–12",
-    weightByWeek: w("47.5 kg", ["s21", "47.5 kg"], ["s23", "50 kg"], ["s25", "47.5 kg"], ["s27", "47.5 kg"]),
+    weightByWeek: w("47.5 kg / 105 lb", ["s21", "47.5 kg / 105 lb"], ["s23", "50 kg / 110 lb"], ["s25", "47.5 kg / 105 lb"], ["s27", "47.5 kg / 105 lb"]),
     badgeMap: { base: "ok" }, rest: "3 min",
   },
   {
@@ -136,7 +136,7 @@ export const pushBExercises: ExercisePlan[] = [
   {
     letter: "C", name: "Press hombro sentado DB", muscle: "Deltoides frontal/medio · Tríceps",
     sets: "3", reps: "10–12",
-    weightByWeek: w("17.5 kg", ["s21", "17.5 kg"], ["s23", "20 kg"], ["s25", "17.5 kg"], ["s27", "17.5 kg"]),
+    weightByWeek: w("17.5 kg / 38 lb", ["s21", "17.5 kg"], ["s23", "20 kg"], ["s25", "17.5 kg"], ["s27", "17.5 kg"]),
     rest: "2 min",
   },
   {
@@ -199,13 +199,13 @@ export const piernaExercises: ExercisePlan[] = [
   {
     letter: "G", name: "Abductor en máquina", muscle: "Glúteo medio · Estabilización rodilla",
     sets: "3", reps: "15–20",
-    weightByWeek: w("Máquina"),
+    weightByWeek: w("82 lb / 37 kg"),
     rest: "1 min",
   },
   {
     letter: "H", name: "Aductor en máquina", muscle: "Aductores · Equilibrio muscular cara interna",
     sets: "2", reps: "15–20",
-    weightByWeek: w("82 lb"),
+    weightByWeek: w("82 lb / 37 kg"),
     rest: "1 min",
   },
 ];
@@ -221,7 +221,7 @@ export const pullAExercises: ExercisePlan[] = [
   {
     letter: "B", name: "T-bar row", muscle: "Dorsal · Romboides · Trapecio medio",
     sets: "4", reps: "8–10",
-    weightByWeek: w("45 kg / 100 Lb", ["s21", "45 kg"], ["s23", "47.5 kg"], ["s25", "45 kg"], ["s27", "45 kg"]),
+    weightByWeek: w("45 kg / 100 Lb", ["s21", "45 kg / 100 lb"], ["s23", "47.5 kg"], ["s25", "45 kg"], ["s27", "45 kg"]),
     rest: "2:30 min",
   },
   {
