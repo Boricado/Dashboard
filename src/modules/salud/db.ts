@@ -237,6 +237,56 @@ function buildConsistencyFromSessions(items: SessionHistoryItem[]): ConsistencyP
     .map(([label, value]) => ({ label, value }));
 }
 
+function buildSessionSummary(
+  exercises: SessionExerciseRow[],
+  status: string,
+): string {
+  if (status !== "completado") {
+    return status;
+  }
+
+  const completed = exercises.filter((ex) => ex.completed);
+  if (completed.length === 0) {
+    return "Sin ejercicios completados";
+  }
+
+  const parts = completed.map((ex) => {
+    const load = ex.load_text ? `(${ex.load_text})` : "";
+    const setsReps = [ex.sets_text, ex.reps_text].filter(Boolean).join("×");
+    const detail = setsReps ? `${setsReps}${load}` : load;
+    return detail ? `${ex.name} ${detail}` : ex.name;
+  });
+
+  if (parts.length <= 3) {
+    return parts.join(" · ");
+  }
+
+  return `${parts.slice(0, 3).join(" · ")} +${parts.length - 3} más`;
+}
+
+function deduplicateSessionHistory(items: SessionHistoryItem[]): SessionHistoryItem[] {
+  const groups = new Map<string, SessionHistoryItem>();
+
+  for (const item of items) {
+    const key = `${item.week}|${item.session}|${item.date}`;
+    const existing = groups.get(key);
+
+    if (!existing) {
+      groups.set(key, item);
+      continue;
+    }
+
+    const existingScore = (existing.details?.length ?? 0) + (existing.notes ? 2 : 0);
+    const currentScore = (item.details?.length ?? 0) + (item.notes ? 2 : 0);
+
+    if (currentScore > existingScore) {
+      groups.set(key, item);
+    }
+  }
+
+  return [...groups.values()];
+}
+
 function getInbodyFilePath(userId: string, fileName: string) {
   return `${userId}/inbody/${fileName}`;
 }
@@ -827,16 +877,14 @@ export async function getHealthPageData(): Promise<HealthPagePayload> {
       date: formatDateLabel(session.session_date),
       week: session.week_label ?? weekMap.get(session.routine_week_id ?? "") ?? "Manual",
       session: session.session_type,
-      summary:
-        session.status === "completado"
-          ? `${relatedExercises.filter((item) => item.completed).length} ejercicios completados`
-          : session.status,
+      summary: buildSessionSummary(relatedExercises, session.status),
       notes: session.notes ?? undefined,
       details,
     };
   });
 
-  const sessionHistory = savedSessionHistory.length > 0 ? savedSessionHistory : legacySessionHistory;
+  const rawSessionHistory = savedSessionHistory.length > 0 ? savedSessionHistory : legacySessionHistory;
+  const sessionHistory = deduplicateSessionHistory(rawSessionHistory);
 
   const weeklyConsistency =
     sessionHistory.length > 0

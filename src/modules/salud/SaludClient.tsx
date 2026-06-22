@@ -269,6 +269,33 @@ function buildConsistencyFromHistory(items: SessionHistoryItem[]) {
   );
 }
 
+function buildSessionSummary(
+  exercises: RegistrationExercise[],
+  status: string,
+): string {
+  if (status !== "completado") {
+    return status;
+  }
+
+  const completed = exercises.filter((ex) => ex.done);
+  if (completed.length === 0) {
+    return "Sin ejercicios completados";
+  }
+
+  const parts = completed.map((ex) => {
+    const load = ex.load ? `(${ex.load})` : "";
+    const setsReps = [ex.sets, ex.reps].filter(Boolean).join("×");
+    const detail = setsReps ? `${setsReps}${load}` : load;
+    return detail ? `${ex.name} ${detail}` : ex.name;
+  });
+
+  if (parts.length <= 3) {
+    return parts.join(" · ");
+  }
+
+  return `${parts.slice(0, 3).join(" · ")} +${parts.length - 3} más`;
+}
+
 function deduplicateSessionHistory(items: SessionHistoryItem[]): SessionHistoryItem[] {
   const groups = new Map<string, SessionHistoryItem>();
 
@@ -602,10 +629,7 @@ export function SaludClient(props: { initialData: HealthPagePayload }) {
     }
 
     const completedExercises = registrationDraft.exercises.filter((exercise) => exercise.done);
-    const summary =
-      registrationDraft.status === "completado"
-        ? `${completedExercises.length} ejercicios completados`
-        : registrationDraft.status;
+    const summary = buildSessionSummary(registrationDraft.exercises, registrationDraft.status);
 
     const details = registrationDraft.exercises.map((exercise) => {
       const blocks = [
